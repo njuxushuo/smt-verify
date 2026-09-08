@@ -1,0 +1,36 @@
+{
+  "name": "matmul_shard_to_partial_large",
+  "world_size": 8,
+  "single": {
+    "tensors": {
+      "A": {"shape": [4096, 11008]},
+      "B": {"shape": [11008, 4096]},
+      "C": {"shape": [4096, 4096]}
+    },
+    "ops": [
+      {"type": "matmul", "inputs": ["A", "B"], "outputs": ["C"]}
+    ]
+  },
+  "distributed": {
+    "ranks": {
+      "0": {"tensors": {"A0": {"shape": [4096, 1376]}, "B0": {"shape": [1376, 4096]}, "C0": {"shape": [4096, 4096]}}, "ops": [{"type": "matmul", "inputs": ["A0", "B0"], "outputs": ["C0"]}]},
+      "1": {"tensors": {"A1": {"shape": [4096, 1376]}, "B1": {"shape": [1376, 4096]}, "C1": {"shape": [4096, 4096]}}, "ops": [{"type": "matmul", "inputs": ["A1", "B1"], "outputs": ["C1"]}]},
+      "2": {"tensors": {"A2": {"shape": [4096, 1376]}, "B2": {"shape": [1376, 4096]}, "C2": {"shape": [4096, 4096]}}, "ops": [{"type": "matmul", "inputs": ["A2", "B2"], "outputs": ["C2"]}]},
+      "3": {"tensors": {"A3": {"shape": [4096, 1376]}, "B3": {"shape": [1376, 4096]}, "C3": {"shape": [4096, 4096]}}, "ops": [{"type": "matmul", "inputs": ["A3", "B3"], "outputs": ["C3"]}]},
+      "4": {"tensors": {"A4": {"shape": [4096, 1376]}, "B4": {"shape": [1376, 4096]}, "C4": {"shape": [4096, 4096]}}, "ops": [{"type": "matmul", "inputs": ["A4", "B4"], "outputs": ["C4"]}]},
+      "5": {"tensors": {"A5": {"shape": [4096, 1376]}, "B5": {"shape": [1376, 4096]}, "C5": {"shape": [4096, 4096]}}, "ops": [{"type": "matmul", "inputs": ["A5", "B5"], "outputs": ["C5"]}]},
+      "6": {"tensors": {"A6": {"shape": [4096, 1376]}, "B6": {"shape": [1376, 4096]}, "C6": {"shape": [4096, 4096]}}, "ops": [{"type": "matmul", "inputs": ["A6", "B6"], "outputs": ["C6"]}]},
+      "7": {"tensors": {"A7": {"shape": [4096, 1376]}, "B7": {"shape": [1376, 4096]}, "C7": {"shape": [4096, 4096]}}, "ops": [{"type": "matmul", "inputs": ["A7", "B7"], "outputs": ["C7"]}]}
+    }
+  },
+  "input_relations": [
+    {"single_tensor": "A", "distributed_tensors": ["A0", "A1", "A2", "A3", "A4", "A5", "A6", "A7"], "type": "shard", "dim": 1},
+    {"single_tensor": "B", "distributed_tensors": ["B0", "B1", "B2", "B3", "B4", "B5", "B6", "B7"], "type": "shard", "dim": 0}
+  ],
+  "output_relation": {
+    "single_tensor": "C",
+    "distributed_tensors": ["C0", "C1", "C2", "C3", "C4", "C5", "C6", "C7"],
+    "type": "partial",
+    "reduce_op": "sum"
+  }
+}
