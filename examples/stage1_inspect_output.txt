@@ -1,0 +1,14 @@
+Stage: matmul_shard_to_partial
+World size: 2
+Single tensors: 3
+Single ops: 1
+Distributed ranks: 2
+Distributed tensors: 6
+Distributed ops: 2
+Input relations:
+  A -> Shard(dim=1)
+  B -> Shard(dim=0)
+Output relation:
+  C -> Partial(sum)
+Validation: PASS
+

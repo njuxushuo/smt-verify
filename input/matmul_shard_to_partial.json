@@ -1,0 +1,48 @@
+{
+  "name": "matmul_shard_to_partial",
+  "world_size": 2,
+  "single": {
+    "tensors": {
+      "A": {"shape": [4, 8]},
+      "B": {"shape": [8, 4]},
+      "C": {"shape": [4, 4]}
+    },
+    "ops": [
+      {"type": "matmul", "inputs": ["A", "B"], "outputs": ["C"]}
+    ]
+  },
+  "distributed": {
+    "ranks": {
+      "0": {
+        "tensors": {
+          "A0": {"shape": [4, 4]},
+          "B0": {"shape": [4, 4]},
+          "C0": {"shape": [4, 4]}
+        },
+        "ops": [
+          {"type": "matmul", "inputs": ["A0", "B0"], "outputs": ["C0"]}
+        ]
+      },
+      "1": {
+        "tensors": {
+          "A1": {"shape": [4, 4]},
+          "B1": {"shape": [4, 4]},
+          "C1": {"shape": [4, 4]}
+        },
+        "ops": [
+          {"type": "matmul", "inputs": ["A1", "B1"], "outputs": ["C1"]}
+        ]
+      }
+    }
+  },
+  "input_relations": [
+    {"single_tensor": "A", "distributed_tensors": ["A0", "A1"], "type": "shard", "dim": 1},
+    {"single_tensor": "B", "distributed_tensors": ["B0", "B1"], "type": "shard", "dim": 0}
+  ],
+  "output_relation": {
+    "single_tensor": "C",
+    "distributed_tensors": ["C0", "C1"],
+    "type": "partial",
+    "reduce_op": "sum"
+  }
+}
