@@ -1,0 +1,31 @@
+Stage: matmul_shard_to_partial
+
+Symbolic execution:
+
+Single:
+  Inputs:
+    A: shape=[1, 2], symbolic_values=2
+    B: shape=[2, 1], symbolic_values=2
+  Produced:
+    C: shape=[1, 1], expressions=1
+
+Rank 0:
+  Inputs:
+    A0: shape=[1, 1], symbolic_values=1
+    B0: shape=[1, 1], symbolic_values=1
+  Produced:
+    C0: shape=[1, 1], expressions=1
+
+Rank 1:
+  Inputs:
+    A1: shape=[1, 1], symbolic_values=1
+    B1: shape=[1, 1], symbolic_values=1
+  Produced:
+    C1: shape=[1, 1], expressions=1
+
+Output expressions:
+  Single.C[0,0]: single__A__v0*single__B__v0 + single__A__v1*single__B__v1
+  Rank 0.C0[0,0]: rank0__A0__v0*rank0__B0__v0
+  Rank 1.C1[0,0]: rank1__A1__v0*rank1__B1__v0
+
+Symbolic execution: PASS
