@@ -2,23 +2,11 @@
 
 from __future__ import annotations
 
+from .operators import DECLARED_OPERATOR_TYPES
 from .stage_loader import StageInputError
 from .stage_model import OpSpec, ProgramSpec, RelationSpec, StageSpec, TensorSpec
 
 
-SUPPORTED_OPERATORS = frozenset(
-    {
-        "add",
-        "mul",
-        "matmul",
-        "transpose",
-        "reshape",
-        "sum",
-        "all_reduce",
-        "all_gather",
-        "reduce_scatter",
-    }
-)
 SUPPORTED_RELATIONS = frozenset({"replicate", "shard", "partial"})
 
 
@@ -45,7 +33,7 @@ def _validate_tensor(name: object, tensor: object, context: str) -> None:
 def _validate_op(op: object, tensors: dict[str, TensorSpec], context: str) -> None:
     if not isinstance(op, OpSpec):
         raise StageInputError(f"{context}: expected OpSpec")
-    if not isinstance(op.type, str) or op.type not in SUPPORTED_OPERATORS:
+    if not isinstance(op.type, str) or op.type not in DECLARED_OPERATOR_TYPES:
         raise StageInputError(f"{context}.type: unsupported operator {op.type!r}")
     for field_name, references in (("inputs", op.inputs), ("outputs", op.outputs)):
         if not isinstance(references, (tuple, list)) or not references:

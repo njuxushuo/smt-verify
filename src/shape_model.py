@@ -7,6 +7,14 @@ from dataclasses import dataclass
 import z3
 
 
+class ShapeReductionError(ValueError):
+    pass
+
+
+class UnsupportedShapeSemanticsError(ShapeReductionError):
+    pass
+
+
 @dataclass(frozen=True)
 class TensorRef:
     scope: str

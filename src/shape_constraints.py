@@ -4,16 +4,9 @@ from __future__ import annotations
 
 import z3
 
-from .shape_model import SymbolicShapeBook, TensorRef
+from .operators import get_operator
+from .shape_model import ShapeReductionError, SymbolicShapeBook, TensorRef
 from .stage_model import ProgramSpec, RelationSpec, StageSpec
-
-
-class ShapeReductionError(ValueError):
-    pass
-
-
-class UnsupportedShapeSemanticsError(ShapeReductionError):
-    pass
 
 
 def _single_ref(name: str) -> TensorRef:
@@ -40,14 +33,6 @@ def create_symbolic_shapes(stage: StageSpec) -> SymbolicShapeBook:
     return SymbolicShapeBook(shapes=shapes)
 
 
-def _same_shape_constraints(
-    left: tuple[z3.ArithRef, ...], right: tuple[z3.ArithRef, ...], context: str
-) -> list[z3.BoolRef]:
-    if len(left) != len(right):
-        raise ShapeReductionError(f"{context}: tensors must have the same rank")
-    return [left[index] == right[index] for index in range(len(left))]
-
-
 def _relation_constraints(
     stage: StageSpec,
     relation: RelationSpec,
@@ -61,7 +46,11 @@ def _relation_constraints(
     for rank, local_name in enumerate(relation.distributed_tensors):
         local_shape = shapes.shapes[_distributed_ref(rank, local_name)]
         if relation.type in {"replicate", "partial"}:
-            constraints.extend(_same_shape_constraints(single_shape, local_shape, context))
+            if len(single_shape) != len(local_shape):
+                raise ShapeReductionError(f"{context}: tensors must have the same rank")
+            constraints.extend(
+                single_shape[index] == local_shape[index] for index in range(len(single_shape))
+            )
         elif relation.type == "shard":
             if len(single_shape) != len(local_shape):
                 raise ShapeReductionError(f"{context}: shard tensors must have the same rank")
@@ -81,30 +70,15 @@ def _operator_constraints(
     shapes: SymbolicShapeBook,
     context: str,
 ) -> list[z3.BoolRef]:
-    """Build shape constraints for the Stage 2 operator subset."""
+    """Resolve Stage operators and delegate their shape semantics."""
 
     constraints: list[z3.BoolRef] = []
     for index, op in enumerate(program.ops):
         op_context = f"{context}.ops[{index}]"
-        if op.type not in {"matmul", "add", "mul"}:
-            raise UnsupportedShapeSemanticsError(
-                f"{op_context}: shape semantics for operator {op.type!r} are not supported"
-            )
-        if len(op.inputs) != 2 or len(op.outputs) != 1:
-            raise ShapeReductionError(
-                f"{op_context}: {op.type} requires exactly two inputs and one output"
-            )
-        left = shapes.shapes[tensor_refs[op.inputs[0]]]
-        right = shapes.shapes[tensor_refs[op.inputs[1]]]
-        output = shapes.shapes[tensor_refs[op.outputs[0]]]
-
-        if op.type == "matmul":
-            if len(left) != 2 or len(right) != 2 or len(output) != 2:
-                raise ShapeReductionError(f"{op_context}: matmul currently supports only 2-D tensors")
-            constraints.extend([left[1] == right[0], output[0] == left[0], output[1] == right[1]])
-        else:
-            constraints.extend(_same_shape_constraints(left, right, op_context))
-            constraints.extend(_same_shape_constraints(left, output, op_context))
+        semantics = get_operator(op.type, op_context)
+        input_shapes = tuple(shapes.shapes[tensor_refs[name]] for name in op.inputs)
+        output_shapes = tuple(shapes.shapes[tensor_refs[name]] for name in op.outputs)
+        constraints.extend(semantics.shape_constraints(input_shapes, output_shapes, op_context))
     return constraints
 
 

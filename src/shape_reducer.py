@@ -4,16 +4,16 @@ from __future__ import annotations
 
 import z3
 
-from .shape_constraints import ShapeReductionError, build_shape_constraints, create_symbolic_shapes
-from .shape_model import ReducedShapeResult, TensorRef
+from .shape_constraints import build_shape_constraints, create_symbolic_shapes
+from .shape_model import ReducedShapeResult, ShapeReductionError, TensorRef
 from .stage_model import StageSpec
 
 
 def _simplify_and_deduplicate(constraints: list[z3.BoolRef]) -> list[z3.BoolRef]:
-    unique: dict[int, z3.BoolRef] = {}
+    unique: dict[str, z3.BoolRef] = {}
     for constraint in constraints:
         simplified = z3.simplify(constraint)
-        unique.setdefault(hash(simplified), simplified)
+        unique.setdefault(simplified.sexpr(), simplified)
     return list(unique.values())
 
 

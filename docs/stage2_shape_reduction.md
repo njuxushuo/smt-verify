@@ -28,6 +28,10 @@
 
 `transpose`、`reshape`、`sum`、`all_reduce`、`all_gather` 与 `reduce_scatter` 可以由阶段一读取，但阶段二会抛出 `UnsupportedShapeSemanticsError`。
 
+## Operator semantics organization
+
+Stage-level constraint builder does not encode concrete operator rules. Concrete operator shape semantics are registered in [`src/operators.py`](../src/operators.py): `matmul`、`add` 与 `mul` 通过 `get_operator()` 取得对应的 operator class，再由该类生成其 shape constraints。这样阶段三可以在同一 operator abstraction 上增加 value semantics，而不会重新建立 central dispatch。
+
 ## Optimize objective
 
 使用 Z3 `Optimize`，目标固定为所有 tensor symbolic dimensions 的总和：

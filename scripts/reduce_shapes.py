@@ -9,7 +9,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from src.shape_constraints import ShapeReductionError
+from src.shape_model import ShapeReductionError
 from src.shape_reducer import reduce_shapes
 from src.stage_loader import StageInputError, load_stage
 

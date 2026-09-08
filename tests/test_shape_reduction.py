@@ -10,13 +10,30 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from src.shape_constraints import ShapeReductionError, UnsupportedShapeSemanticsError
+from src.operators import AddOperator, MatMulOperator, MulOperator, get_operator
+from src.shape_model import ShapeReductionError, UnsupportedShapeSemanticsError
 from src.shape_reducer import reduce_shapes
 from src.stage_loader import load_stage
 
 
 STANDARD_FIXTURE = ROOT / "input" / "matmul_shard_to_partial.json"
 LARGE_FIXTURE = ROOT / "input" / "matmul_shard_to_partial_large.json"
+
+
+@pytest.mark.parametrize(
+    ("name", "operator_type"),
+    [("matmul", MatMulOperator), ("add", AddOperator), ("mul", MulOperator)],
+)
+def test_operator_registry_returns_implemented_semantics(name: str, operator_type: type):
+    assert isinstance(get_operator(name), operator_type)
+
+
+def test_declared_but_unimplemented_operator_reports_context():
+    with pytest.raises(UnsupportedShapeSemanticsError) as error:
+        get_operator("reshape", "single.ops[0]")
+
+    assert "single.ops[0]" in str(error.value)
+    assert "reshape" in str(error.value)
 
 
 def _load_data(tmp_path: Path, data: dict):
