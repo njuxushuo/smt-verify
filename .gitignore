@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+
+# Build and coverage artifacts
+build/
+dist/
+*.egg-info/
+htmlcov/
+.coverage
+coverage.xml
+
+# Solver and local runtime artifacts
+*.log
+*.smt2
+*.z3log
+tmp/
+.cache/
+
+# Editor and operating-system files
+.DS_Store
+.vscode/
+.idea/
+*~
