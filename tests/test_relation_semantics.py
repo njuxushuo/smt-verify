@@ -21,7 +21,9 @@ from src.relations import (
 from src.shape_model import ReducedShapeResult
 from src.shape_reducer import reduce_shapes
 from src.stage_loader import load_stage
+from src.stage_loader import StageInputError
 from src.stage_model import OpSpec, ProgramSpec, RelationSpec, StageSpec, TensorSpec
+from src.stage_validator import validate_stage
 from src.symbolic_executor import execute_stage
 from src.symbolic_tensor import SymbolicTensor, create_symbolic_input_tensor
 
@@ -226,8 +228,8 @@ def _produced_relation_stage() -> tuple[StageSpec, ReducedShapeResult]:
 def test_input_relation_must_reference_true_program_inputs() -> None:
     stage, reduced = _produced_relation_stage()
 
-    with pytest.raises(RelationEncodingError, match="input relation.*C.*program input"):
-        encode_stage_relations(stage, execute_stage(stage, reduced))
+    with pytest.raises(StageInputError, match="input relation.*C.*program input"):
+        validate_stage(stage)
 
 
 def test_output_relation_can_reference_an_input_tensor() -> None:

@@ -13,7 +13,7 @@ if str(ROOT) not in sys.path:
 from src.operators import AddOperator, MatMulOperator, MulOperator, get_operator
 from src.shape_model import ShapeReductionError, UnsupportedShapeSemanticsError
 from src.shape_reducer import reduce_shapes
-from src.stage_loader import load_stage
+from src.stage_loader import StageInputError, load_stage
 
 
 STANDARD_FIXTURE = ROOT / "input" / "matmul_shard_to_partial.json"
@@ -155,7 +155,7 @@ def test_unsupported_operator_fails_during_shape_reduction(tmp_path: Path):
         reduce_shapes(stage)
 
 
-def test_rank_three_matmul_is_rejected_by_shape_reduction(tmp_path: Path):
+def test_rank_three_matmul_is_rejected_by_static_validation(tmp_path: Path):
     data = _elementwise_case("add")
     data["single"] = {
         "tensors": {"A": {"shape": [2, 3, 4]}, "B": {"shape": [2, 4, 5]}, "C": {"shape": [2, 3, 5]}},
@@ -171,12 +171,11 @@ def test_rank_three_matmul_is_rejected_by_shape_reduction(tmp_path: Path):
         "type": "replicate",
     }
 
-    stage = _load_data(tmp_path, data)
-    with pytest.raises(ShapeReductionError, match="only 2-D tensors"):
-        reduce_shapes(stage)
+    with pytest.raises(StageInputError, match="only 2-D tensors"):
+        _load_data(tmp_path, data)
 
 
-def test_conflicting_operator_and_relation_shape_constraints_are_unsat(tmp_path: Path):
+def test_invalid_original_add_shapes_are_rejected_by_static_validation(tmp_path: Path):
     data = {
         "name": "unsat_add_relations",
         "world_size": 2,
@@ -197,6 +196,5 @@ def test_conflicting_operator_and_relation_shape_constraints_are_unsat(tmp_path:
         "output_relation": {"single_tensor": "C", "distributed_tensors": ["C0", "C1"], "type": "replicate"},
     }
 
-    stage = _load_data(tmp_path, data)
-    with pytest.raises(ShapeReductionError, match="unsatisfiable"):
-        reduce_shapes(stage)
+    with pytest.raises(StageInputError, match="add tensors must have the same shape"):
+        _load_data(tmp_path, data)

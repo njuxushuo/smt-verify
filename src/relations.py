@@ -1,4 +1,4 @@
-"""Relation-specific symbolic shape and value semantics."""
+"""Relation-specific concrete, reduced-shape, and symbolic value semantics."""
 
 from __future__ import annotations
 
@@ -15,17 +15,33 @@ class RelationEncodingError(ValueError):
     """Raised when symbolic relation value encoding is inconsistent."""
 
 
+class ConcreteRelationError(ValueError):
+    """Raised when original concrete relation shapes are not legal."""
+
+
 DECLARED_RELATION_TYPES = frozenset({"replicate", "shard", "partial"})
 
 
 class RelationSemantics:
     name: str
 
+    def validate_concrete_shapes(
+        self,
+        relation: RelationSpec,
+        single_shape: tuple[int, ...],
+        local_shapes: tuple[tuple[int, ...], ...],
+        world_size: int,
+        context: str,
+    ) -> None:
+        raise NotImplementedError
+
     def shape_constraints(
         self,
         relation: RelationSpec,
         single_shape: tuple[z3.ArithRef, ...],
         local_shapes: tuple[tuple[z3.ArithRef, ...], ...],
+        original_single_shape: tuple[int, ...],
+        original_local_shapes: tuple[tuple[int, ...], ...],
         world_size: int,
         context: str,
     ) -> list[z3.BoolRef]:
@@ -51,24 +67,13 @@ def _validate_shape_local_count(
         )
 
 
-def _same_shape_constraints(
-    single_shape: tuple[z3.ArithRef, ...],
-    local_shapes: tuple[tuple[z3.ArithRef, ...], ...],
-    world_size: int,
-    context: str,
-) -> list[z3.BoolRef]:
-    _validate_shape_local_count(local_shapes, world_size, context)
-    constraints: list[z3.BoolRef] = []
-    for rank, local_shape in enumerate(local_shapes):
-        if len(local_shape) != len(single_shape):
-            raise ShapeReductionError(
-                f"{context}: local tensor on rank {rank} must have rank {len(single_shape)}"
-            )
-        constraints.extend(
-            local_shape[dimension] == single_shape[dimension]
-            for dimension in range(len(single_shape))
+def _validate_concrete_local_count(
+    local_shapes: tuple[tuple[int, ...], ...], world_size: int, context: str
+) -> None:
+    if len(local_shapes) != world_size:
+        raise ConcreteRelationError(
+            f"{context}: expected {world_size} local shapes, found {len(local_shapes)}"
         )
-    return constraints
 
 
 def _validate_value_local_count(
@@ -80,18 +85,85 @@ def _validate_value_local_count(
         )
 
 
+def _ratio_constraints(
+    single_shape: tuple[z3.ArithRef, ...],
+    local_shapes: tuple[tuple[z3.ArithRef, ...], ...],
+    original_single_shape: tuple[int, ...],
+    original_local_shapes: tuple[tuple[int, ...], ...],
+    world_size: int,
+    context: str,
+) -> list[z3.BoolRef]:
+    """Preserve each original local-to-single dimension ratio by cross multiplication."""
+
+    _validate_shape_local_count(local_shapes, world_size, context)
+    _validate_concrete_local_count(original_local_shapes, world_size, context)
+    if len(single_shape) != len(original_single_shape):
+        raise ShapeReductionError(f"{context}: original and reduced single ranks differ")
+
+    constraints: list[z3.BoolRef] = []
+    for rank, (local_shape, original_local_shape) in enumerate(
+        zip(local_shapes, original_local_shapes)
+    ):
+        if len(local_shape) != len(single_shape):
+            raise ShapeReductionError(
+                f"{context}: local tensor on rank {rank} must have rank {len(single_shape)}"
+            )
+        if len(original_local_shape) != len(original_single_shape):
+            raise ShapeReductionError(
+                f"{context}: original local tensor on rank {rank} must have rank "
+                f"{len(original_single_shape)}"
+            )
+        constraints.extend(
+            local_dimension * original_single_dimension
+            == single_dimension * original_local_dimension
+            for local_dimension, single_dimension, original_local_dimension, original_single_dimension in zip(
+                local_shape, single_shape, original_local_shape, original_single_shape
+            )
+        )
+    return constraints
+
+
 class ReplicateRelation(RelationSemantics):
     name = "replicate"
+
+    def validate_concrete_shapes(
+        self,
+        relation: RelationSpec,
+        single_shape: tuple[int, ...],
+        local_shapes: tuple[tuple[int, ...], ...],
+        world_size: int,
+        context: str,
+    ) -> None:
+        if relation.dim is not None:
+            raise ConcreteRelationError(f"{context}: replicate relation must not define dim")
+        if relation.reduce_op is not None:
+            raise ConcreteRelationError(f"{context}: replicate relation must not define reduce_op")
+        _validate_concrete_local_count(local_shapes, world_size, context)
+        for rank, local_shape in enumerate(local_shapes):
+            if local_shape != single_shape:
+                raise ConcreteRelationError(
+                    f"{context}: replicate tensor on rank {rank} has shape {local_shape}, "
+                    f"expected {single_shape}"
+                )
 
     def shape_constraints(
         self,
         relation: RelationSpec,
         single_shape: tuple[z3.ArithRef, ...],
         local_shapes: tuple[tuple[z3.ArithRef, ...], ...],
+        original_single_shape: tuple[int, ...],
+        original_local_shapes: tuple[tuple[int, ...], ...],
         world_size: int,
         context: str,
     ) -> list[z3.BoolRef]:
-        return _same_shape_constraints(single_shape, local_shapes, world_size, context)
+        return _ratio_constraints(
+            single_shape,
+            local_shapes,
+            original_single_shape,
+            original_local_shapes,
+            world_size,
+            context,
+        )
 
     def value_constraints(
         self,
@@ -123,11 +195,48 @@ class ReplicateRelation(RelationSemantics):
 class ShardRelation(RelationSemantics):
     name = "shard"
 
+    def validate_concrete_shapes(
+        self,
+        relation: RelationSpec,
+        single_shape: tuple[int, ...],
+        local_shapes: tuple[tuple[int, ...], ...],
+        world_size: int,
+        context: str,
+    ) -> None:
+        if not isinstance(relation.dim, int) or isinstance(relation.dim, bool):
+            raise ConcreteRelationError(f"{context}: shard dim must be an integer")
+        if relation.dim < 0 or relation.dim >= len(single_shape):
+            raise ConcreteRelationError(
+                f"{context}: shard dim {relation.dim} is out of range for tensor "
+                f"{relation.single_tensor} with rank {len(single_shape)}"
+            )
+        if relation.reduce_op is not None:
+            raise ConcreteRelationError(f"{context}: shard relation must not define reduce_op")
+        _validate_concrete_local_count(local_shapes, world_size, context)
+        if single_shape[relation.dim] % world_size != 0:
+            raise ConcreteRelationError(
+                f"{context}: shard dimension {single_shape[relation.dim]} of tensor "
+                f"{relation.single_tensor} is not divisible by world_size {world_size}"
+            )
+        expected_shard_dimension = single_shape[relation.dim] // world_size
+        expected_shape = tuple(
+            expected_shard_dimension if index == relation.dim else extent
+            for index, extent in enumerate(single_shape)
+        )
+        for rank, local_shape in enumerate(local_shapes):
+            if local_shape != expected_shape:
+                raise ConcreteRelationError(
+                    f"{context}: shard tensor on rank {rank} has shape {local_shape}, "
+                    f"expected {expected_shape}"
+                )
+
     def shape_constraints(
         self,
         relation: RelationSpec,
         single_shape: tuple[z3.ArithRef, ...],
         local_shapes: tuple[tuple[z3.ArithRef, ...], ...],
+        original_single_shape: tuple[int, ...],
+        original_local_shapes: tuple[tuple[int, ...], ...],
         world_size: int,
         context: str,
     ) -> list[z3.BoolRef]:
@@ -135,21 +244,15 @@ class ShardRelation(RelationSemantics):
             raise ShapeReductionError(f"{context}: shard dim must be an integer")
         if relation.dim < 0 or relation.dim >= len(single_shape):
             raise ShapeReductionError(f"{context}: shard dim {relation.dim} is out of range")
-        _validate_shape_local_count(local_shapes, world_size, context)
-
-        constraints = [single_shape[relation.dim] % world_size == 0]
-        for rank, local_shape in enumerate(local_shapes):
-            if len(local_shape) != len(single_shape):
-                raise ShapeReductionError(
-                    f"{context}: shard tensor on rank {rank} must have rank {len(single_shape)}"
-                )
-            for dimension, (single_dimension, local_dimension) in enumerate(
-                zip(single_shape, local_shape)
-            ):
-                if dimension == relation.dim:
-                    constraints.append(world_size * local_dimension == single_dimension)
-                else:
-                    constraints.append(local_dimension == single_dimension)
+        constraints = _ratio_constraints(
+            single_shape,
+            local_shapes,
+            original_single_shape,
+            original_local_shapes,
+            world_size,
+            context,
+        )
+        constraints.append(single_shape[relation.dim] % world_size == 0)
         return constraints
 
     def value_constraints(
@@ -202,15 +305,44 @@ class ShardRelation(RelationSemantics):
 class PartialRelation(RelationSemantics):
     name = "partial"
 
+    def validate_concrete_shapes(
+        self,
+        relation: RelationSpec,
+        single_shape: tuple[int, ...],
+        local_shapes: tuple[tuple[int, ...], ...],
+        world_size: int,
+        context: str,
+    ) -> None:
+        if relation.dim is not None:
+            raise ConcreteRelationError(f"{context}: partial relation must not define dim")
+        if relation.reduce_op != "sum":
+            raise ConcreteRelationError(f"{context}: partial reduce_op must be 'sum'")
+        _validate_concrete_local_count(local_shapes, world_size, context)
+        for rank, local_shape in enumerate(local_shapes):
+            if local_shape != single_shape:
+                raise ConcreteRelationError(
+                    f"{context}: partial tensor on rank {rank} has shape {local_shape}, "
+                    f"expected {single_shape}"
+                )
+
     def shape_constraints(
         self,
         relation: RelationSpec,
         single_shape: tuple[z3.ArithRef, ...],
         local_shapes: tuple[tuple[z3.ArithRef, ...], ...],
+        original_single_shape: tuple[int, ...],
+        original_local_shapes: tuple[tuple[int, ...], ...],
         world_size: int,
         context: str,
     ) -> list[z3.BoolRef]:
-        return _same_shape_constraints(single_shape, local_shapes, world_size, context)
+        return _ratio_constraints(
+            single_shape,
+            local_shapes,
+            original_single_shape,
+            original_local_shapes,
+            world_size,
+            context,
+        )
 
     def value_constraints(
         self,

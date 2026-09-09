@@ -67,25 +67,6 @@ def _encode_one_relation(
     )
 
 
-def _validate_input_relation_boundary(
-    relation: RelationSpec,
-    symbolic: SymbolicStageResult,
-    context: str,
-) -> None:
-    if relation.single_tensor not in symbolic.single.input_names:
-        raise RelationEncodingError(
-            f"{context}: input relation tensor {relation.single_tensor!r} must be a program input"
-        )
-    for rank, local_name in enumerate(relation.distributed_tensors):
-        if rank not in symbolic.distributed:
-            raise RelationEncodingError(f"{context}: symbolic result is missing rank {rank}")
-        if local_name not in symbolic.distributed[rank].input_names:
-            raise RelationEncodingError(
-                f"{context}: input relation tensor {local_name!r} on rank {rank} "
-                "must be a program input"
-            )
-
-
 def encode_stage_relations(
     stage: StageSpec,
     symbolic: SymbolicStageResult,
@@ -104,7 +85,6 @@ def encode_stage_relations(
     input_constraints: list[z3.BoolRef] = []
     for index, relation in enumerate(stage.input_relations):
         context = f"input_relations[{index}]"
-        _validate_input_relation_boundary(relation, symbolic, context)
         input_constraints.extend(_encode_one_relation(stage, relation, symbolic, context))
 
     output_constraints = _encode_one_relation(

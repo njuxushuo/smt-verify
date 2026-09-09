@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from .operators import get_operator
+from .program_analysis import ProgramAnalysisError, find_program_inputs, validate_program_dataflow
 from .shape_model import ReducedShapeResult
 from .stage_model import ProgramSpec, StageSpec
 from .symbolic_tensor import (
@@ -12,20 +13,6 @@ from .symbolic_tensor import (
     SymbolicTensor,
     create_symbolic_input_tensor,
 )
-
-
-def find_program_inputs(program: ProgramSpec) -> tuple[str, ...]:
-    """Return declared tensors without a producer, preserving declaration order."""
-
-    producer_counts: dict[str, int] = {}
-    for op in program.ops:
-        for output_name in op.outputs:
-            producer_counts[output_name] = producer_counts.get(output_name, 0) + 1
-            if producer_counts[output_name] > 1:
-                raise SymbolicExecutionError(
-                    f"tensor {output_name!r} has multiple producers"
-                )
-    return tuple(name for name in program.tensors if name not in producer_counts)
 
 
 def _validate_reduced_shapes(
@@ -64,7 +51,11 @@ def execute_program(
     """Execute a program in declared operation order over symbolic tensors."""
 
     _validate_reduced_shapes(program, reduced_shapes, context)
-    input_names = find_program_inputs(program)
+    try:
+        validate_program_dataflow(program, context)
+        input_names = find_program_inputs(program)
+    except ProgramAnalysisError as exc:
+        raise SymbolicExecutionError(str(exc)) from exc
     environment: dict[str, SymbolicTensor] = {
         name: create_symbolic_input_tensor(name, reduced_shapes[name], scope_prefix)
         for name in input_names
@@ -72,12 +63,6 @@ def execute_program(
 
     for index, op in enumerate(program.ops):
         op_context = f"{context}.ops[{index}]"
-        for input_name in op.inputs:
-            if input_name not in environment:
-                raise SymbolicExecutionError(
-                    f"{op_context}: input tensor {input_name!r} is not available or has not been produced"
-                )
-
         semantics = get_operator(op.type, op_context)
         input_tensors = tuple(environment[name] for name in op.inputs)
         output_shapes = tuple(reduced_shapes[name] for name in op.outputs)
@@ -87,10 +72,6 @@ def execute_program(
                 f"{op_context}: operator returned {len(outputs)} outputs, expected {len(op.outputs)}"
             )
         for output_name, output_tensor in zip(op.outputs, outputs):
-            if output_name in environment:
-                raise SymbolicExecutionError(
-                    f"{op_context}: output tensor {output_name!r} would overwrite an existing tensor"
-                )
             environment[output_name] = output_tensor
 
     if set(environment) != set(program.tensors):

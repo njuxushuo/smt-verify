@@ -43,13 +43,24 @@ def _relation_constraints(
     """Resolve one Stage relation and delegate its symbolic shape semantics."""
 
     single_shape = shapes.shapes[_single_ref(relation.single_tensor)]
+    original_single_shape = stage.single.tensors[relation.single_tensor].shape
     local_shapes = tuple(
         shapes.shapes[_distributed_ref(rank, local_name)]
         for rank, local_name in enumerate(relation.distributed_tensors)
     )
+    original_local_shapes = tuple(
+        stage.distributed[rank].tensors[local_name].shape
+        for rank, local_name in enumerate(relation.distributed_tensors)
+    )
     semantics = get_relation(relation.type, context)
     return semantics.shape_constraints(
-        relation, single_shape, local_shapes, stage.world_size, context
+        relation,
+        single_shape,
+        local_shapes,
+        original_single_shape,
+        original_local_shapes,
+        stage.world_size,
+        context,
     )
 
 

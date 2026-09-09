@@ -2,8 +2,9 @@
 
 from __future__ import annotations
 
-from .operators import DECLARED_OPERATOR_TYPES
-from .relations import DECLARED_RELATION_TYPES
+from .operators import ConcreteShapeError, DECLARED_OPERATOR_TYPES, OPERATOR_REGISTRY
+from .program_analysis import ProgramAnalysisError, find_program_inputs, validate_program_dataflow
+from .relations import ConcreteRelationError, DECLARED_RELATION_TYPES, get_relation
 from .stage_loader import StageInputError
 from .stage_model import OpSpec, ProgramSpec, RelationSpec, StageSpec, TensorSpec
 
@@ -55,7 +56,26 @@ def _validate_program(program: object, context: str) -> None:
     if not isinstance(program.ops, (tuple, list)):
         raise StageInputError(f"{context}.ops: expected ordered list")
     for index, op in enumerate(program.ops):
-        _validate_op(op, program.tensors, f"{context}.ops[{index}]")
+        op_context = f"{context}.ops[{index}]"
+        _validate_op(op, program.tensors, op_context)
+    try:
+        validate_program_dataflow(program, context)
+    except ProgramAnalysisError as exc:
+        raise StageInputError(str(exc)) from exc
+
+
+def _validate_program_concrete_shapes(program: ProgramSpec, context: str) -> None:
+    for index, op in enumerate(program.ops):
+        semantics = OPERATOR_REGISTRY.get(op.type)
+        if semantics is None:
+            continue
+        op_context = f"{context}.ops[{index}]"
+        input_shapes = tuple(program.tensors[name].shape for name in op.inputs)
+        output_shapes = tuple(program.tensors[name].shape for name in op.outputs)
+        try:
+            semantics.validate_concrete_shapes(input_shapes, output_shapes, op_context)
+        except ConcreteShapeError as exc:
+            raise StageInputError(str(exc)) from exc
 
 
 def _validate_relation(stage: StageSpec, relation: object, context: str) -> None:
@@ -88,59 +108,30 @@ def _validate_relation(stage: StageSpec, relation: object, context: str) -> None
             )
         local_shapes.append(rank_tensors[tensor_name].shape)
 
-    if relation.type == "replicate":
-        if relation.dim is not None:
-            raise StageInputError(f"{context}: replicate relation must not define dim")
-        if relation.reduce_op is not None:
-            raise StageInputError(f"{context}: replicate relation must not define reduce_op")
-        for rank, local_shape in enumerate(local_shapes):
-            if local_shape != single_shape:
-                raise StageInputError(
-                    f"{context}: replicate tensor on rank {rank} has shape {local_shape}, "
-                    f"expected {single_shape}"
-                )
-        return
+    semantics = get_relation(relation.type, context)
+    try:
+        semantics.validate_concrete_shapes(
+            relation, single_shape, tuple(local_shapes), stage.world_size, context
+        )
+    except ConcreteRelationError as exc:
+        raise StageInputError(str(exc)) from exc
 
-    if relation.type == "shard":
-        if not _is_integer(relation.dim):
-            raise StageInputError(f"{context}: shard dim must be an integer")
-        if relation.dim < 0 or relation.dim >= len(single_shape):
-            raise StageInputError(
-                f"{context}: shard dim {relation.dim} is out of range for tensor "
-                f"{relation.single_tensor} with rank {len(single_shape)}"
-            )
-        if relation.reduce_op is not None:
-            raise StageInputError(f"{context}: shard relation must not define reduce_op")
-        if single_shape[relation.dim] % stage.world_size != 0:
-            raise StageInputError(
-                f"{context}: shard dimension {single_shape[relation.dim]} of tensor "
-                f"{relation.single_tensor} is not divisible by world_size {stage.world_size}"
-            )
-        expected_shard_dim = single_shape[relation.dim] // stage.world_size
-        for rank, local_shape in enumerate(local_shapes):
-            if len(local_shape) != len(single_shape):
-                raise StageInputError(
-                    f"{context}: shard tensor on rank {rank} has rank {len(local_shape)}, "
-                    f"expected {len(single_shape)}"
-                )
-            for dim_index, (single_dim, local_dim) in enumerate(zip(single_shape, local_shape)):
-                expected_dim = expected_shard_dim if dim_index == relation.dim else single_dim
-                if local_dim != expected_dim:
-                    raise StageInputError(
-                        f"{context}: shard tensor on rank {rank} has dimension {local_dim} "
-                        f"at dim {dim_index}, expected {expected_dim}"
-                    )
-        return
 
-    if relation.dim is not None:
-        raise StageInputError(f"{context}: partial relation must not define dim")
-    if relation.reduce_op != "sum":
-        raise StageInputError(f"{context}: partial reduce_op must be 'sum'")
-    for rank, local_shape in enumerate(local_shapes):
-        if local_shape != single_shape:
+def _validate_input_relation_boundary(
+    relation: RelationSpec,
+    single_input_names: tuple[str, ...],
+    distributed_input_names: dict[int, tuple[str, ...]],
+    context: str,
+) -> None:
+    if relation.single_tensor not in single_input_names:
+        raise StageInputError(
+            f"{context}: input relation tensor {relation.single_tensor!r} must be a program input"
+        )
+    for rank, local_name in enumerate(relation.distributed_tensors):
+        if local_name not in distributed_input_names[rank]:
             raise StageInputError(
-                f"{context}: partial tensor on rank {rank} has shape {local_shape}, "
-                f"expected {single_shape}"
+                f"{context}: input relation tensor {local_name!r} on rank {rank} "
+                "must be a program input"
             )
 
 
@@ -165,6 +156,10 @@ def validate_stage(stage: StageSpec) -> None:
     _validate_program(stage.single, "single")
     for rank in range(stage.world_size):
         _validate_program(stage.distributed[rank], f"distributed.ranks[{rank}]")
+    single_input_names = find_program_inputs(stage.single)
+    distributed_input_names = {
+        rank: find_program_inputs(stage.distributed[rank]) for rank in range(stage.world_size)
+    }
 
     if not isinstance(stage.input_relations, (tuple, list)):
         raise StageInputError("input_relations: expected list")
@@ -172,6 +167,9 @@ def validate_stage(stage: StageSpec) -> None:
     for index, relation in enumerate(stage.input_relations):
         context = f"input_relations[{index}]"
         _validate_relation(stage, relation, context)
+        _validate_input_relation_boundary(
+            relation, single_input_names, distributed_input_names, context
+        )
         if relation.single_tensor in seen_single_tensors:
             raise StageInputError(
                 f"{context}: duplicate input relation for single tensor {relation.single_tensor!r}"
@@ -179,3 +177,7 @@ def validate_stage(stage: StageSpec) -> None:
         seen_single_tensors.add(relation.single_tensor)
 
     _validate_relation(stage, stage.output_relation, "output_relation")
+
+    _validate_program_concrete_shapes(stage.single, "single")
+    for rank in range(stage.world_size):
+        _validate_program_concrete_shapes(stage.distributed[rank], f"distributed.ranks[{rank}]")

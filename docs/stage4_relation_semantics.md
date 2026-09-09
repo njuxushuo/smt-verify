@@ -23,7 +23,7 @@ EncodedRelations(
 )
 ```
 
-Input relations are required to name true program inputs on the single program and every rank. This prevents produced/intermediate tensors from becoming unsound proof premises. Output relations may name any symbolic tensor that exists, including an input for identity stages.
+Static Stage validation requires input relations to name true program inputs on the single program and every rank. This prevents produced/intermediate tensors from becoming unsound proof premises before symbolic execution. The encoder only resolves tensors and emits value constraints. Output relations may name any symbolic tensor that exists, including an input for identity stages.
 
 ## Boundary with Stage 5
 
