@@ -15,6 +15,8 @@
 
 ## Relation shape semantics
 
+Relation-specific symbolic shape semantics are implemented in [`src/relations.py`](../src/relations.py) and are reached through the relation registry. [`src/shape_constraints.py`](../src/shape_constraints.py) only resolves Stage shapes and aggregates the constraints.
+
 - `replicate`：每个 rank local shape 逐维等于 single shape。
 - `shard(dim=d)`：非 shard 维相等；第 `d` 维满足 `world_size * local_dim == global_dim`，并要求全局维度整除 world size。
 - `partial(sum)`：本阶段只要求 local shape 逐维等于 single shape；跨 rank 的 value sum 属于后续阶段。

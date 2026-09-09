@@ -5,7 +5,8 @@ from __future__ import annotations
 import z3
 
 from .operators import get_operator
-from .shape_model import ShapeReductionError, SymbolicShapeBook, TensorRef
+from .relations import get_relation
+from .shape_model import SymbolicShapeBook, TensorRef
 from .stage_model import ProgramSpec, RelationSpec, StageSpec
 
 
@@ -39,29 +40,17 @@ def _relation_constraints(
     shapes: SymbolicShapeBook,
     context: str,
 ) -> list[z3.BoolRef]:
-    """Build only the symbolic shape equalities induced by one relation."""
+    """Resolve one Stage relation and delegate its symbolic shape semantics."""
 
     single_shape = shapes.shapes[_single_ref(relation.single_tensor)]
-    constraints: list[z3.BoolRef] = []
-    for rank, local_name in enumerate(relation.distributed_tensors):
-        local_shape = shapes.shapes[_distributed_ref(rank, local_name)]
-        if relation.type in {"replicate", "partial"}:
-            if len(single_shape) != len(local_shape):
-                raise ShapeReductionError(f"{context}: tensors must have the same rank")
-            constraints.extend(
-                single_shape[index] == local_shape[index] for index in range(len(single_shape))
-            )
-        elif relation.type == "shard":
-            if len(single_shape) != len(local_shape):
-                raise ShapeReductionError(f"{context}: shard tensors must have the same rank")
-            for index, (single_dim, local_dim) in enumerate(zip(single_shape, local_shape)):
-                if index == relation.dim:
-                    constraints.append(stage.world_size * local_dim == single_dim)
-                else:
-                    constraints.append(local_dim == single_dim)
-        else:
-            raise ShapeReductionError(f"{context}: unsupported relation {relation.type!r}")
-    return constraints
+    local_shapes = tuple(
+        shapes.shapes[_distributed_ref(rank, local_name)]
+        for rank, local_name in enumerate(relation.distributed_tensors)
+    )
+    semantics = get_relation(relation.type, context)
+    return semantics.shape_constraints(
+        relation, single_shape, local_shapes, stage.world_size, context
+    )
 
 
 def _operator_constraints(
@@ -82,20 +71,11 @@ def _operator_constraints(
     return constraints
 
 
-def _shard_divisibility_constraints(
-    stage: StageSpec, relation: RelationSpec, shapes: SymbolicShapeBook
-) -> list[z3.BoolRef]:
-    if relation.type != "shard":
-        return []
-    single_shape = shapes.shapes[_single_ref(relation.single_tensor)]
-    return [single_shape[relation.dim] % stage.world_size == 0]
-
-
 def build_shape_constraints(
     stage: StageSpec,
     shapes: SymbolicShapeBook,
 ) -> list[z3.BoolRef]:
-    """Build validity, relation, operator, and shard-divisibility constraints."""
+    """Build validity plus delegated relation and operator constraints."""
 
     constraints: list[z3.BoolRef] = []
 
@@ -120,9 +100,5 @@ def build_shape_constraints(
 
     # 5. Candidate output relation.
     constraints.extend(_relation_constraints(stage, stage.output_relation, shapes, "output_relation"))
-
-    # 6. Explicit shard divisibility, after all shape equalities.
-    for relation in (*stage.input_relations, stage.output_relation):
-        constraints.extend(_shard_divisibility_constraints(stage, relation, shapes))
 
     return constraints

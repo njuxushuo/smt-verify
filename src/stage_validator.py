@@ -3,11 +3,9 @@
 from __future__ import annotations
 
 from .operators import DECLARED_OPERATOR_TYPES
+from .relations import DECLARED_RELATION_TYPES
 from .stage_loader import StageInputError
 from .stage_model import OpSpec, ProgramSpec, RelationSpec, StageSpec, TensorSpec
-
-
-SUPPORTED_RELATIONS = frozenset({"replicate", "shard", "partial"})
 
 
 def _is_integer(value: object) -> bool:
@@ -72,7 +70,7 @@ def _validate_relation(stage: StageSpec, relation: object, context: str) -> None
             f"{context}.distributed_tensors: expected {stage.world_size} tensors, "
             f"found {len(relation.distributed_tensors)}"
         )
-    if not isinstance(relation.type, str) or relation.type not in SUPPORTED_RELATIONS:
+    if not isinstance(relation.type, str) or relation.type not in DECLARED_RELATION_TYPES:
         raise StageInputError(f"{context}.type: unsupported relation {relation.type!r}")
 
     single_shape = stage.single.tensors[relation.single_tensor].shape
