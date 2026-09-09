@@ -1,0 +1,1070 @@
+SMT-Verify Demo Report
+Each example follows:
+Input -> Shape Reduction -> Symbolic Execution
+-> Relation Encoding -> SMT Verification -> Certified Lemma
+
+============================================================
+Example 1: matmul_shard_to_partial
+============================================================
+
+[1] Input Stage Summary
+Stage name: matmul_shard_to_partial
+World size: 2
+Input relations:
+  A -> Shard(dim=1)
+  B -> Shard(dim=0)
+Single ops:
+  matmul(A, B) -> C
+Distributed ops:
+  Rank 0:
+    matmul(A0, B0) -> C0
+  Rank 1:
+    matmul(A1, B1) -> C1
+Output relation: C -> Partial(sum)
+
+[2] Original Shapes
+Single:
+  A: [4, 8]
+  B: [8, 4]
+  C: [4, 4]
+
+Rank 0:
+  A0: [4, 4]
+  B0: [4, 4]
+  C0: [4, 4]
+
+Rank 1:
+  A1: [4, 4]
+  B1: [4, 4]
+  C1: [4, 4]
+
+[3] Reduced Shapes
+Single:
+  A: [1, 4]
+  B: [4, 1]
+  C: [1, 1]
+
+Rank 0:
+  A0: [1, 2]
+  B0: [2, 1]
+  C0: [1, 1]
+
+Rank 1:
+  A1: [1, 2]
+  B1: [2, 1]
+  C1: [1, 1]
+Reduced objective: 28
+
+[4] Symbolic Execution
+Single outputs:
+  C[0] = single__A__v0*single__B__v0 +
+single__A__v1*single__B__v1 +
+single__A__v2*single__B__v2 +
+single__A__v3*single__B__v3
+Rank 0 outputs:
+  C0[0] = rank0__A0__v0*rank0__B0__v0 + rank0__A0__v1*rank0__B0__v1
+Rank 1 outputs:
+  C1[0] = rank1__A1__v0*rank1__B1__v0 + rank1__A1__v1*rank1__B1__v1
+
+[5] Relation Encoding
+Input constraints: 8
+  [0] rank0__A0__v0 == single__A__v0
+  [1] rank0__A0__v1 == single__A__v1
+  [2] rank1__A1__v0 == single__A__v2
+  [3] rank1__A1__v1 == single__A__v3
+  [4] rank0__B0__v0 == single__B__v0
+  [5] rank0__B0__v1 == single__B__v1
+  [6] rank1__B1__v0 == single__B__v2
+  [7] rank1__B1__v1 == single__B__v3
+Output constraints: 1
+  [0] single__A__v0*single__B__v0 +
+single__A__v1*single__B__v1 +
+single__A__v2*single__B__v2 +
+single__A__v3*single__B__v3 ==
+rank0__A0__v0*rank0__B0__v0 +
+rank0__A0__v1*rank0__B0__v1 +
+rank1__A1__v0*rank1__B1__v0 +
+rank1__A1__v1*rank1__B1__v1
+
+[6] SMT Verification
+SMT query:
+  Rin AND NOT(AND(Rout))
+SMT result: UNSAT
+Verification: PROVED
+Input constraint count: 8
+Output constraint count: 1
+Reduced objective: 28
+
+[7] Counterexample
+Counterexample: None
+
+[8] Certified Lemma
+Lemma: GENERATED
+Lemma ID: lemma_675689084d519aa5
+{
+  "distributed_ops": {
+    "0": [
+      {
+        "inputs": [
+          "A0",
+          "B0"
+        ],
+        "outputs": [
+          "C0"
+        ],
+        "type": "matmul"
+      }
+    ],
+    "1": [
+      {
+        "inputs": [
+          "A1",
+          "B1"
+        ],
+        "outputs": [
+          "C1"
+        ],
+        "type": "matmul"
+      }
+    ]
+  },
+  "input_relations": [
+    {
+      "dim": 1,
+      "distributed_tensors": [
+        "A0",
+        "A1"
+      ],
+      "reduce_op": null,
+      "single_tensor": "A",
+      "type": "shard"
+    },
+    {
+      "dim": 0,
+      "distributed_tensors": [
+        "B0",
+        "B1"
+      ],
+      "reduce_op": null,
+      "single_tensor": "B",
+      "type": "shard"
+    }
+  ],
+  "lemma_id": "lemma_675689084d519aa5",
+  "original_distributed_shapes": {
+    "0": {
+      "A0": [
+        4,
+        4
+      ],
+      "B0": [
+        4,
+        4
+      ],
+      "C0": [
+        4,
+        4
+      ]
+    },
+    "1": {
+      "A1": [
+        4,
+        4
+      ],
+      "B1": [
+        4,
+        4
+      ],
+      "C1": [
+        4,
+        4
+      ]
+    }
+  },
+  "original_single_shapes": {
+    "A": [
+      4,
+      8
+    ],
+    "B": [
+      8,
+      4
+    ],
+    "C": [
+      4,
+      4
+    ]
+  },
+  "output_relation": {
+    "dim": null,
+    "distributed_tensors": [
+      "C0",
+      "C1"
+    ],
+    "reduce_op": "sum",
+    "single_tensor": "C",
+    "type": "partial"
+  },
+  "reduced_shapes": {
+    "distributed": {
+      "0": {
+        "A0": [
+          1,
+          2
+        ],
+        "B0": [
+          2,
+          1
+        ],
+        "C0": [
+          1,
+          1
+        ]
+      },
+      "1": {
+        "A1": [
+          1,
+          2
+        ],
+        "B1": [
+          2,
+          1
+        ],
+        "C1": [
+          1,
+          1
+        ]
+      }
+    },
+    "objective_value": 28,
+    "single": {
+      "A": [
+        1,
+        4
+      ],
+      "B": [
+        4,
+        1
+      ],
+      "C": [
+        1,
+        1
+      ]
+    },
+    "stage_name": "matmul_shard_to_partial"
+  },
+  "single_ops": [
+    {
+      "inputs": [
+        "A",
+        "B"
+      ],
+      "outputs": [
+        "C"
+      ],
+      "type": "matmul"
+    }
+  ],
+  "source_stage_name": "matmul_shard_to_partial",
+  "world_size": 2
+}
+
+
+============================================================
+Example 2: matmul_shard_to_partial_large
+============================================================
+
+[1] Input Stage Summary
+Stage name: matmul_shard_to_partial_large
+World size: 8
+Input relations:
+  A -> Shard(dim=1)
+  B -> Shard(dim=0)
+Single ops:
+  matmul(A, B) -> C
+Distributed ops:
+  Rank 0:
+    matmul(A0, B0) -> C0
+  Rank 1:
+    matmul(A1, B1) -> C1
+  Rank 2:
+    matmul(A2, B2) -> C2
+  Rank 3:
+    matmul(A3, B3) -> C3
+  Rank 4:
+    matmul(A4, B4) -> C4
+  Rank 5:
+    matmul(A5, B5) -> C5
+  Rank 6:
+    matmul(A6, B6) -> C6
+  Rank 7:
+    matmul(A7, B7) -> C7
+Output relation: C -> Partial(sum)
+
+[2] Original Shapes
+Single:
+  A: [4096, 11008]
+  B: [11008, 4096]
+  C: [4096, 4096]
+
+Rank 0:
+  A0: [4096, 1376]
+  B0: [1376, 4096]
+  C0: [4096, 4096]
+
+Rank 1:
+  A1: [4096, 1376]
+  B1: [1376, 4096]
+  C1: [4096, 4096]
+
+Rank 2:
+  A2: [4096, 1376]
+  B2: [1376, 4096]
+  C2: [4096, 4096]
+
+Rank 3:
+  A3: [4096, 1376]
+  B3: [1376, 4096]
+  C3: [4096, 4096]
+
+Rank 4:
+  A4: [4096, 1376]
+  B4: [1376, 4096]
+  C4: [4096, 4096]
+
+Rank 5:
+  A5: [4096, 1376]
+  B5: [1376, 4096]
+  C5: [4096, 4096]
+
+Rank 6:
+  A6: [4096, 1376]
+  B6: [1376, 4096]
+  C6: [4096, 4096]
+
+Rank 7:
+  A7: [4096, 1376]
+  B7: [1376, 4096]
+  C7: [4096, 4096]
+
+[3] Reduced Shapes
+Single:
+  A: [1, 16]
+  B: [16, 1]
+  C: [1, 1]
+
+Rank 0:
+  A0: [1, 2]
+  B0: [2, 1]
+  C0: [1, 1]
+
+Rank 1:
+  A1: [1, 2]
+  B1: [2, 1]
+  C1: [1, 1]
+
+Rank 2:
+  A2: [1, 2]
+  B2: [2, 1]
+  C2: [1, 1]
+
+Rank 3:
+  A3: [1, 2]
+  B3: [2, 1]
+  C3: [1, 1]
+
+Rank 4:
+  A4: [1, 2]
+  B4: [2, 1]
+  C4: [1, 1]
+
+Rank 5:
+  A5: [1, 2]
+  B5: [2, 1]
+  C5: [1, 1]
+
+Rank 6:
+  A6: [1, 2]
+  B6: [2, 1]
+  C6: [1, 1]
+
+Rank 7:
+  A7: [1, 2]
+  B7: [2, 1]
+  C7: [1, 1]
+Reduced objective: 100
+
+[4] Symbolic Execution
+Single outputs:
+  C[0] = single__A__v0*single__B__v0 +
+single__A__v1*single__B__v1 +
+single__A__v2*single__B__v2 +
+single__A__v3*single__B__v3 +
+single__A__v4*single__B__v4 +
+single__A__v5*single__B__v5 +
+single__A__v6*single__B__v6 +
+single__A__v7*single__B__v7 +
+single__A__v8*single__B__v8 +
+single__A__v9*single__B__v9 +
+single__A__v10*single__B__v10 +
+single__A__v11*single__B__v11 +
+single__A__v12*single__B__v12 +
+single__A__v13*single__B__v13 +
+single__A__v14*single__B__v14 +
+single__A__v15*single__B__v15
+Rank 0 outputs:
+  C0[0] = rank0__A0__v0*rank0__B0__v0 + rank0__A0__v1*rank0__B0__v1
+Rank 1 outputs:
+  C1[0] = rank1__A1__v0*rank1__B1__v0 + rank1__A1__v1*rank1__B1__v1
+Rank 2 outputs:
+  C2[0] = rank2__A2__v0*rank2__B2__v0 + rank2__A2__v1*rank2__B2__v1
+Rank 3 outputs:
+  C3[0] = rank3__A3__v0*rank3__B3__v0 + rank3__A3__v1*rank3__B3__v1
+Rank 4 outputs:
+  C4[0] = rank4__A4__v0*rank4__B4__v0 + rank4__A4__v1*rank4__B4__v1
+Rank 5 outputs:
+  C5[0] = rank5__A5__v0*rank5__B5__v0 + rank5__A5__v1*rank5__B5__v1
+Rank 6 outputs:
+  C6[0] = rank6__A6__v0*rank6__B6__v0 + rank6__A6__v1*rank6__B6__v1
+Rank 7 outputs:
+  C7[0] = rank7__A7__v0*rank7__B7__v0 + rank7__A7__v1*rank7__B7__v1
+
+[5] Relation Encoding
+Input constraints: 32
+  [0] rank0__A0__v0 == single__A__v0
+  [1] rank0__A0__v1 == single__A__v1
+  [2] rank1__A1__v0 == single__A__v2
+  [3] rank1__A1__v1 == single__A__v3
+  [4] rank2__A2__v0 == single__A__v4
+  [5] rank2__A2__v1 == single__A__v5
+  [6] rank3__A3__v0 == single__A__v6
+  [7] rank3__A3__v1 == single__A__v7
+  [8] rank4__A4__v0 == single__A__v8
+  [9] rank4__A4__v1 == single__A__v9
+  [10] rank5__A5__v0 == single__A__v10
+  [11] rank5__A5__v1 == single__A__v11
+  [12] rank6__A6__v0 == single__A__v12
+  [13] rank6__A6__v1 == single__A__v13
+  [14] rank7__A7__v0 == single__A__v14
+  [15] rank7__A7__v1 == single__A__v15
+  [16] rank0__B0__v0 == single__B__v0
+  [17] rank0__B0__v1 == single__B__v1
+  [18] rank1__B1__v0 == single__B__v2
+  [19] rank1__B1__v1 == single__B__v3
+  [20] rank2__B2__v0 == single__B__v4
+  [21] rank2__B2__v1 == single__B__v5
+  [22] rank3__B3__v0 == single__B__v6
+  [23] rank3__B3__v1 == single__B__v7
+  [24] rank4__B4__v0 == single__B__v8
+  [25] rank4__B4__v1 == single__B__v9
+  [26] rank5__B5__v0 == single__B__v10
+  [27] rank5__B5__v1 == single__B__v11
+  [28] rank6__B6__v0 == single__B__v12
+  [29] rank6__B6__v1 == single__B__v13
+  [30] rank7__B7__v0 == single__B__v14
+  [31] rank7__B7__v1 == single__B__v15
+Output constraints: 1
+  [0] single__A__v0*single__B__v0 +
+single__A__v1*single__B__v1 +
+single__A__v2*single__B__v2 +
+single__A__v3*single__B__v3 +
+single__A__v4*single__B__v4 +
+single__A__v5*single__B__v5 +
+single__A__v6*single__B__v6 +
+single__A__v7*single__B__v7 +
+single__A__v8*single__B__v8 +
+single__A__v9*single__B__v9 +
+single__A__v10*single__B__v10 +
+single__A__v11*single__B__v11 +
+single__A__v12*single__B__v12 +
+single__A__v13*single__B__v13 +
+single__A__v14*single__B__v14 +
+single__A__v15*single__B__v15 ==
+rank0__A0__v0*rank0__B0__v0 +
+rank0__A0__v1*rank0__B0__v1 +
+rank1__A1__v0*rank1__B1__v0 +
+rank1__A1__v1*rank1__B1__v1 +
+rank2__A2__v0*rank2__B2__v0 +
+rank2__A2__v1*rank2__B2__v1 +
+rank3__A3__v0*rank3__B3__v0 +
+rank3__A3__v1*rank3__B3__v1 +
+rank4__A4__v0*rank4__B4__v0 +
+rank4__A4__v1*rank4__B4__v1 +
+rank5__A5__v0*rank5__B5__v0 +
+rank5__A5__v1*rank5__B5__v1 +
+rank6__A6__v0*rank6__B6__v0 +
+rank6__A6__v1*rank6__B6__v1 +
+rank7__A7__v0*rank7__B7__v0 +
+rank7__A7__v1*rank7__B7__v1
+
+[6] SMT Verification
+SMT query:
+  Rin AND NOT(AND(Rout))
+SMT result: UNSAT
+Verification: PROVED
+Input constraint count: 32
+Output constraint count: 1
+Reduced objective: 100
+
+[7] Counterexample
+Counterexample: None
+
+[8] Certified Lemma
+Lemma: GENERATED
+Lemma ID: lemma_b4d64d235cb63bba
+{
+  "distributed_ops": {
+    "0": [
+      {
+        "inputs": [
+          "A0",
+          "B0"
+        ],
+        "outputs": [
+          "C0"
+        ],
+        "type": "matmul"
+      }
+    ],
+    "1": [
+      {
+        "inputs": [
+          "A1",
+          "B1"
+        ],
+        "outputs": [
+          "C1"
+        ],
+        "type": "matmul"
+      }
+    ],
+    "2": [
+      {
+        "inputs": [
+          "A2",
+          "B2"
+        ],
+        "outputs": [
+          "C2"
+        ],
+        "type": "matmul"
+      }
+    ],
+    "3": [
+      {
+        "inputs": [
+          "A3",
+          "B3"
+        ],
+        "outputs": [
+          "C3"
+        ],
+        "type": "matmul"
+      }
+    ],
+    "4": [
+      {
+        "inputs": [
+          "A4",
+          "B4"
+        ],
+        "outputs": [
+          "C4"
+        ],
+        "type": "matmul"
+      }
+    ],
+    "5": [
+      {
+        "inputs": [
+          "A5",
+          "B5"
+        ],
+        "outputs": [
+          "C5"
+        ],
+        "type": "matmul"
+      }
+    ],
+    "6": [
+      {
+        "inputs": [
+          "A6",
+          "B6"
+        ],
+        "outputs": [
+          "C6"
+        ],
+        "type": "matmul"
+      }
+    ],
+    "7": [
+      {
+        "inputs": [
+          "A7",
+          "B7"
+        ],
+        "outputs": [
+          "C7"
+        ],
+        "type": "matmul"
+      }
+    ]
+  },
+  "input_relations": [
+    {
+      "dim": 1,
+      "distributed_tensors": [
+        "A0",
+        "A1",
+        "A2",
+        "A3",
+        "A4",
+        "A5",
+        "A6",
+        "A7"
+      ],
+      "reduce_op": null,
+      "single_tensor": "A",
+      "type": "shard"
+    },
+    {
+      "dim": 0,
+      "distributed_tensors": [
+        "B0",
+        "B1",
+        "B2",
+        "B3",
+        "B4",
+        "B5",
+        "B6",
+        "B7"
+      ],
+      "reduce_op": null,
+      "single_tensor": "B",
+      "type": "shard"
+    }
+  ],
+  "lemma_id": "lemma_b4d64d235cb63bba",
+  "original_distributed_shapes": {
+    "0": {
+      "A0": [
+        4096,
+        1376
+      ],
+      "B0": [
+        1376,
+        4096
+      ],
+      "C0": [
+        4096,
+        4096
+      ]
+    },
+    "1": {
+      "A1": [
+        4096,
+        1376
+      ],
+      "B1": [
+        1376,
+        4096
+      ],
+      "C1": [
+        4096,
+        4096
+      ]
+    },
+    "2": {
+      "A2": [
+        4096,
+        1376
+      ],
+      "B2": [
+        1376,
+        4096
+      ],
+      "C2": [
+        4096,
+        4096
+      ]
+    },
+    "3": {
+      "A3": [
+        4096,
+        1376
+      ],
+      "B3": [
+        1376,
+        4096
+      ],
+      "C3": [
+        4096,
+        4096
+      ]
+    },
+    "4": {
+      "A4": [
+        4096,
+        1376
+      ],
+      "B4": [
+        1376,
+        4096
+      ],
+      "C4": [
+        4096,
+        4096
+      ]
+    },
+    "5": {
+      "A5": [
+        4096,
+        1376
+      ],
+      "B5": [
+        1376,
+        4096
+      ],
+      "C5": [
+        4096,
+        4096
+      ]
+    },
+    "6": {
+      "A6": [
+        4096,
+        1376
+      ],
+      "B6": [
+        1376,
+        4096
+      ],
+      "C6": [
+        4096,
+        4096
+      ]
+    },
+    "7": {
+      "A7": [
+        4096,
+        1376
+      ],
+      "B7": [
+        1376,
+        4096
+      ],
+      "C7": [
+        4096,
+        4096
+      ]
+    }
+  },
+  "original_single_shapes": {
+    "A": [
+      4096,
+      11008
+    ],
+    "B": [
+      11008,
+      4096
+    ],
+    "C": [
+      4096,
+      4096
+    ]
+  },
+  "output_relation": {
+    "dim": null,
+    "distributed_tensors": [
+      "C0",
+      "C1",
+      "C2",
+      "C3",
+      "C4",
+      "C5",
+      "C6",
+      "C7"
+    ],
+    "reduce_op": "sum",
+    "single_tensor": "C",
+    "type": "partial"
+  },
+  "reduced_shapes": {
+    "distributed": {
+      "0": {
+        "A0": [
+          1,
+          2
+        ],
+        "B0": [
+          2,
+          1
+        ],
+        "C0": [
+          1,
+          1
+        ]
+      },
+      "1": {
+        "A1": [
+          1,
+          2
+        ],
+        "B1": [
+          2,
+          1
+        ],
+        "C1": [
+          1,
+          1
+        ]
+      },
+      "2": {
+        "A2": [
+          1,
+          2
+        ],
+        "B2": [
+          2,
+          1
+        ],
+        "C2": [
+          1,
+          1
+        ]
+      },
+      "3": {
+        "A3": [
+          1,
+          2
+        ],
+        "B3": [
+          2,
+          1
+        ],
+        "C3": [
+          1,
+          1
+        ]
+      },
+      "4": {
+        "A4": [
+          1,
+          2
+        ],
+        "B4": [
+          2,
+          1
+        ],
+        "C4": [
+          1,
+          1
+        ]
+      },
+      "5": {
+        "A5": [
+          1,
+          2
+        ],
+        "B5": [
+          2,
+          1
+        ],
+        "C5": [
+          1,
+          1
+        ]
+      },
+      "6": {
+        "A6": [
+          1,
+          2
+        ],
+        "B6": [
+          2,
+          1
+        ],
+        "C6": [
+          1,
+          1
+        ]
+      },
+      "7": {
+        "A7": [
+          1,
+          2
+        ],
+        "B7": [
+          2,
+          1
+        ],
+        "C7": [
+          1,
+          1
+        ]
+      }
+    },
+    "objective_value": 100,
+    "single": {
+      "A": [
+        1,
+        16
+      ],
+      "B": [
+        16,
+        1
+      ],
+      "C": [
+        1,
+        1
+      ]
+    },
+    "stage_name": "matmul_shard_to_partial_large"
+  },
+  "single_ops": [
+    {
+      "inputs": [
+        "A",
+        "B"
+      ],
+      "outputs": [
+        "C"
+      ],
+      "type": "matmul"
+    }
+  ],
+  "source_stage_name": "matmul_shard_to_partial_large",
+  "world_size": 8
+}
+
+
+============================================================
+Example 3: matmul_shard_wrong_replicate
+============================================================
+
+[1] Input Stage Summary
+Stage name: matmul_shard_wrong_replicate
+World size: 2
+Input relations:
+  A -> Shard(dim=1)
+  B -> Shard(dim=0)
+Single ops:
+  matmul(A, B) -> C
+Distributed ops:
+  Rank 0:
+    matmul(A0, B0) -> C0
+  Rank 1:
+    matmul(A1, B1) -> C1
+Output relation: C -> Replicate
+
+[2] Original Shapes
+Single:
+  A: [4, 8]
+  B: [8, 4]
+  C: [4, 4]
+
+Rank 0:
+  A0: [4, 4]
+  B0: [4, 4]
+  C0: [4, 4]
+
+Rank 1:
+  A1: [4, 4]
+  B1: [4, 4]
+  C1: [4, 4]
+
+[3] Reduced Shapes
+Single:
+  A: [1, 4]
+  B: [4, 1]
+  C: [1, 1]
+
+Rank 0:
+  A0: [1, 2]
+  B0: [2, 1]
+  C0: [1, 1]
+
+Rank 1:
+  A1: [1, 2]
+  B1: [2, 1]
+  C1: [1, 1]
+Reduced objective: 28
+
+[4] Symbolic Execution
+Single outputs:
+  C[0] = single__A__v0*single__B__v0 +
+single__A__v1*single__B__v1 +
+single__A__v2*single__B__v2 +
+single__A__v3*single__B__v3
+Rank 0 outputs:
+  C0[0] = rank0__A0__v0*rank0__B0__v0 + rank0__A0__v1*rank0__B0__v1
+Rank 1 outputs:
+  C1[0] = rank1__A1__v0*rank1__B1__v0 + rank1__A1__v1*rank1__B1__v1
+
+[5] Relation Encoding
+Input constraints: 8
+  [0] rank0__A0__v0 == single__A__v0
+  [1] rank0__A0__v1 == single__A__v1
+  [2] rank1__A1__v0 == single__A__v2
+  [3] rank1__A1__v1 == single__A__v3
+  [4] rank0__B0__v0 == single__B__v0
+  [5] rank0__B0__v1 == single__B__v1
+  [6] rank1__B1__v0 == single__B__v2
+  [7] rank1__B1__v1 == single__B__v3
+Output constraints: 2
+  [0] rank0__A0__v0*rank0__B0__v0 + rank0__A0__v1*rank0__B0__v1 ==
+single__A__v0*single__B__v0 +
+single__A__v1*single__B__v1 +
+single__A__v2*single__B__v2 +
+single__A__v3*single__B__v3
+  [1] rank1__A1__v0*rank1__B1__v0 + rank1__A1__v1*rank1__B1__v1 ==
+single__A__v0*single__B__v0 +
+single__A__v1*single__B__v1 +
+single__A__v2*single__B__v2 +
+single__A__v3*single__B__v3
+
+[6] SMT Verification
+SMT query:
+  Rin AND NOT(AND(Rout))
+SMT result: SAT
+Verification: DISPROVED
+Input constraint count: 8
+Output constraint count: 2
+Reduced objective: 28
+
+[7] Counterexample
+Single inputs:
+  A = ('1', '0', '0', '0')
+  B = ('1', '1', '1', '1')
+Distributed inputs:
+  Rank 0:
+    A0 = ('1', '0')
+    B0 = ('1', '1')
+  Rank 1:
+    A1 = ('0', '0')
+    B1 = ('1', '1')
+Failed output constraints:
+  (1,)
+
+[8] Certified Lemma
+Lemma: NOT GENERATED
+
+
+============================================================
+Summary
+============================================================
+
+matmul_shard_to_partial
+  Verification: PROVED
+  Lemma: GENERATED
+  Lemma ID: lemma_675689084d519aa5
+
+matmul_shard_to_partial_large
+  Verification: PROVED
+  Lemma: GENERATED
+  Lemma ID: lemma_b4d64d235cb63bba
+
+matmul_shard_wrong_replicate
+  Verification: DISPROVED
+  Lemma: NOT GENERATED
