@@ -78,7 +78,17 @@ def _operator_constraints(
         semantics = get_operator(op.type, op_context)
         input_shapes = tuple(shapes.shapes[tensor_refs[name]] for name in op.inputs)
         output_shapes = tuple(shapes.shapes[tensor_refs[name]] for name in op.outputs)
-        constraints.extend(semantics.shape_constraints(input_shapes, output_shapes, op_context))
+        original_input_shapes = tuple(program.tensors[name].shape for name in op.inputs)
+        original_output_shapes = tuple(program.tensors[name].shape for name in op.outputs)
+        constraints.extend(
+            semantics.shape_constraints(
+                input_shapes,
+                output_shapes,
+                original_input_shapes,
+                original_output_shapes,
+                op_context,
+            )
+        )
     return constraints
 
 
@@ -90,9 +100,18 @@ def build_shape_constraints(
 
     constraints: list[z3.BoolRef] = []
 
-    # 1. Every symbolic dimension is positive.
-    for symbolic_shape in shapes.shapes.values():
-        constraints.extend(dimension >= 1 for dimension in symbolic_shape)
+    # 1. Every reduced symbolic dimension is positive and does not exceed its original extent.
+    for name, tensor in stage.single.tensors.items():
+        symbolic_shape = shapes.shapes[_single_ref(name)]
+        for dimension, original_dimension in zip(symbolic_shape, tensor.shape):
+            constraints.append(dimension >= 1)
+            constraints.append(dimension <= original_dimension)
+    for rank, program in stage.distributed.items():
+        for name, tensor in program.tensors.items():
+            symbolic_shape = shapes.shapes[_distributed_ref(rank, name)]
+            for dimension, original_dimension in zip(symbolic_shape, tensor.shape):
+                constraints.append(dimension >= 1)
+                constraints.append(dimension <= original_dimension)
 
     # 2. Known input relations.
     for index, relation in enumerate(stage.input_relations):

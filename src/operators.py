@@ -42,6 +42,8 @@ class OperatorSemantics:
         self,
         input_shapes: tuple[tuple[z3.ArithRef, ...], ...],
         output_shapes: tuple[tuple[z3.ArithRef, ...], ...],
+        original_input_shapes: tuple[tuple[int, ...], ...],
+        original_output_shapes: tuple[tuple[int, ...], ...],
         context: str,
     ) -> list[z3.BoolRef]:
         raise NotImplementedError
@@ -109,6 +111,8 @@ class MatMulOperator(OperatorSemantics):
         self,
         input_shapes: tuple[tuple[z3.ArithRef, ...], ...],
         output_shapes: tuple[tuple[z3.ArithRef, ...], ...],
+        original_input_shapes: tuple[tuple[int, ...], ...],
+        original_output_shapes: tuple[tuple[int, ...], ...],
         context: str,
     ) -> list[z3.BoolRef]:
         if len(input_shapes) != 2 or len(output_shapes) != 1:
@@ -119,7 +123,20 @@ class MatMulOperator(OperatorSemantics):
         (output,) = output_shapes
         if len(left) != 2 or len(right) != 2 or len(output) != 2:
             raise ShapeReductionError(f"{context}: matmul currently supports only 2-D tensors")
-        return [left[1] == right[0], output[0] == left[0], output[1] == right[1]]
+        if len(original_input_shapes) != 2 or len(original_output_shapes) != 1:
+            raise ShapeReductionError(
+                f"{context}: matmul requires original shapes for two inputs and one output"
+            )
+        original_left, original_right = original_input_shapes
+        (original_output,) = original_output_shapes
+        if len(original_left) != 2 or len(original_right) != 2 or len(original_output) != 2:
+            raise ShapeReductionError(f"{context}: original matmul shapes must be 2-D")
+        return [
+            left[1] == right[0],
+            output[0] == left[0],
+            output[1] == right[1],
+            left[1] >= min(2, original_left[1]),
+        ]
 
     def symbolic_execute(
         self,
@@ -169,6 +186,8 @@ class AddOperator(OperatorSemantics):
         self,
         input_shapes: tuple[tuple[z3.ArithRef, ...], ...],
         output_shapes: tuple[tuple[z3.ArithRef, ...], ...],
+        original_input_shapes: tuple[tuple[int, ...], ...],
+        original_output_shapes: tuple[tuple[int, ...], ...],
         context: str,
     ) -> list[z3.BoolRef]:
         if len(input_shapes) != 2 or len(output_shapes) != 1:
@@ -216,6 +235,8 @@ class MulOperator(OperatorSemantics):
         self,
         input_shapes: tuple[tuple[z3.ArithRef, ...], ...],
         output_shapes: tuple[tuple[z3.ArithRef, ...], ...],
+        original_input_shapes: tuple[tuple[int, ...], ...],
+        original_output_shapes: tuple[tuple[int, ...], ...],
         context: str,
     ) -> list[z3.BoolRef]:
         if len(input_shapes) != 2 or len(output_shapes) != 1:

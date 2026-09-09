@@ -152,5 +152,5 @@ def test_relation_reduction_preserves_original_ratio_by_cross_multiplication(
 
 
 def test_standard_and_large_original_structure_reduction_objectives_are_preserved() -> None:
-    assert reduce_shapes(load_stage(STANDARD_FIXTURE)).objective_value == 20
-    assert reduce_shapes(load_stage(LARGE_FIXTURE)).objective_value == 68
+    assert reduce_shapes(load_stage(STANDARD_FIXTURE)).objective_value == 28
+    assert reduce_shapes(load_stage(LARGE_FIXTURE)).objective_value == 100

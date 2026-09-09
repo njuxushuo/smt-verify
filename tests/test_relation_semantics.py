@@ -76,10 +76,10 @@ def test_stage_two_shape_reduction_results_are_preserved() -> None:
     standard = reduce_shapes(load_stage(STANDARD_FIXTURE))
     large = reduce_shapes(load_stage(LARGE_FIXTURE))
 
-    assert standard.single == {"A": (1, 2), "B": (2, 1), "C": (1, 1)}
-    assert standard.objective_value == 20
-    assert large.single == {"A": (1, 8), "B": (8, 1), "C": (1, 1)}
-    assert large.objective_value == 68
+    assert standard.single == {"A": (1, 4), "B": (4, 1), "C": (1, 1)}
+    assert standard.objective_value == 28
+    assert large.single == {"A": (1, 16), "B": (16, 1), "C": (1, 1)}
+    assert large.objective_value == 100
 
 
 def test_replicate_value_constraints_imply_each_rank_matches_single() -> None:
@@ -261,7 +261,7 @@ def _standard_encoded():
 
 def test_standard_case_relation_constraint_counts() -> None:
     _, _, encoded = _standard_encoded()
-    assert len(encoded.input_constraints) == 4
+    assert len(encoded.input_constraints) == 8
     assert len(encoded.output_constraints) == 1
 
 

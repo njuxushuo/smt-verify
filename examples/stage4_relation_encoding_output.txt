@@ -4,21 +4,31 @@ Relation encoding:
 
 Input relations:
   [0] A: shard(dim=1)
-    constraints: 2
+    constraints: 4
     [0] rank0__A0__v0 == single__A__v0
-    [1] rank1__A1__v0 == single__A__v1
+    [1] rank0__A0__v1 == single__A__v1
+    [2] rank1__A1__v0 == single__A__v2
+    [3] rank1__A1__v1 == single__A__v3
 
   [1] B: shard(dim=0)
-    constraints: 2
+    constraints: 4
     [0] rank0__B0__v0 == single__B__v0
-    [1] rank1__B1__v0 == single__B__v1
+    [1] rank0__B0__v1 == single__B__v1
+    [2] rank1__B1__v0 == single__B__v2
+    [3] rank1__B1__v1 == single__B__v3
 
 Output relation:
   C: partial(sum)
     constraints: 1
-    [0] single__A__v0*single__B__v0 + single__A__v1*single__B__v1 ==
-rank0__A0__v0*rank0__B0__v0 + rank1__A1__v0*rank1__B1__v0
+    [0] single__A__v0*single__B__v0 +
+single__A__v1*single__B__v1 +
+single__A__v2*single__B__v2 +
+single__A__v3*single__B__v3 ==
+rank0__A0__v0*rank0__B0__v0 +
+rank0__A0__v1*rank0__B0__v1 +
+rank1__A1__v0*rank1__B1__v0 +
+rank1__A1__v1*rank1__B1__v1
 
-Total input constraints: 4
+Total input constraints: 8
 Total output constraints: 1
 Relation encoding: PASS

@@ -93,26 +93,27 @@ def _elementwise_case(operator: str) -> dict:
 def test_standard_matmul_shard_to_partial_reduction():
     result = reduce_shapes(load_stage(STANDARD_FIXTURE))
 
-    assert result.single["A"] == (1, 2)
-    assert result.single["B"] == (2, 1)
+    assert result.single["A"] == (1, 4)
+    assert result.single["B"] == (4, 1)
     assert result.single["C"] == (1, 1)
     for rank in (0, 1):
-        assert result.distributed[rank][f"A{rank}"] == (1, 1)
-        assert result.distributed[rank][f"B{rank}"] == (1, 1)
+        assert result.distributed[rank][f"A{rank}"] == (1, 2)
+        assert result.distributed[rank][f"B{rank}"] == (2, 1)
         assert result.distributed[rank][f"C{rank}"] == (1, 1)
-    assert result.objective_value == 20
+    assert result.objective_value == 28
 
 
 def test_large_shape_case_reduces_to_rank_aware_minimum():
     result = reduce_shapes(load_stage(LARGE_FIXTURE))
 
-    assert result.single["A"] == (1, 8)
-    assert result.single["B"] == (8, 1)
+    assert result.single["A"] == (1, 16)
+    assert result.single["B"] == (16, 1)
     assert result.single["C"] == (1, 1)
     for rank in range(8):
-        assert result.distributed[rank][f"A{rank}"] == (1, 1)
-        assert result.distributed[rank][f"B{rank}"] == (1, 1)
+        assert result.distributed[rank][f"A{rank}"] == (1, 2)
+        assert result.distributed[rank][f"B{rank}"] == (2, 1)
         assert result.distributed[rank][f"C{rank}"] == (1, 1)
+    assert result.objective_value == 100
 
 
 def test_matmul_k_dimensions_match_on_single_and_all_ranks():

@@ -133,7 +133,12 @@ def test_standard_stage_matmul_symbolic_semantics() -> None:
     assert result.distributed[1].input_names == ("A1", "B1")
     single_a = result.single.tensors["A"]
     single_b = result.single.tensors["B"]
-    expected = single_a.at((0, 0)) * single_b.at((0, 0)) + single_a.at((0, 1)) * single_b.at((1, 0))
+    expected = z3.Sum(
+        [
+            single_a.at((0, index)) * single_b.at((index, 0))
+            for index in range(single_a.shape[1])
+        ]
+    )
     _assert_equivalent(result.single.tensors["C"].at((0, 0)), expected)
 
 
@@ -143,7 +148,12 @@ def test_standard_stage_rank_local_matmul_symbolic_semantics(rank: int) -> None:
     program = result.distributed[rank]
     local_a = program.tensors[f"A{rank}"]
     local_b = program.tensors[f"B{rank}"]
-    expected = local_a.at((0, 0)) * local_b.at((0, 0))
+    expected = z3.Sum(
+        [
+            local_a.at((0, index)) * local_b.at((index, 0))
+            for index in range(local_a.shape[1])
+        ]
+    )
     _assert_equivalent(program.tensors[f"C{rank}"].at((0, 0)), expected)
 
 
