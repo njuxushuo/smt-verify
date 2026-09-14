@@ -87,7 +87,7 @@ def test_invalid_original_elementwise_operators_are_rejected(
 ) -> None:
     data = _operator_case(operator, {"A": [2, 3], "B": [2, 4], "C": [2, 3]})
 
-    with pytest.raises(StageInputError, match=f"{operator} tensors must have the same shape"):
+    with pytest.raises(StageInputError, match="not broadcast-compatible"):
         _load_data(tmp_path, data)
 
 

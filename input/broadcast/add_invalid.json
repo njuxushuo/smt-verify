@@ -1,0 +1,37 @@
+{
+  "name": "add_invalid_broadcast",
+  "world_size": 1,
+  "single": {
+    "tensors": {
+      "A": {"shape": [2, 3, 4]},
+      "B": {"shape": [5]},
+      "C": {"shape": [2, 3, 4]}
+    },
+    "ops": [
+      {"type": "add", "inputs": ["A", "B"], "outputs": ["C"]}
+    ]
+  },
+  "distributed": {
+    "ranks": {
+      "0": {
+        "tensors": {
+          "A0": {"shape": [2, 3, 4]},
+          "B0": {"shape": [5]},
+          "C0": {"shape": [2, 3, 4]}
+        },
+        "ops": [
+          {"type": "add", "inputs": ["A0", "B0"], "outputs": ["C0"]}
+        ]
+      }
+    }
+  },
+  "input_relations": [
+    {"single_tensor": "A", "distributed_tensors": ["A0"], "type": "replicate"},
+    {"single_tensor": "B", "distributed_tensors": ["B0"], "type": "replicate"}
+  ],
+  "output_relation": {
+    "single_tensor": "C",
+    "distributed_tensors": ["C0"],
+    "type": "replicate"
+  }
+}

@@ -2,10 +2,18 @@
 
 from __future__ import annotations
 
+from itertools import product
+
 import z3
 
 from ..shape.model import ShapeReductionError, UnsupportedShapeSemanticsError
 from ..symbolic.tensor import SymbolicExecutionError, SymbolicTensor
+from .broadcast import (
+    BroadcastShapeError,
+    broadcast_index,
+    broadcast_shape_constraints,
+    infer_broadcast_shape,
+)
 
 
 class ConcreteShapeError(ValueError):
@@ -55,32 +63,6 @@ class OperatorSemantics:
         context: str,
     ) -> tuple[SymbolicTensor, ...]:
         raise NotImplementedError
-
-
-def _same_shape_constraints(
-    left: tuple[z3.ArithRef, ...],
-    right: tuple[z3.ArithRef, ...],
-    context: str,
-) -> list[z3.BoolRef]:
-    if len(left) != len(right):
-        raise ShapeReductionError(f"{context}: tensors must have the same rank")
-    return [left[index] == right[index] for index in range(len(left))]
-
-
-def _validate_concrete_same_shapes(
-    operator_name: str,
-    input_shapes: tuple[tuple[int, ...], ...],
-    output_shapes: tuple[tuple[int, ...], ...],
-    context: str,
-) -> None:
-    if len(input_shapes) != 2 or len(output_shapes) != 1:
-        raise ConcreteShapeError(
-            f"{context}: {operator_name} requires exactly two inputs and one output"
-        )
-    left, right = input_shapes
-    (output,) = output_shapes
-    if left != right or left != output:
-        raise ConcreteShapeError(f"{context}: {operator_name} tensors must have the same shape")
 
 
 class MatMulOperator(OperatorSemantics):
@@ -180,7 +162,19 @@ class AddOperator(OperatorSemantics):
         output_shapes: tuple[tuple[int, ...], ...],
         context: str,
     ) -> None:
-        _validate_concrete_same_shapes("add", input_shapes, output_shapes, context)
+        if len(input_shapes) != 2 or len(output_shapes) != 1:
+            raise ConcreteShapeError(f"{context}: add requires exactly two inputs and one output")
+        left, right = input_shapes
+        (output,) = output_shapes
+        try:
+            expected_output = infer_broadcast_shape(left, right, f"{context}: add")
+        except BroadcastShapeError as exc:
+            raise ConcreteShapeError(str(exc)) from exc
+        if output != expected_output:
+            raise ConcreteShapeError(
+                f"{context}: add output shape {output} does not match "
+                f"broadcast shape {expected_output}"
+            )
 
     def shape_constraints(
         self,
@@ -196,9 +190,24 @@ class AddOperator(OperatorSemantics):
             )
         left, right = input_shapes
         (output,) = output_shapes
-        return _same_shape_constraints(left, right, context) + _same_shape_constraints(
-            left, output, context
-        )
+        if len(original_input_shapes) != 2 or len(original_output_shapes) != 1:
+            raise ShapeReductionError(
+                f"{context}: add requires original shapes for two inputs and one output"
+            )
+        original_left, original_right = original_input_shapes
+        (original_output,) = original_output_shapes
+        try:
+            return broadcast_shape_constraints(
+                left,
+                right,
+                output,
+                original_left,
+                original_right,
+                original_output,
+                f"{context}: add",
+            )
+        except BroadcastShapeError as exc:
+            raise ShapeReductionError(str(exc)) from exc
 
     def symbolic_execute(
         self,
@@ -210,12 +219,23 @@ class AddOperator(OperatorSemantics):
             raise SymbolicExecutionError(f"{context}: add requires exactly two inputs and one output")
         left, right = input_tensors
         (output_shape,) = output_shapes
-        if left.shape != right.shape or left.shape != output_shape:
-            raise SymbolicExecutionError(f"{context}: add tensors must have the same shape")
+        try:
+            expected_output = infer_broadcast_shape(left.shape, right.shape, f"{context}: add")
+        except BroadcastShapeError as exc:
+            raise SymbolicExecutionError(str(exc)) from exc
+        if output_shape != expected_output:
+            raise SymbolicExecutionError(
+                f"{context}: add output shape {output_shape} does not match "
+                f"broadcast shape {expected_output}"
+            )
         return (
             SymbolicTensor(
                 shape=output_shape,
-                values=tuple(left_value + right_value for left_value, right_value in zip(left.values, right.values)),
+                values=tuple(
+                    left.at(broadcast_index(index, left.shape, output_shape))
+                    + right.at(broadcast_index(index, right.shape, output_shape))
+                    for index in product(*(range(extent) for extent in output_shape))
+                ),
             ),
         )
 
@@ -229,7 +249,19 @@ class MulOperator(OperatorSemantics):
         output_shapes: tuple[tuple[int, ...], ...],
         context: str,
     ) -> None:
-        _validate_concrete_same_shapes("mul", input_shapes, output_shapes, context)
+        if len(input_shapes) != 2 or len(output_shapes) != 1:
+            raise ConcreteShapeError(f"{context}: mul requires exactly two inputs and one output")
+        left, right = input_shapes
+        (output,) = output_shapes
+        try:
+            expected_output = infer_broadcast_shape(left, right, f"{context}: mul")
+        except BroadcastShapeError as exc:
+            raise ConcreteShapeError(str(exc)) from exc
+        if output != expected_output:
+            raise ConcreteShapeError(
+                f"{context}: mul output shape {output} does not match "
+                f"broadcast shape {expected_output}"
+            )
 
     def shape_constraints(
         self,
@@ -245,9 +277,24 @@ class MulOperator(OperatorSemantics):
             )
         left, right = input_shapes
         (output,) = output_shapes
-        return _same_shape_constraints(left, right, context) + _same_shape_constraints(
-            left, output, context
-        )
+        if len(original_input_shapes) != 2 or len(original_output_shapes) != 1:
+            raise ShapeReductionError(
+                f"{context}: mul requires original shapes for two inputs and one output"
+            )
+        original_left, original_right = original_input_shapes
+        (original_output,) = original_output_shapes
+        try:
+            return broadcast_shape_constraints(
+                left,
+                right,
+                output,
+                original_left,
+                original_right,
+                original_output,
+                f"{context}: mul",
+            )
+        except BroadcastShapeError as exc:
+            raise ShapeReductionError(str(exc)) from exc
 
     def symbolic_execute(
         self,
@@ -259,12 +306,23 @@ class MulOperator(OperatorSemantics):
             raise SymbolicExecutionError(f"{context}: mul requires exactly two inputs and one output")
         left, right = input_tensors
         (output_shape,) = output_shapes
-        if left.shape != right.shape or left.shape != output_shape:
-            raise SymbolicExecutionError(f"{context}: mul tensors must have the same shape")
+        try:
+            expected_output = infer_broadcast_shape(left.shape, right.shape, f"{context}: mul")
+        except BroadcastShapeError as exc:
+            raise SymbolicExecutionError(str(exc)) from exc
+        if output_shape != expected_output:
+            raise SymbolicExecutionError(
+                f"{context}: mul output shape {output_shape} does not match "
+                f"broadcast shape {expected_output}"
+            )
         return (
             SymbolicTensor(
                 shape=output_shape,
-                values=tuple(left_value * right_value for left_value, right_value in zip(left.values, right.values)),
+                values=tuple(
+                    left.at(broadcast_index(index, left.shape, output_shape))
+                    * right.at(broadcast_index(index, right.shape, output_shape))
+                    for index in product(*(range(extent) for extent in output_shape))
+                ),
             ),
         )
 

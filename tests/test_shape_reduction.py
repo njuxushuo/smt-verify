@@ -197,5 +197,5 @@ def test_invalid_original_add_shapes_are_rejected_by_static_validation(tmp_path:
         "output_relation": {"single_tensor": "C", "distributed_tensors": ["C0", "C1"], "type": "replicate"},
     }
 
-    with pytest.raises(StageInputError, match="add tensors must have the same shape"):
+    with pytest.raises(StageInputError, match="not broadcast-compatible"):
         _load_data(tmp_path, data)

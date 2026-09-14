@@ -10,9 +10,9 @@ Reduced dimensions are still symbolic positive integers optimized by Stage 2, bu
 local_reduced * original_single == single_reduced * original_local
 ```
 
-This avoids Z3 Real division. Replicate and Partial have original ratio one; regular Shard preserves its original equal-size ratio and retains reduced shard divisibility. The current covered structure is tensor rank, regular Replicate/Shard/Partial shape ratios, concrete MatMul/Add/Mul legality, and their existing reduced structural equations. This is not a claim of general preservation for future broadcast, reshape, sum, layout, or uneven-shard semantics.
+This avoids Z3 Real division. Replicate and Partial have original ratio one; regular Shard preserves its original equal-size ratio and retains reduced shard divisibility. The current covered structure is tensor rank, regular Replicate/Shard/Partial shape ratios, concrete MatMul/Add/Mul legality, MatMul structural equations, and original-pattern-preserving Add/Mul trailing broadcast equations. This is not a claim of general preservation for future reshape, sum, layout, uneven-shard, or other operator-specific semantics.
 
-Concrete legality is checked during `validate_stage()`: MatMul is 2-D with matching shared/output dimensions; Add and Mul require exact same shapes. Thus an invalid original program cannot be repaired by reduction.
+Concrete legality is checked during `validate_stage()`: MatMul is 2-D with matching shared/output dimensions; Add and Mul require a standard trailing broadcast-compatible pair and the exact inferred output shape. Thus an invalid original program cannot be repaired by reduction.
 
 ## Input boundary contract
 
