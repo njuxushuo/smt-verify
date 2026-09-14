@@ -9,8 +9,8 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from src.stage_loader import load_stage
-from src.verifier import VerificationError, VerificationStatus, verify_stage
+from src.stage.loader import load_stage
+from src.verification.verifier import VerificationError, VerificationStatus, verify_stage
 
 
 STANDARD_FIXTURE = ROOT / "input" / "matmul_shard_to_partial.json"

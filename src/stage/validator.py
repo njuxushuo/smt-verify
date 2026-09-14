@@ -2,11 +2,11 @@
 
 from __future__ import annotations
 
-from .operators import ConcreteShapeError, DECLARED_OPERATOR_TYPES, OPERATOR_REGISTRY
-from .program_analysis import ProgramAnalysisError, find_program_inputs, validate_program_dataflow
-from .relations import ConcreteRelationError, DECLARED_RELATION_TYPES, get_relation
-from .stage_loader import StageInputError
-from .stage_model import OpSpec, ProgramSpec, RelationSpec, StageSpec, TensorSpec
+from ..semantics.operators import ConcreteShapeError, DECLARED_OPERATOR_TYPES, OPERATOR_REGISTRY
+from ..semantics.relations import ConcreteRelationError, DECLARED_RELATION_TYPES, get_relation
+from .analysis import ProgramAnalysisError, find_program_inputs, validate_program_dataflow
+from .loader import StageInputError
+from .model import OpSpec, ProgramSpec, RelationSpec, StageSpec, TensorSpec
 
 
 def _is_integer(value: object) -> bool:

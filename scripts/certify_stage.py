@@ -11,12 +11,12 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 from src.lemma import LemmaMaterializationError, certify_stage
-from src.lemma_store import LemmaStoreError, save_lemma
-from src.relation_encoder import RelationEncodingError
-from src.shape_model import ShapeReductionError
-from src.stage_loader import StageInputError, load_stage
-from src.symbolic_tensor import SymbolicExecutionError
-from src.verifier import VerificationError, VerificationStatus
+from src.lemma.store import LemmaStoreError, save_lemma
+from src.verification.relation_encoder import RelationEncodingError
+from src.shape.model import ShapeReductionError
+from src.stage.loader import StageInputError, load_stage
+from src.symbolic.tensor import SymbolicExecutionError
+from src.verification.verifier import VerificationError, VerificationStatus
 
 
 def main(argv: list[str] | None = None) -> int:

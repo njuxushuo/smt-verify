@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from .lemma import CertifiedLemma, canonical_json_bytes, lemma_to_dict
+from .model import CertifiedLemma, canonical_json_bytes, lemma_to_dict
 
 
 class LemmaStoreError(ValueError):

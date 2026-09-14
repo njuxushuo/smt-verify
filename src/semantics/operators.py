@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import z3
 
-from .shape_model import ShapeReductionError, UnsupportedShapeSemanticsError
-from .symbolic_tensor import SymbolicExecutionError, SymbolicTensor
+from ..shape.model import ShapeReductionError, UnsupportedShapeSemanticsError
+from ..symbolic.tensor import SymbolicExecutionError, SymbolicTensor
 
 
 class ConcreteShapeError(ValueError):

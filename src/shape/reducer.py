@@ -4,9 +4,9 @@ from __future__ import annotations
 
 import z3
 
-from .shape_constraints import build_shape_constraints, create_symbolic_shapes
-from .shape_model import ReducedShapeResult, ShapeReductionError, TensorRef
-from .stage_model import StageSpec
+from ..stage.model import StageSpec
+from .constraints import build_shape_constraints, create_symbolic_shapes
+from .model import ReducedShapeResult, ShapeReductionError, TensorRef
 
 
 def _simplify_and_deduplicate(constraints: list[z3.BoolRef]) -> list[z3.BoolRef]:

@@ -2,11 +2,11 @@
 
 from __future__ import annotations
 
-from .operators import get_operator
-from .program_analysis import ProgramAnalysisError, find_program_inputs, validate_program_dataflow
-from .shape_model import ReducedShapeResult
-from .stage_model import ProgramSpec, StageSpec
-from .symbolic_tensor import (
+from ..semantics.operators import get_operator
+from ..shape.model import ReducedShapeResult
+from ..stage.analysis import ProgramAnalysisError, find_program_inputs, validate_program_dataflow
+from ..stage.model import ProgramSpec, StageSpec
+from .tensor import (
     SymbolicExecutionError,
     SymbolicProgramResult,
     SymbolicStageResult,

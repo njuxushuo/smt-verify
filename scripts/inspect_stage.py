@@ -9,8 +9,8 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from src.stage_loader import StageInputError, load_stage
-from src.stage_model import RelationSpec
+from src.stage.loader import StageInputError, load_stage
+from src.stage.model import RelationSpec
 
 
 def _format_relation(relation: RelationSpec) -> str:

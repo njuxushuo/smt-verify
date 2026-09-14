@@ -15,7 +15,7 @@
 
 ## Relation shape semantics
 
-Relation-specific symbolic shape semantics are implemented in [`src/relations.py`](../src/relations.py) and are reached through the relation registry. [`src/shape_constraints.py`](../src/shape_constraints.py) only resolves Stage shapes and aggregates the constraints.
+Relation-specific symbolic shape semantics are implemented in [`src/semantics/relations.py`](../src/semantics/relations.py) and are reached through the relation registry. [`src/shape/constraints.py`](../src/shape/constraints.py) only resolves Stage shapes and aggregates the constraints.
 
 - `replicate`：每个 rank local shape 逐维等于 single shape。
 - `shard(dim=d)`：非 shard 维相等；第 `d` 维满足 `world_size * local_dim == global_dim`，并要求全局维度整除 world size。
@@ -32,7 +32,7 @@ Relation-specific symbolic shape semantics are implemented in [`src/relations.py
 
 ## Operator semantics organization
 
-Stage-level constraint builder does not encode concrete operator rules. Concrete operator shape semantics are registered in [`src/operators.py`](../src/operators.py): `matmul`、`add` 与 `mul` 通过 `get_operator()` 取得对应的 operator class，再由该类生成其 shape constraints。这样阶段三可以在同一 operator abstraction 上增加 value semantics，而不会重新建立 central dispatch。
+Stage-level constraint builder does not encode concrete operator rules. Concrete operator shape semantics are registered in [`src/semantics/operators.py`](../src/semantics/operators.py): `matmul`、`add` 与 `mul` 通过 `get_operator()` 取得对应的 operator class，再由该类生成其 shape constraints。这样阶段三可以在同一 operator abstraction 上增加 value semantics，而不会重新建立 central dispatch。
 
 ## Optimize objective
 

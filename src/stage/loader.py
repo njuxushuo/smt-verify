@@ -6,7 +6,7 @@ import json
 from pathlib import Path
 from typing import Any
 
-from .stage_model import OpSpec, ProgramSpec, RelationSpec, StageSpec, TensorSpec
+from .model import OpSpec, ProgramSpec, RelationSpec, StageSpec, TensorSpec
 
 
 class StageInputError(ValueError):
@@ -140,7 +140,7 @@ def load_stage(path: str | Path) -> StageSpec:
 
     try:
         stage = _parse_stage(raw_stage)
-        from .stage_validator import validate_stage
+        from .validator import validate_stage
 
         validate_stage(stage)
         return stage

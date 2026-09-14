@@ -4,10 +4,10 @@ from __future__ import annotations
 
 import z3
 
-from .operators import get_operator
-from .relations import get_relation
-from .shape_model import SymbolicShapeBook, TensorRef
-from .stage_model import ProgramSpec, RelationSpec, StageSpec
+from ..semantics.operators import get_operator
+from ..semantics.relations import get_relation
+from ..stage.model import ProgramSpec, RelationSpec, StageSpec
+from .model import SymbolicShapeBook, TensorRef
 
 
 def _single_ref(name: str) -> TensorRef:

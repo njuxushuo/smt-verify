@@ -11,11 +11,11 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from src.shape_constraints import build_shape_constraints, create_symbolic_shapes
-from src.shape_model import TensorRef
-from src.shape_reducer import reduce_shapes
-from src.stage_loader import StageInputError, load_stage
-from src.stage_model import ProgramSpec, RelationSpec, StageSpec, TensorSpec
+from src.shape.constraints import build_shape_constraints, create_symbolic_shapes
+from src.shape.model import TensorRef
+from src.shape.reducer import reduce_shapes
+from src.stage.loader import StageInputError, load_stage
+from src.stage.model import ProgramSpec, RelationSpec, StageSpec, TensorSpec
 
 
 STANDARD_FIXTURE = ROOT / "input" / "matmul_shard_to_partial.json"

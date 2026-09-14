@@ -11,13 +11,13 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from src.relation_encoder import _encode_one_relation, encode_stage_relations
-from src.relations import RelationEncodingError
-from src.shape_model import ShapeReductionError
-from src.shape_reducer import reduce_shapes
-from src.stage_loader import StageInputError, load_stage
-from src.symbolic_executor import execute_stage
-from src.symbolic_tensor import SymbolicExecutionError
+from src.verification.relation_encoder import _encode_one_relation, encode_stage_relations
+from src.semantics.relations import RelationEncodingError
+from src.shape.model import ShapeReductionError
+from src.shape.reducer import reduce_shapes
+from src.stage.loader import StageInputError, load_stage
+from src.symbolic.executor import execute_stage
+from src.symbolic.tensor import SymbolicExecutionError
 
 
 def _relation_label(relation_type: str, dim: int | None, reduce_op: str | None) -> str:

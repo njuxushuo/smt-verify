@@ -16,9 +16,9 @@ from src.lemma import (
     certify_stage,
     lemma_id_for_stage,
 )
-from src.stage_loader import load_stage
-from src.stage_model import RelationSpec
-from src.verifier import VerificationStatus
+from src.stage.loader import load_stage
+from src.stage.model import RelationSpec
+from src.verification.verifier import VerificationStatus
 
 
 STANDARD_FIXTURE = ROOT / "input" / "matmul_shard_to_partial.json"

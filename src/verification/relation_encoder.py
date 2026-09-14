@@ -6,9 +6,9 @@ from dataclasses import dataclass
 
 import z3
 
-from .relations import RelationEncodingError, get_relation
-from .stage_model import RelationSpec, StageSpec
-from .symbolic_tensor import SymbolicStageResult, SymbolicTensor
+from ..semantics.relations import RelationEncodingError, get_relation
+from ..stage.model import RelationSpec, StageSpec
+from ..symbolic.tensor import SymbolicStageResult, SymbolicTensor
 
 
 @dataclass

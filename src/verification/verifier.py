@@ -7,12 +7,12 @@ from enum import Enum
 
 import z3
 
+from ..shape.model import ReducedShapeResult
+from ..shape.reducer import reduce_shapes
+from ..stage.model import StageSpec
+from ..symbolic.executor import execute_stage
+from ..symbolic.tensor import SymbolicStageResult
 from .relation_encoder import EncodedRelations, encode_stage_relations
-from .shape_model import ReducedShapeResult
-from .shape_reducer import reduce_shapes
-from .stage_model import StageSpec
-from .symbolic_executor import execute_stage
-from .symbolic_tensor import SymbolicStageResult
 
 
 class VerificationStatus(str, Enum):

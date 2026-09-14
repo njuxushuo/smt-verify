@@ -10,10 +10,10 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from src.operators import AddOperator, MatMulOperator, MulOperator, get_operator
-from src.shape_model import ShapeReductionError, UnsupportedShapeSemanticsError
-from src.shape_reducer import reduce_shapes
-from src.stage_loader import StageInputError, load_stage
+from src.semantics.operators import AddOperator, MatMulOperator, MulOperator, get_operator
+from src.shape.model import ShapeReductionError, UnsupportedShapeSemanticsError
+from src.shape.reducer import reduce_shapes
+from src.stage.loader import StageInputError, load_stage
 
 
 STANDARD_FIXTURE = ROOT / "input" / "matmul_shard_to_partial.json"

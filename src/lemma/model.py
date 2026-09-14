@@ -6,9 +6,9 @@ from dataclasses import dataclass
 import hashlib
 import json
 
-from .shape_model import ReducedShapeResult
-from .stage_model import OpSpec, RelationSpec, StageSpec
-from .verifier import VerificationResult, VerificationStatus, verify_stage
+from ..shape.model import ReducedShapeResult
+from ..stage.model import OpSpec, RelationSpec, StageSpec
+from ..verification.verifier import VerificationResult, VerificationStatus, verify_stage
 
 
 class LemmaMaterializationError(ValueError):

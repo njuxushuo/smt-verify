@@ -11,14 +11,14 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from src.operators import AddOperator, MulOperator
-from src.program_analysis import ProgramAnalysisError, find_program_inputs
-from src.shape_model import UnsupportedShapeSemanticsError
-from src.shape_reducer import reduce_shapes
-from src.stage_loader import load_stage
-from src.stage_model import OpSpec, ProgramSpec, TensorSpec
-from src.symbolic_executor import execute_program, execute_stage
-from src.symbolic_tensor import (
+from src.semantics.operators import AddOperator, MulOperator
+from src.stage.analysis import ProgramAnalysisError, find_program_inputs
+from src.shape.model import UnsupportedShapeSemanticsError
+from src.shape.reducer import reduce_shapes
+from src.stage.loader import load_stage
+from src.stage.model import OpSpec, ProgramSpec, TensorSpec
+from src.symbolic.executor import execute_program, execute_stage
+from src.symbolic.tensor import (
     SymbolicExecutionError,
     SymbolicTensor,
     create_symbolic_input_tensor,

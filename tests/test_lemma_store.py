@@ -12,9 +12,9 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from src.lemma import certify_stage, lemma_to_dict
-from src.lemma_store import LemmaStoreError, save_lemma
-from src.stage_loader import load_stage
-from src.verifier import VerificationStatus
+from src.lemma.store import LemmaStoreError, save_lemma
+from src.stage.loader import load_stage
+from src.verification.verifier import VerificationStatus
 
 
 STANDARD_FIXTURE = ROOT / "input" / "matmul_shard_to_partial.json"

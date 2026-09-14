@@ -6,9 +6,9 @@ from itertools import product
 
 import z3
 
-from .shape_model import ShapeReductionError
-from .stage_model import RelationSpec
-from .symbolic_tensor import SymbolicTensor
+from ..shape.model import ShapeReductionError
+from ..stage.model import RelationSpec
+from ..symbolic.tensor import SymbolicTensor
 
 
 class RelationEncodingError(ValueError):

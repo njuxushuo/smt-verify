@@ -4,7 +4,7 @@ Stage 4 encodes the value relationship between a single symbolic tensor and its 
 
 ## RelationSemantics
 
-[`src/relations.py`](../src/relations.py) is the single source of relation-specific symbolic semantics. `RelationSemantics` supplies both `shape_constraints(...)` and `value_constraints(...)`, with the registry providing `replicate`, `shard`, and `partial` implementations.
+[`src/semantics/relations.py`](../src/semantics/relations.py) is the single source of relation-specific symbolic semantics. `RelationSemantics` supplies both `shape_constraints(...)` and `value_constraints(...)`, with the registry providing `replicate`, `shard`, and `partial` implementations.
 
 - **Replicate** requires equal shapes and encodes every `local[r][i] == single[i]`.
 - **Shard(dim)** requires regular contiguous equal-size one-axis shards. It constrains non-shard dimensions to match, requires `world_size * local_dim == single_dim` and divisibility, then maps local index `i` to global index `rank * local_dim + i` on the shard axis.

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from .stage_model import ProgramSpec
+from .model import ProgramSpec
 
 
 class ProgramAnalysisError(ValueError):

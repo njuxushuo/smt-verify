@@ -10,11 +10,11 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from src.relation_encoder import RelationEncodingError
-from src.shape_model import ShapeReductionError
-from src.stage_loader import StageInputError, load_stage
-from src.symbolic_tensor import SymbolicExecutionError
-from src.verifier import VerificationError, VerificationResult, VerificationStatus, verify_stage
+from src.verification.relation_encoder import RelationEncodingError
+from src.shape.model import ShapeReductionError
+from src.stage.loader import StageInputError, load_stage
+from src.symbolic.tensor import SymbolicExecutionError
+from src.verification.verifier import VerificationError, VerificationResult, VerificationStatus, verify_stage
 
 
 def _print_counterexample(result: VerificationResult) -> None:

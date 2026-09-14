@@ -16,13 +16,13 @@ Programs use single-assignment semantics: a tensor may have only one producer. O
 
 ## Operator semantics
 
-The existing `OperatorSemantics` abstraction in `src/operators.py` now owns both shape constraints and `symbolic_execute(...)`. The supported operators are:
+The existing `OperatorSemantics` abstraction in `src/semantics/operators.py` now owns both shape constraints and `symbolic_execute(...)`. The supported operators are:
 
 - `matmul`: two-dimensional matrix multiplication using `z3.Sum` over the shared dimension.
 - `add`: same-shape elementwise addition.
 - `mul`: same-shape elementwise multiplication.
 
-`src/symbolic_executor.py` only coordinates producer checks, ordered execution, reduced-shape validation, and registry dispatch through `get_operator()`; it contains no operator-specific mathematical formulas.
+`src/symbolic/executor.py` only coordinates producer checks, ordered execution, reduced-shape validation, and registry dispatch through `get_operator()`; it contains no operator-specific mathematical formulas.
 
 ## Current boundary
 
