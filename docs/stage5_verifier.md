@@ -42,4 +42,4 @@ $$
 Valid(S_{reduced}) \Rightarrow Valid(S_{original}).
 $$
 
-This is a scoped design argument, not a mechanically checked theorem. The supported fragment is 2-D MatMul and arbitrary-rank Add/Mul with original-pattern-preserving standard trailing broadcasting; and Replicate, regular contiguous equal-size Shard(dim), and Partial(sum). It excludes MatMul batch broadcasting, arbitrary layouts, uneven or interleaved shards, unsupported operators, communication value semantics, and whole-graph reasoning.
+This is a scoped design argument, not a mechanically checked theorem. The supported fragment is rank >= 2 batched MatMul with original-pattern-preserving batch broadcasting, arbitrary-rank Add/Mul with original-pattern-preserving standard trailing broadcasting, and Replicate, regular contiguous equal-size Shard(dim), and Partial(sum). It excludes rank-1 MatMul forms, arbitrary layouts, uneven or interleaved shards, unsupported operators, communication value semantics, and whole-graph reasoning.

@@ -156,7 +156,7 @@ def test_unsupported_operator_fails_during_shape_reduction(tmp_path: Path):
         reduce_shapes(stage)
 
 
-def test_rank_three_matmul_is_rejected_by_static_validation(tmp_path: Path):
+def test_rank_three_matmul_passes_static_validation_and_reduction(tmp_path: Path):
     data = _elementwise_case("add")
     data["single"] = {
         "tensors": {"A": {"shape": [2, 3, 4]}, "B": {"shape": [2, 4, 5]}, "C": {"shape": [2, 3, 5]}},
@@ -172,8 +172,11 @@ def test_rank_three_matmul_is_rejected_by_static_validation(tmp_path: Path):
         "type": "replicate",
     }
 
-    with pytest.raises(StageInputError, match="only 2-D tensors"):
-        _load_data(tmp_path, data)
+    result = reduce_shapes(_load_data(tmp_path, data))
+
+    assert result.single["A"][-1] == result.single["B"][-2]
+    assert result.single["C"][-2] == result.single["A"][-2]
+    assert result.single["C"][-1] == result.single["B"][-1]
 
 
 def test_invalid_original_add_shapes_are_rejected_by_static_validation(tmp_path: Path):

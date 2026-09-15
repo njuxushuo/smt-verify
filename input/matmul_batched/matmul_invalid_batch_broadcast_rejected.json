@@ -1,0 +1,37 @@
+{
+  "name": "matmul_invalid_batch_broadcast_rejected",
+  "world_size": 1,
+  "single": {
+    "tensors": {
+      "A": {"shape": [2, 3, 4, 5]},
+      "B": {"shape": [4, 3, 5, 6]},
+      "C": {"shape": [2, 3, 4, 6]}
+    },
+    "ops": [
+      {"type": "matmul", "inputs": ["A", "B"], "outputs": ["C"]}
+    ]
+  },
+  "distributed": {
+    "ranks": {
+      "0": {
+        "tensors": {
+          "A0": {"shape": [2, 3, 4, 5]},
+          "B0": {"shape": [4, 3, 5, 6]},
+          "C0": {"shape": [2, 3, 4, 6]}
+        },
+        "ops": [
+          {"type": "matmul", "inputs": ["A0", "B0"], "outputs": ["C0"]}
+        ]
+      }
+    }
+  },
+  "input_relations": [
+    {"single_tensor": "A", "distributed_tensors": ["A0"], "type": "replicate"},
+    {"single_tensor": "B", "distributed_tensors": ["B0"], "type": "replicate"}
+  ],
+  "output_relation": {
+    "single_tensor": "C",
+    "distributed_tensors": ["C0"],
+    "type": "replicate"
+  }
+}

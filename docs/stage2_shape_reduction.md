@@ -25,7 +25,7 @@ Relation-specific symbolic shape semantics are implemented in [`src/semantics/re
 
 当前只支持：
 
-- `matmul`：仅二维；约束 `A[1] == B[0]`、`C[0] == A[0]`、`C[1] == B[1]`。
+- `matmul`：支持 rank >= 2 的 batched MatMul。仅 `A[:-2]` 与 `B[:-2]` 进行 trailing broadcasting，并根据 original shape 保留 batch broadcast pattern；矩阵维度约束为 `A[-1] == B[-2]`、`C[-2] == A[-2]`、`C[-1] == B[-1]`。
 - `add`、`mul`：支持 arbitrary-rank standard trailing-dimension broadcasting。reduced shape 约束根据 original shape 逐维保留 equal、left-singleton、right-singleton 或 missing-leading 模式，避免 reduction 改变原始 broadcast pattern。
 
 `transpose`、`reshape`、`sum`、`all_reduce`、`all_gather` 与 `reduce_scatter` 可以由阶段一读取，但阶段二会抛出 `UnsupportedShapeSemanticsError`。

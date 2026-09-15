@@ -18,11 +18,11 @@ Programs use single-assignment semantics: a tensor may have only one producer. O
 
 The existing `OperatorSemantics` abstraction in `src/semantics/operators.py` now owns both shape constraints and `symbolic_execute(...)`. The supported operators are:
 
-- `matmul`: two-dimensional matrix multiplication using `z3.Sum` over the shared dimension.
+- `matmul`: rank >= 2 batched matrix multiplication. Batch dimensions use standard trailing broadcasting, while `z3.Sum` ranges over the matrix contraction dimension.
 - `add`: arbitrary-rank elementwise addition with standard trailing-dimension broadcasting.
 - `mul`: arbitrary-rank elementwise multiplication with standard trailing-dimension broadcasting.
 
-Both operators explicitly reuse the shared helpers in `src/semantics/broadcast.py`. Each output index is projected onto the corresponding input index; singleton dimensions map to zero and missing leading dimensions are omitted.
+Add and Mul explicitly reuse the shared helpers in `src/semantics/broadcast.py` for their complete shapes. MatMul reuses the same helpers only for batch dimensions (`shape[:-2]`), then appends its row/contraction/column indices. Each broadcasted output index is projected onto the corresponding input index; singleton dimensions map to zero and missing leading dimensions are omitted.
 
 `src/symbolic/executor.py` only coordinates producer checks, ordered execution, reduced-shape validation, and registry dispatch through `get_operator()`; it contains no operator-specific mathematical formulas.
 
