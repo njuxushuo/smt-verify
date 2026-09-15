@@ -76,7 +76,7 @@ Relation 关联一个单机 tensor 与按 rank 顺序排列的 local tensor：
 }
 ```
 
-完整的可运行样例见 [`../input/broadcast/matmul_batched/matmul_shard_to_partial.json`](../input/broadcast/matmul_batched/matmul_shard_to_partial.json)。
+完整的可运行样例见 [`../input/matmul_shard_to_partial.json`](../input/matmul_shard_to_partial.json)。
 
 ## 当前限制
 

@@ -18,8 +18,8 @@ from src.stage.loader import StageInputError, load_stage
 from src.stage.model import ProgramSpec, RelationSpec, StageSpec, TensorSpec
 
 
-STANDARD_FIXTURE = ROOT / "input" / "broadcast" / "matmul_batched" / "matmul_shard_to_partial.json"
-LARGE_FIXTURE = ROOT / "input" / "broadcast" / "matmul_batched" / "matmul_shard_to_partial_large.json"
+STANDARD_FIXTURE = ROOT / "input" / "matmul_shard_to_partial.json"
+LARGE_FIXTURE = ROOT / "input" / "matmul_shard_to_partial_large.json"
 
 
 def _operator_case(operator: str, shapes: dict[str, list[int]]) -> dict:

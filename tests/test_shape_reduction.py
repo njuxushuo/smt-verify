@@ -16,8 +16,8 @@ from src.shape.reducer import reduce_shapes
 from src.stage.loader import StageInputError, load_stage
 
 
-STANDARD_FIXTURE = ROOT / "input" / "broadcast" / "matmul_batched" / "matmul_shard_to_partial.json"
-LARGE_FIXTURE = ROOT / "input" / "broadcast" / "matmul_batched" / "matmul_shard_to_partial_large.json"
+STANDARD_FIXTURE = ROOT / "input" / "matmul_shard_to_partial.json"
+LARGE_FIXTURE = ROOT / "input" / "matmul_shard_to_partial_large.json"
 
 
 @pytest.mark.parametrize(

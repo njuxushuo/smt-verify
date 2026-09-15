@@ -13,7 +13,7 @@ if str(ROOT) not in sys.path:
 from src.stage.loader import StageInputError, load_stage
 
 
-STANDARD_FIXTURE = ROOT / "input" / "broadcast" / "matmul_batched" / "matmul_shard_to_partial.json"
+STANDARD_FIXTURE = ROOT / "input" / "matmul_shard_to_partial.json"
 
 
 def _write_and_load(tmp_path: Path, data: dict):
