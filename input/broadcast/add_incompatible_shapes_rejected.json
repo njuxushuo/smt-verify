@@ -1,5 +1,5 @@
 {
-  "name": "add_invalid_broadcast",
+  "name": "add_incompatible_shapes_rejected",
   "world_size": 1,
   "single": {
     "tensors": {

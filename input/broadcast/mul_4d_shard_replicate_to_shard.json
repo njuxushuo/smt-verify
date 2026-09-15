@@ -1,5 +1,5 @@
 {
-  "name": "mul_4d_broadcast",
+  "name": "mul_4d_shard_replicate_to_shard",
   "world_size": 2,
   "single": {
     "tensors": {

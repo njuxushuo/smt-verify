@@ -18,12 +18,16 @@ from src.verification.verifier import VerificationStatus, verify_stage
 
 BROADCAST_INPUTS = ROOT / "input" / "broadcast"
 POSITIVE_FIXTURES = (
-    BROADCAST_INPUTS / "add_rank_mismatch.json",
-    BROADCAST_INPUTS / "add_singleton.json",
-    BROADCAST_INPUTS / "mul_4d.json",
+    BROADCAST_INPUTS / "add_rank_mismatch_shard_replicate_to_shard.json",
+    BROADCAST_INPUTS / "add_singleton_shard_replicate_to_shard.json",
+    BROADCAST_INPUTS / "mul_4d_shard_replicate_to_shard.json",
+    BROADCAST_INPUTS / "mul_4d_shard_shard_to_shard.json",
 )
-INVALID_FIXTURE = BROADCAST_INPUTS / "add_invalid.json"
-WRONG_RELATION_FIXTURE = BROADCAST_INPUTS / "add_wrong_partial.json"
+INVALID_FIXTURE = BROADCAST_INPUTS / "add_incompatible_shapes_rejected.json"
+WRONG_RELATION_FIXTURE = (
+    BROADCAST_INPUTS / "add_replicate_inputs_wrong_partial_disproved.json"
+)
+SHARDED_BIAS_FIXTURE = BROADCAST_INPUTS / "add_hidden_sharded_bias_to_shard.json"
 
 
 @pytest.mark.parametrize("fixture", POSITIVE_FIXTURES)
@@ -41,7 +45,7 @@ def test_broadcast_example_runs_complete_pipeline_and_is_proved(fixture: Path) -
 
 
 def test_singleton_example_reduction_preserves_broadcast_pattern() -> None:
-    stage = load_stage(BROADCAST_INPUTS / "add_singleton.json")
+    stage = load_stage(BROADCAST_INPUTS / "add_singleton_shard_replicate_to_shard.json")
     reduced = reduce_shapes(stage)
 
     assert reduced.single["A"][1] == 1
@@ -54,6 +58,36 @@ def test_singleton_example_reduction_preserves_broadcast_pattern() -> None:
             reduced.distributed[rank][f"A{rank}"][2]
             == reduced.distributed[rank][f"B{rank}"][2]
         )
+
+
+def test_sharded_bias_broadcast_runs_complete_pipeline_and_is_proved() -> None:
+    stage = load_stage(SHARDED_BIAS_FIXTURE)
+
+    assert stage.single.tensors["A"].shape == (2, 3, 8)
+    assert stage.single.tensors["B"].shape == (8,)
+    assert stage.single.tensors["C"].shape == (2, 3, 8)
+    for rank in range(stage.world_size):
+        assert stage.distributed[rank].tensors[f"A{rank}"].shape == (2, 3, 4)
+        assert stage.distributed[rank].tensors[f"B{rank}"].shape == (4,)
+        assert stage.distributed[rank].tensors[f"C{rank}"].shape == (2, 3, 4)
+
+    reduced = reduce_shapes(stage)
+    symbolic = execute_stage(stage, reduced)
+    encoded = encode_stage_relations(stage, symbolic)
+    verification = verify_stage(stage)
+
+    for rank in range(stage.world_size):
+        local = reduced.distributed[rank]
+        assert reduced.single["A"][2] == stage.world_size * local[f"A{rank}"][2]
+        assert reduced.single["B"][0] == stage.world_size * local[f"B{rank}"][0]
+        assert reduced.single["C"][2] == stage.world_size * local[f"C{rank}"][2]
+        assert local[f"A{rank}"][2] == local[f"B{rank}"][0]
+        assert local[f"C{rank}"][2] == local[f"A{rank}"][2]
+
+    assert encoded.input_constraints
+    assert encoded.output_constraints
+    assert verification.status is VerificationStatus.PROVED
+    assert verification.counterexample is None
 
 
 def test_invalid_broadcast_example_fails_during_load_validation() -> None:
