@@ -30,10 +30,10 @@ def test_operator_registry_returns_implemented_semantics(name: str, operator_typ
 
 def test_declared_but_unimplemented_operator_reports_context():
     with pytest.raises(UnsupportedShapeSemanticsError) as error:
-        get_operator("reshape", "single.ops[0]")
+        get_operator("sum", "single.ops[0]")
 
     assert "single.ops[0]" in str(error.value)
-    assert "reshape" in str(error.value)
+    assert "sum" in str(error.value)
 
 
 def _load_data(tmp_path: Path, data: dict):
@@ -149,10 +149,10 @@ def test_elementwise_operator_shape_semantics(tmp_path: Path, operator: str):
 
 def test_unsupported_operator_fails_during_shape_reduction(tmp_path: Path):
     data = _elementwise_case("add")
-    data["single"]["ops"][0]["type"] = "reshape"
+    data["single"]["ops"][0]["type"] = "sum"
 
     stage = _load_data(tmp_path, data)
-    with pytest.raises(UnsupportedShapeSemanticsError, match="reshape"):
+    with pytest.raises(UnsupportedShapeSemanticsError, match="sum"):
         reduce_shapes(stage)
 
 

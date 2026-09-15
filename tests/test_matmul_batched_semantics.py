@@ -40,7 +40,7 @@ def test_matmul_valid_shapes_support_batch_broadcast(
     output: tuple[int, ...],
 ) -> None:
     assert infer_matmul_output_shape(left, right) == output
-    MatMulOperator().validate_concrete_shapes((left, right), (output,), "test")
+    MatMulOperator().validate_concrete_shapes((left, right), (output,), {}, "test")
 
 
 def test_matmul_rejects_invalid_batch_broadcast() -> None:
@@ -48,6 +48,7 @@ def test_matmul_rejects_invalid_batch_broadcast() -> None:
         MatMulOperator().validate_concrete_shapes(
             ((2, 3, 4, 5), (4, 3, 5, 6)),
             ((2, 3, 4, 6),),
+            {},
             "test",
         )
 
@@ -57,6 +58,7 @@ def test_matmul_rejects_invalid_contraction_dimension() -> None:
         MatMulOperator().validate_concrete_shapes(
             ((2, 3, 4, 5), (1, 3, 6, 7)),
             ((2, 3, 4, 7),),
+            {},
             "test",
         )
 
@@ -66,6 +68,7 @@ def test_matmul_rejects_wrong_declared_output_shape() -> None:
         MatMulOperator().validate_concrete_shapes(
             ((2, 3, 4, 5), (1, 3, 5, 6)),
             ((2, 3, 4, 7),),
+            {},
             "test",
         )
 
@@ -75,6 +78,7 @@ def test_matmul_rejects_output_rank_below_two() -> None:
         MatMulOperator().validate_concrete_shapes(
             ((3, 4), (4, 5)),
             ((3,),),
+            {},
             "test",
         )
 
@@ -93,7 +97,7 @@ def test_matmul_rejects_rank_one_forms(
     output: tuple[int, ...],
 ) -> None:
     with pytest.raises(ConcreteShapeError, match="rank at least 2"):
-        MatMulOperator().validate_concrete_shapes((left, right), (output,), "test")
+        MatMulOperator().validate_concrete_shapes((left, right), (output,), {}, "test")
 
 
 def test_matmul_reduced_constraints_preserve_batch_singleton_pattern() -> None:
@@ -105,6 +109,7 @@ def test_matmul_reduced_constraints_preserve_batch_singleton_pattern() -> None:
         (output,),
         ((2, 1, 4, 5), (1, 3, 5, 6)),
         ((2, 3, 4, 6),),
+        {},
         "test",
     )
 
@@ -133,6 +138,7 @@ def test_matmul_reduced_constraints_preserve_missing_leading_batch_dimension() -
         (output,),
         ((2, 3, 4, 5), (3, 5, 6)),
         ((2, 3, 4, 6),),
+        {},
         "test",
     )
 
@@ -157,6 +163,7 @@ def test_matmul_reduced_constraints_preserve_k_minimum_two() -> None:
         (output,),
         ((2, 3, 8), (2, 8, 5)),
         ((2, 3, 5),),
+        {},
         "test",
     )
 
@@ -174,6 +181,7 @@ def test_matmul_reduced_constraints_allow_k_one_when_original_k_is_one() -> None
         (output,),
         ((2, 3, 1), (2, 1, 5)),
         ((2, 3, 5),),
+        {},
         "test",
     )
 
@@ -192,6 +200,7 @@ def test_matmul_reduced_constraints_do_not_require_m_or_n_two() -> None:
         (output,),
         ((2, 7, 8), (2, 8, 9)),
         ((2, 7, 9),),
+        {},
         "test",
     )
 
@@ -207,6 +216,7 @@ def test_matmul_symbolic_execution_projects_broadcast_batch_indices() -> None:
     output = MatMulOperator().symbolic_execute(
         (left, right),
         ((2, 4, 2, 2),),
+        {},
         "test",
     )[0]
     expected = z3.Sum(

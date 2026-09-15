@@ -86,6 +86,7 @@ def _operator_constraints(
                 output_shapes,
                 original_input_shapes,
                 original_output_shapes,
+                op.attrs,
                 op_context,
             )
         )

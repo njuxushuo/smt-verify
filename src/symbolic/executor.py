@@ -66,7 +66,9 @@ def execute_program(
         semantics = get_operator(op.type, op_context)
         input_tensors = tuple(environment[name] for name in op.inputs)
         output_shapes = tuple(reduced_shapes[name] for name in op.outputs)
-        outputs = semantics.symbolic_execute(input_tensors, output_shapes, op_context)
+        outputs = semantics.symbolic_execute(
+            input_tensors, output_shapes, op.attrs, op_context
+        )
         if len(outputs) != len(op.outputs):
             raise SymbolicExecutionError(
                 f"{op_context}: operator returned {len(outputs)} outputs, expected {len(op.outputs)}"

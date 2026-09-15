@@ -10,19 +10,25 @@ Programs use single-assignment semantics: a tensor may have only one producer. O
 
 ## Symbolic tensors and results
 
-`SymbolicTensor` stores a positive, concrete reduced shape and an immutable row-major flattened tuple of Z3 arithmetic expressions. Its checked `at(...)` method maps multidimensional indices to this storage. Inputs store free Real variables; intermediate and output tensors store expressions returned by their producer operator and never acquire independent output variables.
+`SymbolicTensor` stores a positive, concrete reduced shape and an immutable row-major flattened tuple of Z3 arithmetic expressions. Its checked `at(...)` method maps multidimensional indices to this storage. Inputs store free Real variables; intermediate and output tensors store expressions returned by their producer operator and never acquire independent output variables. Operator attrs are passed directly from `OpSpec` to `symbolic_execute(...)`.
 
 `SymbolicProgramResult` contains the detected input names and every symbolic tensor in one program. `SymbolicStageResult` contains the single result and one result for each distributed rank.
 
 ## Operator semantics
 
-The existing `OperatorSemantics` abstraction in `src/semantics/operators.py` now owns both shape constraints and `symbolic_execute(...)`. The supported operators are:
+The `OperatorSemantics` abstraction in `src/semantics/operators/__init__.py` owns both shape constraints and `symbolic_execute(...)`. The supported operators are:
 
 - `matmul`: rank >= 2 batched matrix multiplication. Batch dimensions use standard trailing broadcasting, while `z3.Sum` ranges over the matrix contraction dimension.
 - `add`: arbitrary-rank elementwise addition with standard trailing-dimension broadcasting.
 - `mul`: arbitrary-rank elementwise multiplication with standard trailing-dimension broadcasting.
+- `transpose`: arbitrary-rank axis-swap index permutation, including negative axes.
+- `reshape`: logical row-major flat-offset-preserving remapping.
+- `squeeze` / `unsqueeze`: singleton-axis removal/insertion index remapping.
+- `expand`: unary trailing-aligned broadcast index projection.
 
 Add and Mul explicitly reuse the shared helpers in `src/semantics/broadcast.py` for their complete shapes. MatMul reuses the same helpers only for batch dimensions (`shape[:-2]`), then appends its row/contraction/column indices. Each broadcasted output index is projected onto the corresponding input index; singleton dimensions map to zero and missing leading dimensions are omitted.
+
+View operators are implemented in `src/semantics/operators/view.py`. They model logical tensor values only: no stride, storage contiguity, aliasing, or copy-vs-view distinction is represented.
 
 `src/symbolic/executor.py` only coordinates producer checks, ordered execution, reduced-shape validation, and registry dispatch through `get_operator()`; it contains no operator-specific mathematical formulas.
 

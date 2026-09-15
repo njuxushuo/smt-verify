@@ -64,6 +64,9 @@ def _parse_program(value: Any, context: str) -> ProgramSpec:
                 outputs=_string_list(
                     _required(raw_op_mapping, "outputs", op_context), f"{op_context}.outputs"
                 ),
+                attrs=dict(
+                    _mapping(raw_op_mapping.get("attrs", {}), f"{op_context}.attrs")
+                ),
             )
         )
     return ProgramSpec(tensors=tensors, ops=tuple(ops))

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 
 @dataclass
@@ -16,6 +16,7 @@ class OpSpec:
     type: str
     inputs: tuple[str, ...]
     outputs: tuple[str, ...]
+    attrs: dict[str, object] = field(default_factory=dict)
 
 
 @dataclass

@@ -1,0 +1,26 @@
+{
+  "name": "reshape_shard_dim_0_proved",
+  "world_size": 2,
+  "single": {
+    "tensors": {"X": {"shape": [4, 2, 3]}, "Y": {"shape": [4, 6]}},
+    "ops": [{"type": "reshape", "inputs": ["X"], "outputs": ["Y"], "attrs": {"shape": [4, 6]}}]
+  },
+  "distributed": {
+    "ranks": {
+      "0": {
+        "tensors": {"X0": {"shape": [2, 2, 3]}, "Y0": {"shape": [2, 6]}},
+        "ops": [{"type": "reshape", "inputs": ["X0"], "outputs": ["Y0"], "attrs": {"shape": [2, 6]}}]
+      },
+      "1": {
+        "tensors": {"X1": {"shape": [2, 2, 3]}, "Y1": {"shape": [2, 6]}},
+        "ops": [{"type": "reshape", "inputs": ["X1"], "outputs": ["Y1"], "attrs": {"shape": [2, 6]}}]
+      }
+    }
+  },
+  "input_relations": [
+    {"single_tensor": "X", "distributed_tensors": ["X0", "X1"], "type": "shard", "dim": 0}
+  ],
+  "output_relation": {
+    "single_tensor": "Y", "distributed_tensors": ["Y0", "Y1"], "type": "shard", "dim": 0
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "name": "transpose_negative_axes_proved",
+  "world_size": 2,
+  "single": {
+    "tensors": {"X": {"shape": [4, 3, 4, 6]}, "Y": {"shape": [4, 3, 6, 4]}},
+    "ops": [{"type": "transpose", "inputs": ["X"], "outputs": ["Y"], "attrs": {"dim0": -1, "dim1": -2}}]
+  },
+  "distributed": {
+    "ranks": {
+      "0": {
+        "tensors": {"X0": {"shape": [2, 3, 4, 6]}, "Y0": {"shape": [2, 3, 6, 4]}},
+        "ops": [{"type": "transpose", "inputs": ["X0"], "outputs": ["Y0"], "attrs": {"dim0": -1, "dim1": -2}}]
+      },
+      "1": {
+        "tensors": {"X1": {"shape": [2, 3, 4, 6]}, "Y1": {"shape": [2, 3, 6, 4]}},
+        "ops": [{"type": "transpose", "inputs": ["X1"], "outputs": ["Y1"], "attrs": {"dim0": -1, "dim1": -2}}]
+      }
+    }
+  },
+  "input_relations": [
+    {"single_tensor": "X", "distributed_tensors": ["X0", "X1"], "type": "shard", "dim": 0}
+  ],
+  "output_relation": {
+    "single_tensor": "Y", "distributed_tensors": ["Y0", "Y1"], "type": "shard", "dim": 0
+  }
+}

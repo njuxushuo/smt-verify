@@ -33,18 +33,18 @@ def test_add_same_shape_regression() -> None:
     shape = (2, 3, 4)
 
     assert infer_broadcast_shape(shape, shape) == shape
-    AddOperator().validate_concrete_shapes((shape, shape), (shape,), "test")
+    AddOperator().validate_concrete_shapes((shape, shape), (shape,), {}, "test")
 
 
 def test_add_rank_mismatch_broadcast() -> None:
     assert infer_broadcast_shape((2, 3, 4), (4,)) == (2, 3, 4)
-    AddOperator().validate_concrete_shapes(((2, 3, 4), (4,)), ((2, 3, 4),), "test")
+    AddOperator().validate_concrete_shapes(((2, 3, 4), (4,)), ((2, 3, 4),), {}, "test")
 
 
 def test_add_singleton_broadcast() -> None:
     assert infer_broadcast_shape((2, 1, 4), (1, 3, 4)) == (2, 3, 4)
     AddOperator().validate_concrete_shapes(
-        ((2, 1, 4), (1, 3, 4)), ((2, 3, 4),), "test"
+        ((2, 1, 4), (1, 3, 4)), ((2, 3, 4),), {}, "test"
     )
 
 
@@ -53,7 +53,7 @@ def test_mul_four_dimensional_broadcast() -> None:
     right_shape = (1, 3, 1, 5)
 
     assert infer_broadcast_shape(left_shape, right_shape) == left_shape
-    MulOperator().validate_concrete_shapes((left_shape, right_shape), (left_shape,), "test")
+    MulOperator().validate_concrete_shapes((left_shape, right_shape), (left_shape,), {}, "test")
 
 
 def test_invalid_broadcast_is_rejected() -> None:
@@ -61,14 +61,14 @@ def test_invalid_broadcast_is_rejected() -> None:
         infer_broadcast_shape((2, 3, 4), (5,))
     with pytest.raises(ConcreteShapeError, match="not broadcast-compatible"):
         AddOperator().validate_concrete_shapes(
-            ((2, 3, 4), (5,)), ((2, 3, 4),), "test"
+            ((2, 3, 4), (5,)), ((2, 3, 4),), {}, "test"
         )
 
 
 def test_wrong_broadcast_output_shape_is_rejected() -> None:
     with pytest.raises(ConcreteShapeError, match="does not match broadcast shape"):
         AddOperator().validate_concrete_shapes(
-            ((2, 3, 4), (4,)), ((2, 3, 1),), "test"
+            ((2, 3, 4), (4,)), ((2, 3, 1),), {}, "test"
         )
 
 
@@ -81,6 +81,7 @@ def test_reduced_constraints_preserve_original_singleton_pattern() -> None:
         (output,),
         ((32, 1, 4096), (1, 128, 4096)),
         ((32, 128, 4096),),
+        {},
         "test",
     )
 
@@ -108,6 +109,7 @@ def test_reduced_constraints_preserve_missing_leading_dimensions() -> None:
         (output,),
         ((32, 128, 4096), (4096,)),
         ((32, 128, 4096),),
+        {},
         "test",
     )
 
@@ -137,7 +139,7 @@ def test_add_symbolic_execution_uses_broadcast_index_projection() -> None:
     left = create_symbolic_input_tensor("A", (2, 1, 4), "single")
     right = create_symbolic_input_tensor("B", (1, 3, 4), "single")
     output = AddOperator().symbolic_execute(
-        (left, right), ((2, 3, 4),), "test"
+        (left, right), ((2, 3, 4),), {}, "test"
     )[0]
 
     _assert_equivalent(
@@ -150,7 +152,7 @@ def test_mul_symbolic_execution_uses_broadcast_index_projection() -> None:
     left = create_symbolic_input_tensor("A", (2, 1, 4), "single")
     right = create_symbolic_input_tensor("B", (1, 3, 4), "single")
     output = MulOperator().symbolic_execute(
-        (left, right), ((2, 3, 4),), "test"
+        (left, right), ((2, 3, 4),), {}, "test"
     )[0]
 
     _assert_equivalent(

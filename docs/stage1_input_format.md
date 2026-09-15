@@ -29,7 +29,7 @@ Tensor 由当前 scope 的名字和正整数 shape 描述，例如 `"A": {"shape
 {"type": "matmul", "inputs": ["A", "B"], "outputs": ["C"]}
 ```
 
-`inputs` 和 `outputs` 必须引用本 scope 已声明的 tensor。当前只识别 `add`、`mul`、`matmul`、`transpose`、`reshape`、`sum`、`all_reduce`、`all_gather` 和 `reduce_scatter`；不包含这些算子的属性或数学语义。
+`inputs` 和 `outputs` 必须引用本 scope 已声明的 tensor。可选的 `attrs` 必须是 JSON object；省略时等价于 `{}`，因此原有 Add/Mul/MatMul JSON 保持兼容。Transpose、Reshape、Squeeze、Unsqueeze 与 Expand 的参数均由 `attrs` 携带，并由对应 operator semantics 校验必需字段、类型和未知字段。当前识别 `add`、`mul`、`matmul`、`transpose`、`reshape`、`squeeze`、`unsqueeze`、`expand`、`sum`、`all_reduce`、`all_gather` 和 `reduce_scatter`。
 
 ## Relation
 
@@ -80,4 +80,4 @@ Relation 关联一个单机 tensor 与按 rank 顺序排列的 local tensor：
 
 ## 当前限制
 
-输入采用顺序 operator 列表而不是 DAG；每个 rank 必须显式列出；不支持 symbolic shape、额外 operator 属性、跨 rank tensor 引用、真实 IR 前端、Z3 或 relation 的 SMT 编码。
+输入采用顺序 operator 列表而不是 DAG；每个 rank 必须显式列出；不支持 symbolic shape、跨 rank tensor 引用或真实 IR 前端。Stage 1 只负责结构、数据流和 concrete operator/relation 合法性，Z3 reduction 和 relation value encoding 仍属于后续阶段。

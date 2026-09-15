@@ -31,6 +31,8 @@ def test_loads_standard_matmul_shard_to_partial_case():
     stage = load_stage(FIXTURE)
 
     assert stage.name == "matmul_shard_to_partial"
+    assert stage.single.ops[0].attrs == {}
+    assert all(program.ops[0].attrs == {} for program in stage.distributed.values())
     assert stage.world_size == 2
     assert sorted(stage.distributed) == [0, 1]
     assert len(stage.input_relations) == 2
@@ -40,6 +42,14 @@ def test_loads_standard_matmul_shard_to_partial_case():
     assert stage.input_relations[1].dim == 0
     assert stage.output_relation.type == "partial"
     assert stage.output_relation.reduce_op == "sum"
+
+
+def test_rejects_non_object_operator_attrs(tmp_path: Path) -> None:
+    data = _fixture_data()
+    data["single"]["ops"][0]["attrs"] = []
+
+    with pytest.raises(StageInputError, match=r"single\.ops\[0\]\.attrs: expected object"):
+        _load_data(tmp_path, data)
 
 
 def test_rejects_world_size_rank_mismatch(tmp_path: Path):

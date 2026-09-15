@@ -27,12 +27,16 @@ Relation-specific symbolic shape semantics are implemented in [`src/semantics/re
 
 - `matmul`：支持 rank >= 2 的 batched MatMul。仅 `A[:-2]` 与 `B[:-2]` 进行 trailing broadcasting，并根据 original shape 保留 batch broadcast pattern；矩阵维度约束为 `A[-1] == B[-2]`、`C[-2] == A[-2]`、`C[-1] == B[-1]`。
 - `add`、`mul`：支持 arbitrary-rank standard trailing-dimension broadcasting。reduced shape 约束根据 original shape 逐维保留 equal、left-singleton、right-singleton 或 missing-leading 模式，避免 reduction 改变原始 broadcast pattern。
+- `transpose`：reduced output 对 input 执行相同 axis permutation，不增加额外维度下界。
+- `reshape`：按 original row-major contiguous dimension groups 保留每组 element count，而不是只约束整体 numel。
+- `squeeze`、`unsqueeze`：保留删除或插入的 singleton axis 及其余 axis 映射；omitted-dim squeeze 还保留 original singleton/non-singleton 区分。
+- `expand`：按 original equal/singleton/missing-leading pattern 保留 unary trailing expansion。
 
-`transpose`、`reshape`、`sum`、`all_reduce`、`all_gather` 与 `reduce_scatter` 可以由阶段一读取，但阶段二会抛出 `UnsupportedShapeSemanticsError`。
+`sum`、`all_reduce`、`all_gather` 与 `reduce_scatter` 可以由阶段一读取，但阶段二会抛出 `UnsupportedShapeSemanticsError`。
 
 ## Operator semantics organization
 
-Stage-level constraint builder does not encode concrete operator rules. Concrete operator shape semantics are registered in [`src/semantics/operators.py`](../src/semantics/operators.py): `matmul`、`add` 与 `mul` 通过 `get_operator()` 取得对应的 operator class，再由该类生成其 shape constraints。这样阶段三可以在同一 operator abstraction 上增加 value semantics，而不会重新建立 central dispatch。
+Stage-level constraint builder does not encode concrete operator rules. Operator interfaces and the registry live in [`src/semantics/operators/__init__.py`](../src/semantics/operators/__init__.py), while element-wise, MatMul, and View implementations are split into family modules in the same package. `get_operator()` resolves every implemented operator and attrs are passed directly to its shape constraints.
 
 ## Optimize objective
 

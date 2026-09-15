@@ -208,8 +208,8 @@ def test_add_symbolic_execution_supports_z3_algebraic_reasoning() -> None:
     left = create_symbolic_input_tensor("A", (1,), "single")
     right = create_symbolic_input_tensor("B", (1,), "single")
     operator = AddOperator()
-    forward = operator.symbolic_execute((left, right), ((1,),), "test")[0]
-    reverse = operator.symbolic_execute((right, left), ((1,),), "test")[0]
+    forward = operator.symbolic_execute((left, right), ((1,),), {}, "test")[0]
+    reverse = operator.symbolic_execute((right, left), ((1,),), {}, "test")[0]
 
     _assert_equivalent(forward.values[0], reverse.values[0])
 
@@ -217,8 +217,8 @@ def test_add_symbolic_execution_supports_z3_algebraic_reasoning() -> None:
 def test_add_and_mul_symbolic_execution_remain_distinct() -> None:
     left = create_symbolic_input_tensor("A", (1,), "single")
     right = create_symbolic_input_tensor("B", (1,), "single")
-    add_result = AddOperator().symbolic_execute((left, right), ((1,),), "test")[0]
-    mul_result = MulOperator().symbolic_execute((left, right), ((1,),), "test")[0]
+    add_result = AddOperator().symbolic_execute((left, right), ((1,),), {}, "test")[0]
+    mul_result = MulOperator().symbolic_execute((left, right), ((1,),), {}, "test")[0]
     solver = z3.Solver()
     solver.add(add_result.values[0] != mul_result.values[0])
     assert solver.check() == z3.sat
@@ -243,9 +243,9 @@ def test_reduced_shape_mismatch_is_rejected(reduced_shapes: dict[str, tuple[int,
 
 def test_declared_but_unsupported_operator_still_fails_shape_reduction(tmp_path: Path) -> None:
     data = json.loads(FIXTURE.read_text(encoding="utf-8"))
-    data["single"]["ops"][0]["type"] = "reshape"
-    path = tmp_path / "reshape_stage.json"
+    data["single"]["ops"][0]["type"] = "sum"
+    path = tmp_path / "sum_stage.json"
     path.write_text(json.dumps(data), encoding="utf-8")
 
-    with pytest.raises(UnsupportedShapeSemanticsError, match="reshape"):
+    with pytest.raises(UnsupportedShapeSemanticsError, match="sum"):
         reduce_shapes(load_stage(path))

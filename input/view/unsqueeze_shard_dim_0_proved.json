@@ -1,0 +1,26 @@
+{
+  "name": "unsqueeze_shard_dim_0_proved",
+  "world_size": 2,
+  "single": {
+    "tensors": {"X": {"shape": [4, 6]}, "Y": {"shape": [4, 1, 6]}},
+    "ops": [{"type": "unsqueeze", "inputs": ["X"], "outputs": ["Y"], "attrs": {"dim": 1}}]
+  },
+  "distributed": {
+    "ranks": {
+      "0": {
+        "tensors": {"X0": {"shape": [2, 6]}, "Y0": {"shape": [2, 1, 6]}},
+        "ops": [{"type": "unsqueeze", "inputs": ["X0"], "outputs": ["Y0"], "attrs": {"dim": 1}}]
+      },
+      "1": {
+        "tensors": {"X1": {"shape": [2, 6]}, "Y1": {"shape": [2, 1, 6]}},
+        "ops": [{"type": "unsqueeze", "inputs": ["X1"], "outputs": ["Y1"], "attrs": {"dim": 1}}]
+      }
+    }
+  },
+  "input_relations": [
+    {"single_tensor": "X", "distributed_tensors": ["X0", "X1"], "type": "shard", "dim": 0}
+  ],
+  "output_relation": {
+    "single_tensor": "Y", "distributed_tensors": ["Y0", "Y1"], "type": "shard", "dim": 0
+  }
+}

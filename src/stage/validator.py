@@ -34,6 +34,11 @@ def _validate_op(op: object, tensors: dict[str, TensorSpec], context: str) -> No
         raise StageInputError(f"{context}: expected OpSpec")
     if not isinstance(op.type, str) or op.type not in DECLARED_OPERATOR_TYPES:
         raise StageInputError(f"{context}.type: unsupported operator {op.type!r}")
+    if not isinstance(op.attrs, dict):
+        raise StageInputError(f"{context}.attrs: expected object")
+    for name in op.attrs:
+        if not isinstance(name, str):
+            raise StageInputError(f"{context}.attrs: attribute names must be strings")
     for field_name, references in (("inputs", op.inputs), ("outputs", op.outputs)):
         if not isinstance(references, (tuple, list)) or not references:
             raise StageInputError(f"{context}.{field_name}: must contain at least one tensor")
@@ -73,7 +78,9 @@ def _validate_program_concrete_shapes(program: ProgramSpec, context: str) -> Non
         input_shapes = tuple(program.tensors[name].shape for name in op.inputs)
         output_shapes = tuple(program.tensors[name].shape for name in op.outputs)
         try:
-            semantics.validate_concrete_shapes(input_shapes, output_shapes, op_context)
+            semantics.validate_concrete_shapes(
+                input_shapes, output_shapes, op.attrs, op_context
+            )
         except ConcreteShapeError as exc:
             raise StageInputError(str(exc)) from exc
 
