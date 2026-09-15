@@ -21,8 +21,8 @@ from src.stage.model import RelationSpec
 from src.verification.verifier import VerificationStatus
 
 
-STANDARD_FIXTURE = ROOT / "input" / "matmul_shard_to_partial.json"
-WRONG_FIXTURE = ROOT / "input" / "matmul_shard_wrong_replicate.json"
+STANDARD_FIXTURE = ROOT / "input" / "broadcast" / "matmul_batched" / "matmul_shard_to_partial.json"
+WRONG_FIXTURE = ROOT / "input" / "broadcast" / "matmul_batched" / "matmul_shard_wrong_replicate.json"
 
 
 def _proved_stage_and_verification():

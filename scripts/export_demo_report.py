@@ -22,9 +22,9 @@ from src.verification.verifier import VerificationStatus, verify_stage
 
 
 DEFAULT_INPUTS = (
-    PROJECT_ROOT / "input" / "matmul_shard_to_partial.json",
-    PROJECT_ROOT / "input" / "matmul_shard_to_partial_large.json",
-    PROJECT_ROOT / "input" / "matmul_shard_wrong_replicate.json",
+    PROJECT_ROOT / "input" / "broadcast" / "matmul_batched" / "matmul_shard_to_partial.json",
+    PROJECT_ROOT / "input" / "broadcast" / "matmul_batched" / "matmul_shard_to_partial_large.json",
+    PROJECT_ROOT / "input" / "broadcast" / "matmul_batched" / "matmul_shard_wrong_replicate.json",
 )
 DEFAULT_OUTPUT = PROJECT_ROOT / "examples" / "demo_report.txt"
 DIVIDER = "=" * 60

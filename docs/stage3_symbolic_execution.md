@@ -35,7 +35,7 @@ No Replicate, Shard, Partial, collective, value-relation, or equivalence constra
 Run the complete Stage 1 → Stage 2 → Stage 3 chain with:
 
 ```bash
-python scripts/inspect_symbolic.py input/matmul_shard_to_partial.json
+python scripts/inspect_symbolic.py input/broadcast/matmul_batched/matmul_shard_to_partial.json
 ```
 
 The command reports inputs, produced tensors, and representative output expressions. It exits nonzero for Stage input, shape-reduction, or symbolic-execution errors.

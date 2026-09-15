@@ -720,7 +720,7 @@ load
 建议放在：
 
 ```text
-input/broadcast/
+input/broadcast/element_wise/
 ```
 
 如不想调整目录，也可以沿用当前 input 命名风格。

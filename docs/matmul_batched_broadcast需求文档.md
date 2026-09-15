@@ -816,7 +816,7 @@ B[0,3,k,1]
 建议目录：
 
 ```text
-input/matmul_batched/
+input/broadcast/matmul_batched/
 ```
 
 ### Example A：3D × 2D，Replicate weight

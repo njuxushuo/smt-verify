@@ -16,7 +16,7 @@ from src.verification.relation_encoder import encode_stage_relations
 from src.verification.verifier import VerificationStatus, verify_stage
 
 
-BROADCAST_INPUTS = ROOT / "input" / "broadcast"
+BROADCAST_INPUTS = ROOT / "input" / "broadcast" / "element_wise"
 POSITIVE_FIXTURES = (
     BROADCAST_INPUTS / "add_rank_mismatch_shard_replicate_to_shard.json",
     BROADCAST_INPUTS / "add_singleton_shard_replicate_to_shard.json",

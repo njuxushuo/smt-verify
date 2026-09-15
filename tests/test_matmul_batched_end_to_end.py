@@ -16,7 +16,7 @@ from src.verification.relation_encoder import encode_stage_relations
 from src.verification.verifier import VerificationStatus, verify_stage
 
 
-MATMUL_INPUTS = ROOT / "input" / "matmul_batched"
+MATMUL_INPUTS = ROOT / "input" / "broadcast" / "matmul_batched"
 POSITIVE_FIXTURES = (
     MATMUL_INPUTS / "matmul_3d_2d_shard_replicate_to_shard.json",
     MATMUL_INPUTS / "matmul_4d_shard_shard_to_shard.json",

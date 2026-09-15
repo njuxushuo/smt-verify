@@ -34,7 +34,7 @@ The encoder does not call a solver, decide `PROVED`/`DISPROVED`, return countere
 Run the Stage 1 → 2 → 3 → 4 chain in the `smt` environment:
 
 ```bash
-python scripts/inspect_relations.py input/matmul_shard_to_partial.json
+python scripts/inspect_relations.py input/broadcast/matmul_batched/matmul_shard_to_partial.json
 ```
 
 The command prints simplified relation constraints and exits nonzero for input, shape, symbolic-execution, or relation-encoding errors.

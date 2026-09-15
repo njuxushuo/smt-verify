@@ -17,7 +17,7 @@ from src.stage.loader import load_stage
 from src.verification.verifier import VerificationStatus
 
 
-STANDARD_FIXTURE = ROOT / "input" / "matmul_shard_to_partial.json"
+STANDARD_FIXTURE = ROOT / "input" / "broadcast" / "matmul_batched" / "matmul_shard_to_partial.json"
 
 
 def _proved_lemma():
