@@ -37,7 +37,7 @@ REJECTED_FIXTURE = (
 def test_every_repository_json_has_a_sibling_demo() -> None:
     inputs = discover_stage_inputs(INPUT_ROOT)
 
-    assert len(inputs) == 23
+    assert len(inputs) == 24
     assert all(path.parent.name == path.stem for path in inputs)
     reports = [path.parent / "demo.txt" for path in inputs]
     assert all(report.is_file() for report in reports)
@@ -49,7 +49,7 @@ def test_every_repository_json_has_a_sibling_demo() -> None:
         match = re.search(r"^  Verification: (\w+)$", report, re.MULTILINE)
         assert match is not None
         statuses[match.group(1)] += 1
-    assert statuses == {"PROVED": 17, "DISPROVED": 4, "REJECTED": 2}
+    assert statuses == {"PROVED": 17, "DISPROVED": 5, "REJECTED": 2}
 
 
 def test_batch_export_writes_complete_and_rejected_reports(tmp_path: Path) -> None:
