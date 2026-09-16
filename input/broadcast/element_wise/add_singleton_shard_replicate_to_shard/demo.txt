@@ -1,0 +1,382 @@
+SMT-Verify Demo Report
+Each example follows:
+Input -> Shape Reduction -> Symbolic Execution
+-> Relation Encoding -> SMT Verification -> Certified Lemma
+
+============================================================
+Example 1: add_singleton_shard_replicate_to_shard
+============================================================
+
+[1] Input Stage Summary
+Input JSON: add_singleton_shard_replicate_to_shard.json
+Stage name: add_singleton_shard_replicate_to_shard
+World size: 2
+Input relations:
+  A -> Shard(dim=0)
+  B -> Replicate
+Single ops:
+  add(A, B) -> C
+Distributed ops:
+  Rank 0:
+    add(A0, B0) -> C0
+  Rank 1:
+    add(A1, B1) -> C1
+Output relation: C -> Shard(dim=0)
+
+[2] Original Shapes
+Single:
+  A: [4, 1, 4]
+  B: [1, 3, 4]
+  C: [4, 3, 4]
+
+Rank 0:
+  A0: [2, 1, 4]
+  B0: [1, 3, 4]
+  C0: [2, 3, 4]
+
+Rank 1:
+  A1: [2, 1, 4]
+  B1: [1, 3, 4]
+  C1: [2, 3, 4]
+
+[3] Reduced Shapes
+Single:
+  A: [2, 1, 1]
+  B: [1, 1, 1]
+  C: [2, 1, 1]
+
+Rank 0:
+  A0: [1, 1, 1]
+  B0: [1, 1, 1]
+  C0: [1, 1, 1]
+
+Rank 1:
+  A1: [1, 1, 1]
+  B1: [1, 1, 1]
+  C1: [1, 1, 1]
+Reduced objective: 29
+Normalized shape constraints: 92
+  [0] single__A__d0 >= 1
+  [1] single__A__d0 <= 4
+  [2] single__A__d1 >= 1
+  [3] single__A__d1 <= 1
+  [4] single__A__d2 >= 1
+  [5] single__A__d2 <= 4
+  [6] single__B__d0 >= 1
+  [7] single__B__d0 <= 1
+  [8] single__B__d1 >= 1
+  [9] single__B__d1 <= 3
+  [10] single__B__d2 >= 1
+  [11] single__B__d2 <= 4
+  [12] single__C__d0 >= 1
+  [13] single__C__d0 <= 4
+  [14] single__C__d1 >= 1
+  [15] single__C__d1 <= 3
+  [16] single__C__d2 >= 1
+  [17] single__C__d2 <= 4
+  [18] rank0__A0__d0 >= 1
+  [19] rank0__A0__d0 <= 2
+  [20] rank0__A0__d1 >= 1
+  [21] rank0__A0__d1 <= 1
+  [22] rank0__A0__d2 >= 1
+  [23] rank0__A0__d2 <= 4
+  [24] rank0__B0__d0 >= 1
+  [25] rank0__B0__d0 <= 1
+  [26] rank0__B0__d1 >= 1
+  [27] rank0__B0__d1 <= 3
+  [28] rank0__B0__d2 >= 1
+  [29] rank0__B0__d2 <= 4
+  [30] rank0__C0__d0 >= 1
+  [31] rank0__C0__d0 <= 2
+  [32] rank0__C0__d1 >= 1
+  [33] rank0__C0__d1 <= 3
+  [34] rank0__C0__d2 >= 1
+  [35] rank0__C0__d2 <= 4
+  [36] rank1__A1__d0 >= 1
+  [37] rank1__A1__d0 <= 2
+  [38] rank1__A1__d1 >= 1
+  [39] rank1__A1__d1 <= 1
+  [40] rank1__A1__d2 >= 1
+  [41] rank1__A1__d2 <= 4
+  [42] rank1__B1__d0 >= 1
+  [43] rank1__B1__d0 <= 1
+  [44] rank1__B1__d1 >= 1
+  [45] rank1__B1__d1 <= 3
+  [46] rank1__B1__d2 >= 1
+  [47] rank1__B1__d2 <= 4
+  [48] rank1__C1__d0 >= 1
+  [49] rank1__C1__d0 <= 2
+  [50] rank1__C1__d1 >= 1
+  [51] rank1__C1__d1 <= 3
+  [52] rank1__C1__d2 >= 1
+  [53] rank1__C1__d2 <= 4
+  [54] 4*rank0__A0__d0 == 2*single__A__d0
+  [55] rank0__A0__d1 == single__A__d1
+  [56] 4*rank0__A0__d2 == 4*single__A__d2
+  [57] 4*rank1__A1__d0 == 2*single__A__d0
+  [58] rank1__A1__d1 == single__A__d1
+  [59] 4*rank1__A1__d2 == 4*single__A__d2
+  [60] single__A__d0%2 == 0
+  [61] rank0__B0__d0 == single__B__d0
+  [62] 3*rank0__B0__d1 == 3*single__B__d1
+  [63] 4*rank0__B0__d2 == 4*single__B__d2
+  [64] rank1__B1__d0 == single__B__d0
+  [65] 3*rank1__B1__d1 == 3*single__B__d1
+  [66] 4*rank1__B1__d2 == 4*single__B__d2
+  [67] single__B__d0 == 1
+  [68] single__C__d0 == single__A__d0
+  [69] single__A__d1 == 1
+  [70] single__C__d1 == single__B__d1
+  [71] single__A__d2 == single__B__d2
+  [72] single__C__d2 == single__A__d2
+  [73] rank0__B0__d0 == 1
+  [74] rank0__C0__d0 == rank0__A0__d0
+  [75] rank0__A0__d1 == 1
+  [76] rank0__C0__d1 == rank0__B0__d1
+  [77] rank0__A0__d2 == rank0__B0__d2
+  [78] rank0__C0__d2 == rank0__A0__d2
+  [79] rank1__B1__d0 == 1
+  [80] rank1__C1__d0 == rank1__A1__d0
+  [81] rank1__A1__d1 == 1
+  [82] rank1__C1__d1 == rank1__B1__d1
+  [83] rank1__A1__d2 == rank1__B1__d2
+  [84] rank1__C1__d2 == rank1__A1__d2
+  [85] 4*rank0__C0__d0 == 2*single__C__d0
+  [86] 3*rank0__C0__d1 == 3*single__C__d1
+  [87] 4*rank0__C0__d2 == 4*single__C__d2
+  [88] 4*rank1__C1__d0 == 2*single__C__d0
+  [89] 3*rank1__C1__d1 == 3*single__C__d1
+  [90] 4*rank1__C1__d2 == 4*single__C__d2
+  [91] single__C__d0%2 == 0
+
+[4] Symbolic Execution
+Single outputs:
+  C[0] = single__A__v0 + single__B__v0
+  C[1] = single__A__v1 + single__B__v0
+Rank 0 outputs:
+  C0[0] = rank0__A0__v0 + rank0__B0__v0
+Rank 1 outputs:
+  C1[0] = rank1__A1__v0 + rank1__B1__v0
+
+[5] Relation Encoding
+Input constraints: 4
+  [0] rank0__A0__v0 == single__A__v0
+  [1] rank1__A1__v0 == single__A__v1
+  [2] rank0__B0__v0 == single__B__v0
+  [3] rank1__B1__v0 == single__B__v0
+Output constraints: 2
+  [0] rank0__A0__v0 + rank0__B0__v0 ==
+single__A__v0 + single__B__v0
+  [1] rank1__A1__v0 + rank1__B1__v0 ==
+single__A__v1 + single__B__v0
+
+[6] SMT Verification
+SMT query:
+  Rin AND NOT(AND(Rout))
+SMT result: UNSAT
+Verification: PROVED
+Input constraint count: 4
+Output constraint count: 2
+Reduced objective: 29
+
+[7] Counterexample
+Counterexample: None
+
+[8] Certified Lemma
+Lemma: GENERATED
+Lemma ID: lemma_65a8191c5c91eaa6
+{
+  "distributed_ops": {
+    "0": [
+      {
+        "inputs": [
+          "A0",
+          "B0"
+        ],
+        "outputs": [
+          "C0"
+        ],
+        "type": "add"
+      }
+    ],
+    "1": [
+      {
+        "inputs": [
+          "A1",
+          "B1"
+        ],
+        "outputs": [
+          "C1"
+        ],
+        "type": "add"
+      }
+    ]
+  },
+  "input_relations": [
+    {
+      "dim": 0,
+      "distributed_tensors": [
+        "A0",
+        "A1"
+      ],
+      "reduce_op": null,
+      "single_tensor": "A",
+      "type": "shard"
+    },
+    {
+      "dim": null,
+      "distributed_tensors": [
+        "B0",
+        "B1"
+      ],
+      "reduce_op": null,
+      "single_tensor": "B",
+      "type": "replicate"
+    }
+  ],
+  "lemma_id": "lemma_65a8191c5c91eaa6",
+  "original_distributed_shapes": {
+    "0": {
+      "A0": [
+        2,
+        1,
+        4
+      ],
+      "B0": [
+        1,
+        3,
+        4
+      ],
+      "C0": [
+        2,
+        3,
+        4
+      ]
+    },
+    "1": {
+      "A1": [
+        2,
+        1,
+        4
+      ],
+      "B1": [
+        1,
+        3,
+        4
+      ],
+      "C1": [
+        2,
+        3,
+        4
+      ]
+    }
+  },
+  "original_single_shapes": {
+    "A": [
+      4,
+      1,
+      4
+    ],
+    "B": [
+      1,
+      3,
+      4
+    ],
+    "C": [
+      4,
+      3,
+      4
+    ]
+  },
+  "output_relation": {
+    "dim": 0,
+    "distributed_tensors": [
+      "C0",
+      "C1"
+    ],
+    "reduce_op": null,
+    "single_tensor": "C",
+    "type": "shard"
+  },
+  "reduced_shapes": {
+    "distributed": {
+      "0": {
+        "A0": [
+          1,
+          1,
+          1
+        ],
+        "B0": [
+          1,
+          1,
+          1
+        ],
+        "C0": [
+          1,
+          1,
+          1
+        ]
+      },
+      "1": {
+        "A1": [
+          1,
+          1,
+          1
+        ],
+        "B1": [
+          1,
+          1,
+          1
+        ],
+        "C1": [
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    "objective_value": 29,
+    "single": {
+      "A": [
+        2,
+        1,
+        1
+      ],
+      "B": [
+        1,
+        1,
+        1
+      ],
+      "C": [
+        2,
+        1,
+        1
+      ]
+    },
+    "stage_name": "add_singleton_shard_replicate_to_shard"
+  },
+  "single_ops": [
+    {
+      "inputs": [
+        "A",
+        "B"
+      ],
+      "outputs": [
+        "C"
+      ],
+      "type": "add"
+    }
+  ],
+  "source_stage_name": "add_singleton_shard_replicate_to_shard",
+  "world_size": 2
+}
+
+
+============================================================
+Summary
+============================================================
+
+add_singleton_shard_replicate_to_shard
+  Verification: PROVED
+  Lemma: GENERATED
+  Lemma ID: lemma_65a8191c5c91eaa6

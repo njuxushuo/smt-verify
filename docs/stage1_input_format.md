@@ -76,7 +76,8 @@ Relation 关联一个单机 tensor 与按 rank 顺序排列的 local tensor：
 }
 ```
 
-完整的可运行样例见 [`../input/matmul_shard_to_partial.json`](../input/matmul_shard_to_partial.json)。
+完整的可运行样例见 [`../input/matmul_shard_to_partial/matmul_shard_to_partial.json`](../input/matmul_shard_to_partial/matmul_shard_to_partial.json)。
+每个输入 case 位于以 JSON stem 命名的独立目录中；同目录 `demo.txt` 记录其真实 shape reduction、symbolic execution、relation encoding 和验证结果。运行 `conda run -n smt python scripts/export_input_demos.py` 可批量重建全部报告。静态非法 case 的报告会记录 `REJECTED` 和具体 validation error，不会伪造未执行的后续阶段。
 
 ## 当前限制
 

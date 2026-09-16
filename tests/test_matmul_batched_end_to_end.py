@@ -18,14 +18,15 @@ from src.verification.verifier import VerificationStatus, verify_stage
 
 MATMUL_INPUTS = ROOT / "input" / "broadcast" / "matmul_batched"
 POSITIVE_FIXTURES = (
-    MATMUL_INPUTS / "matmul_3d_2d_shard_replicate_to_shard.json",
-    MATMUL_INPUTS / "matmul_4d_shard_shard_to_shard.json",
-    MATMUL_INPUTS / "matmul_batch_broadcast_shard_replicate_to_shard.json",
-    MATMUL_INPUTS / "matmul_batched_contraction_shards_to_partial.json",
+    MATMUL_INPUTS / "matmul_3d_2d_shard_replicate_to_shard" / "matmul_3d_2d_shard_replicate_to_shard.json",
+    MATMUL_INPUTS / "matmul_4d_shard_shard_to_shard" / "matmul_4d_shard_shard_to_shard.json",
+    MATMUL_INPUTS / "matmul_batch_broadcast_shard_replicate_to_shard" / "matmul_batch_broadcast_shard_replicate_to_shard.json",
+    MATMUL_INPUTS / "matmul_batched_contraction_shards_to_partial" / "matmul_batched_contraction_shards_to_partial.json",
 )
-INVALID_FIXTURE = MATMUL_INPUTS / "matmul_invalid_batch_broadcast_rejected.json"
+INVALID_FIXTURE = MATMUL_INPUTS / "matmul_invalid_batch_broadcast_rejected" / "matmul_invalid_batch_broadcast_rejected.json"
 WRONG_RELATION_FIXTURE = (
     MATMUL_INPUTS
+    / "matmul_batched_contraction_shards_wrong_replicate_disproved"
     / "matmul_batched_contraction_shards_wrong_replicate_disproved.json"
 )
 
@@ -48,7 +49,9 @@ def test_batched_matmul_example_runs_complete_pipeline_and_is_proved(
 
 def test_batched_matmul_contraction_shards_retain_local_k_relation() -> None:
     stage = load_stage(
-        MATMUL_INPUTS / "matmul_batched_contraction_shards_to_partial.json"
+        MATMUL_INPUTS
+        / "matmul_batched_contraction_shards_to_partial"
+        / "matmul_batched_contraction_shards_to_partial.json"
     )
     reduced = reduce_shapes(stage)
 

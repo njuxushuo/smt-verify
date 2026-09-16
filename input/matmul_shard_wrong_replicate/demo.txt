@@ -1,0 +1,188 @@
+SMT-Verify Demo Report
+Each example follows:
+Input -> Shape Reduction -> Symbolic Execution
+-> Relation Encoding -> SMT Verification -> Certified Lemma
+
+============================================================
+Example 1: matmul_shard_wrong_replicate
+============================================================
+
+[1] Input Stage Summary
+Input JSON: matmul_shard_wrong_replicate.json
+Stage name: matmul_shard_wrong_replicate
+World size: 2
+Input relations:
+  A -> Shard(dim=1)
+  B -> Shard(dim=0)
+Single ops:
+  matmul(A, B) -> C
+Distributed ops:
+  Rank 0:
+    matmul(A0, B0) -> C0
+  Rank 1:
+    matmul(A1, B1) -> C1
+Output relation: C -> Replicate
+
+[2] Original Shapes
+Single:
+  A: [4, 8]
+  B: [8, 4]
+  C: [4, 4]
+
+Rank 0:
+  A0: [4, 4]
+  B0: [4, 4]
+  C0: [4, 4]
+
+Rank 1:
+  A1: [4, 4]
+  B1: [4, 4]
+  C1: [4, 4]
+
+[3] Reduced Shapes
+Single:
+  A: [1, 4]
+  B: [4, 1]
+  C: [1, 1]
+
+Rank 0:
+  A0: [1, 2]
+  B0: [2, 1]
+  C0: [1, 1]
+
+Rank 1:
+  A1: [1, 2]
+  B1: [2, 1]
+  C1: [1, 1]
+Reduced objective: 28
+Normalized shape constraints: 62
+  [0] single__A__d0 >= 1
+  [1] single__A__d0 <= 4
+  [2] single__A__d1 >= 1
+  [3] single__A__d1 <= 8
+  [4] single__B__d0 >= 1
+  [5] single__B__d0 <= 8
+  [6] single__B__d1 >= 1
+  [7] single__B__d1 <= 4
+  [8] single__C__d0 >= 1
+  [9] single__C__d0 <= 4
+  [10] single__C__d1 >= 1
+  [11] single__C__d1 <= 4
+  [12] rank0__A0__d0 >= 1
+  [13] rank0__A0__d0 <= 4
+  [14] rank0__A0__d1 >= 1
+  [15] rank0__A0__d1 <= 4
+  [16] rank0__B0__d0 >= 1
+  [17] rank0__B0__d0 <= 4
+  [18] rank0__B0__d1 >= 1
+  [19] rank0__B0__d1 <= 4
+  [20] rank0__C0__d0 >= 1
+  [21] rank0__C0__d0 <= 4
+  [22] rank0__C0__d1 >= 1
+  [23] rank0__C0__d1 <= 4
+  [24] rank1__A1__d0 >= 1
+  [25] rank1__A1__d0 <= 4
+  [26] rank1__A1__d1 >= 1
+  [27] rank1__A1__d1 <= 4
+  [28] rank1__B1__d0 >= 1
+  [29] rank1__B1__d0 <= 4
+  [30] rank1__B1__d1 >= 1
+  [31] rank1__B1__d1 <= 4
+  [32] rank1__C1__d0 >= 1
+  [33] rank1__C1__d0 <= 4
+  [34] rank1__C1__d1 >= 1
+  [35] rank1__C1__d1 <= 4
+  [36] 4*rank0__A0__d0 == 4*single__A__d0
+  [37] 8*rank0__A0__d1 == 4*single__A__d1
+  [38] 4*rank1__A1__d0 == 4*single__A__d0
+  [39] 8*rank1__A1__d1 == 4*single__A__d1
+  [40] single__A__d1%2 == 0
+  [41] 8*rank0__B0__d0 == 4*single__B__d0
+  [42] 4*rank0__B0__d1 == 4*single__B__d1
+  [43] 8*rank1__B1__d0 == 4*single__B__d0
+  [44] 4*rank1__B1__d1 == 4*single__B__d1
+  [45] single__B__d0%2 == 0
+  [46] single__A__d1 == single__B__d0
+  [47] single__C__d0 == single__A__d0
+  [48] single__C__d1 == single__B__d1
+  [49] single__A__d1 >= 2
+  [50] rank0__A0__d1 == rank0__B0__d0
+  [51] rank0__C0__d0 == rank0__A0__d0
+  [52] rank0__C0__d1 == rank0__B0__d1
+  [53] rank0__A0__d1 >= 2
+  [54] rank1__A1__d1 == rank1__B1__d0
+  [55] rank1__C1__d0 == rank1__A1__d0
+  [56] rank1__C1__d1 == rank1__B1__d1
+  [57] rank1__A1__d1 >= 2
+  [58] 4*rank0__C0__d0 == 4*single__C__d0
+  [59] 4*rank0__C0__d1 == 4*single__C__d1
+  [60] 4*rank1__C1__d0 == 4*single__C__d0
+  [61] 4*rank1__C1__d1 == 4*single__C__d1
+
+[4] Symbolic Execution
+Single outputs:
+  C[0] = single__A__v0*single__B__v0 +
+single__A__v1*single__B__v1 +
+single__A__v2*single__B__v2 +
+single__A__v3*single__B__v3
+Rank 0 outputs:
+  C0[0] = rank0__A0__v0*rank0__B0__v0 + rank0__A0__v1*rank0__B0__v1
+Rank 1 outputs:
+  C1[0] = rank1__A1__v0*rank1__B1__v0 + rank1__A1__v1*rank1__B1__v1
+
+[5] Relation Encoding
+Input constraints: 8
+  [0] rank0__A0__v0 == single__A__v0
+  [1] rank0__A0__v1 == single__A__v1
+  [2] rank1__A1__v0 == single__A__v2
+  [3] rank1__A1__v1 == single__A__v3
+  [4] rank0__B0__v0 == single__B__v0
+  [5] rank0__B0__v1 == single__B__v1
+  [6] rank1__B1__v0 == single__B__v2
+  [7] rank1__B1__v1 == single__B__v3
+Output constraints: 2
+  [0] rank0__A0__v0*rank0__B0__v0 + rank0__A0__v1*rank0__B0__v1 ==
+single__A__v0*single__B__v0 +
+single__A__v1*single__B__v1 +
+single__A__v2*single__B__v2 +
+single__A__v3*single__B__v3
+  [1] rank1__A1__v0*rank1__B1__v0 + rank1__A1__v1*rank1__B1__v1 ==
+single__A__v0*single__B__v0 +
+single__A__v1*single__B__v1 +
+single__A__v2*single__B__v2 +
+single__A__v3*single__B__v3
+
+[6] SMT Verification
+SMT query:
+  Rin AND NOT(AND(Rout))
+SMT result: SAT
+Verification: DISPROVED
+Input constraint count: 8
+Output constraint count: 2
+Reduced objective: 28
+
+[7] Counterexample
+Single inputs:
+  A = ('1', '0', '0', '0')
+  B = ('1', '1', '1', '1')
+Distributed inputs:
+  Rank 0:
+    A0 = ('1', '0')
+    B0 = ('1', '1')
+  Rank 1:
+    A1 = ('0', '0')
+    B1 = ('1', '1')
+Failed output constraints:
+  (1,)
+
+[8] Certified Lemma
+Lemma: NOT GENERATED
+
+
+============================================================
+Summary
+============================================================
+
+matmul_shard_wrong_replicate
+  Verification: DISPROVED
+  Lemma: NOT GENERATED

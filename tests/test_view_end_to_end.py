@@ -18,14 +18,14 @@ from src.verification.verifier import VerificationStatus, verify_stage
 
 VIEW_INPUTS = ROOT / "input" / "view"
 POSITIVE_FIXTURES = (
-    VIEW_INPUTS / "transpose_shard_axis_1_to_2_proved.json",
-    VIEW_INPUTS / "transpose_negative_axes_proved.json",
-    VIEW_INPUTS / "reshape_shard_dim_0_proved.json",
-    VIEW_INPUTS / "squeeze_shard_dim_0_proved.json",
-    VIEW_INPUTS / "unsqueeze_shard_dim_0_proved.json",
-    VIEW_INPUTS / "expand_shard_dim_0_proved.json",
+    VIEW_INPUTS / "transpose_shard_axis_1_to_2_proved" / "transpose_shard_axis_1_to_2_proved.json",
+    VIEW_INPUTS / "transpose_negative_axes_proved" / "transpose_negative_axes_proved.json",
+    VIEW_INPUTS / "reshape_shard_dim_0_proved" / "reshape_shard_dim_0_proved.json",
+    VIEW_INPUTS / "squeeze_shard_dim_0_proved" / "squeeze_shard_dim_0_proved.json",
+    VIEW_INPUTS / "unsqueeze_shard_dim_0_proved" / "unsqueeze_shard_dim_0_proved.json",
+    VIEW_INPUTS / "expand_shard_dim_0_proved" / "expand_shard_dim_0_proved.json",
 )
-WRONG_TRANSPOSE_FIXTURE = VIEW_INPUTS / "transpose_wrong_shard_axis_disproved.json"
+WRONG_TRANSPOSE_FIXTURE = VIEW_INPUTS / "transpose_wrong_shard_axis_disproved" / "transpose_wrong_shard_axis_disproved.json"
 
 
 @pytest.mark.parametrize("fixture", POSITIVE_FIXTURES)

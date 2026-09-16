@@ -8,6 +8,7 @@ Example 1: matmul_shard_to_partial
 ============================================================
 
 [1] Input Stage Summary
+Input JSON: matmul_shard_to_partial.json
 Stage name: matmul_shard_to_partial
 World size: 2
 Input relations:
@@ -54,6 +55,69 @@ Rank 1:
   B1: [2, 1]
   C1: [1, 1]
 Reduced objective: 28
+Normalized shape constraints: 62
+  [0] single__A__d0 >= 1
+  [1] single__A__d0 <= 4
+  [2] single__A__d1 >= 1
+  [3] single__A__d1 <= 8
+  [4] single__B__d0 >= 1
+  [5] single__B__d0 <= 8
+  [6] single__B__d1 >= 1
+  [7] single__B__d1 <= 4
+  [8] single__C__d0 >= 1
+  [9] single__C__d0 <= 4
+  [10] single__C__d1 >= 1
+  [11] single__C__d1 <= 4
+  [12] rank0__A0__d0 >= 1
+  [13] rank0__A0__d0 <= 4
+  [14] rank0__A0__d1 >= 1
+  [15] rank0__A0__d1 <= 4
+  [16] rank0__B0__d0 >= 1
+  [17] rank0__B0__d0 <= 4
+  [18] rank0__B0__d1 >= 1
+  [19] rank0__B0__d1 <= 4
+  [20] rank0__C0__d0 >= 1
+  [21] rank0__C0__d0 <= 4
+  [22] rank0__C0__d1 >= 1
+  [23] rank0__C0__d1 <= 4
+  [24] rank1__A1__d0 >= 1
+  [25] rank1__A1__d0 <= 4
+  [26] rank1__A1__d1 >= 1
+  [27] rank1__A1__d1 <= 4
+  [28] rank1__B1__d0 >= 1
+  [29] rank1__B1__d0 <= 4
+  [30] rank1__B1__d1 >= 1
+  [31] rank1__B1__d1 <= 4
+  [32] rank1__C1__d0 >= 1
+  [33] rank1__C1__d0 <= 4
+  [34] rank1__C1__d1 >= 1
+  [35] rank1__C1__d1 <= 4
+  [36] 4*rank0__A0__d0 == 4*single__A__d0
+  [37] 8*rank0__A0__d1 == 4*single__A__d1
+  [38] 4*rank1__A1__d0 == 4*single__A__d0
+  [39] 8*rank1__A1__d1 == 4*single__A__d1
+  [40] single__A__d1%2 == 0
+  [41] 8*rank0__B0__d0 == 4*single__B__d0
+  [42] 4*rank0__B0__d1 == 4*single__B__d1
+  [43] 8*rank1__B1__d0 == 4*single__B__d0
+  [44] 4*rank1__B1__d1 == 4*single__B__d1
+  [45] single__B__d0%2 == 0
+  [46] single__A__d1 == single__B__d0
+  [47] single__C__d0 == single__A__d0
+  [48] single__C__d1 == single__B__d1
+  [49] single__A__d1 >= 2
+  [50] rank0__A0__d1 == rank0__B0__d0
+  [51] rank0__C0__d0 == rank0__A0__d0
+  [52] rank0__C0__d1 == rank0__B0__d1
+  [53] rank0__A0__d1 >= 2
+  [54] rank1__A1__d1 == rank1__B1__d0
+  [55] rank1__C1__d0 == rank1__A1__d0
+  [56] rank1__C1__d1 == rank1__B1__d1
+  [57] rank1__A1__d1 >= 2
+  [58] 4*rank0__C0__d0 == 4*single__C__d0
+  [59] 4*rank0__C0__d1 == 4*single__C__d1
+  [60] 4*rank1__C1__d0 == 4*single__C__d0
+  [61] 4*rank1__C1__d1 == 4*single__C__d1
 
 [4] Symbolic Execution
 Single outputs:
@@ -275,6 +339,7 @@ Example 2: matmul_shard_to_partial_large
 ============================================================
 
 [1] Input Stage Summary
+Input JSON: matmul_shard_to_partial_large.json
 Stage name: matmul_shard_to_partial_large
 World size: 8
 Input relations:
@@ -393,6 +458,201 @@ Rank 7:
   B7: [2, 1]
   C7: [1, 1]
 Reduced objective: 100
+Normalized shape constraints: 194
+  [0] single__A__d0 >= 1
+  [1] single__A__d0 <= 4096
+  [2] single__A__d1 >= 1
+  [3] single__A__d1 <= 11008
+  [4] single__B__d0 >= 1
+  [5] single__B__d0 <= 11008
+  [6] single__B__d1 >= 1
+  [7] single__B__d1 <= 4096
+  [8] single__C__d0 >= 1
+  [9] single__C__d0 <= 4096
+  [10] single__C__d1 >= 1
+  [11] single__C__d1 <= 4096
+  [12] rank0__A0__d0 >= 1
+  [13] rank0__A0__d0 <= 4096
+  [14] rank0__A0__d1 >= 1
+  [15] rank0__A0__d1 <= 1376
+  [16] rank0__B0__d0 >= 1
+  [17] rank0__B0__d0 <= 1376
+  [18] rank0__B0__d1 >= 1
+  [19] rank0__B0__d1 <= 4096
+  [20] rank0__C0__d0 >= 1
+  [21] rank0__C0__d0 <= 4096
+  [22] rank0__C0__d1 >= 1
+  [23] rank0__C0__d1 <= 4096
+  [24] rank1__A1__d0 >= 1
+  [25] rank1__A1__d0 <= 4096
+  [26] rank1__A1__d1 >= 1
+  [27] rank1__A1__d1 <= 1376
+  [28] rank1__B1__d0 >= 1
+  [29] rank1__B1__d0 <= 1376
+  [30] rank1__B1__d1 >= 1
+  [31] rank1__B1__d1 <= 4096
+  [32] rank1__C1__d0 >= 1
+  [33] rank1__C1__d0 <= 4096
+  [34] rank1__C1__d1 >= 1
+  [35] rank1__C1__d1 <= 4096
+  [36] rank2__A2__d0 >= 1
+  [37] rank2__A2__d0 <= 4096
+  [38] rank2__A2__d1 >= 1
+  [39] rank2__A2__d1 <= 1376
+  [40] rank2__B2__d0 >= 1
+  [41] rank2__B2__d0 <= 1376
+  [42] rank2__B2__d1 >= 1
+  [43] rank2__B2__d1 <= 4096
+  [44] rank2__C2__d0 >= 1
+  [45] rank2__C2__d0 <= 4096
+  [46] rank2__C2__d1 >= 1
+  [47] rank2__C2__d1 <= 4096
+  [48] rank3__A3__d0 >= 1
+  [49] rank3__A3__d0 <= 4096
+  [50] rank3__A3__d1 >= 1
+  [51] rank3__A3__d1 <= 1376
+  [52] rank3__B3__d0 >= 1
+  [53] rank3__B3__d0 <= 1376
+  [54] rank3__B3__d1 >= 1
+  [55] rank3__B3__d1 <= 4096
+  [56] rank3__C3__d0 >= 1
+  [57] rank3__C3__d0 <= 4096
+  [58] rank3__C3__d1 >= 1
+  [59] rank3__C3__d1 <= 4096
+  [60] rank4__A4__d0 >= 1
+  [61] rank4__A4__d0 <= 4096
+  [62] rank4__A4__d1 >= 1
+  [63] rank4__A4__d1 <= 1376
+  [64] rank4__B4__d0 >= 1
+  [65] rank4__B4__d0 <= 1376
+  [66] rank4__B4__d1 >= 1
+  [67] rank4__B4__d1 <= 4096
+  [68] rank4__C4__d0 >= 1
+  [69] rank4__C4__d0 <= 4096
+  [70] rank4__C4__d1 >= 1
+  [71] rank4__C4__d1 <= 4096
+  [72] rank5__A5__d0 >= 1
+  [73] rank5__A5__d0 <= 4096
+  [74] rank5__A5__d1 >= 1
+  [75] rank5__A5__d1 <= 1376
+  [76] rank5__B5__d0 >= 1
+  [77] rank5__B5__d0 <= 1376
+  [78] rank5__B5__d1 >= 1
+  [79] rank5__B5__d1 <= 4096
+  [80] rank5__C5__d0 >= 1
+  [81] rank5__C5__d0 <= 4096
+  [82] rank5__C5__d1 >= 1
+  [83] rank5__C5__d1 <= 4096
+  [84] rank6__A6__d0 >= 1
+  [85] rank6__A6__d0 <= 4096
+  [86] rank6__A6__d1 >= 1
+  [87] rank6__A6__d1 <= 1376
+  [88] rank6__B6__d0 >= 1
+  [89] rank6__B6__d0 <= 1376
+  [90] rank6__B6__d1 >= 1
+  [91] rank6__B6__d1 <= 4096
+  [92] rank6__C6__d0 >= 1
+  [93] rank6__C6__d0 <= 4096
+  [94] rank6__C6__d1 >= 1
+  [95] rank6__C6__d1 <= 4096
+  [96] rank7__A7__d0 >= 1
+  [97] rank7__A7__d0 <= 4096
+  [98] rank7__A7__d1 >= 1
+  [99] rank7__A7__d1 <= 1376
+  [100] rank7__B7__d0 >= 1
+  [101] rank7__B7__d0 <= 1376
+  [102] rank7__B7__d1 >= 1
+  [103] rank7__B7__d1 <= 4096
+  [104] rank7__C7__d0 >= 1
+  [105] rank7__C7__d0 <= 4096
+  [106] rank7__C7__d1 >= 1
+  [107] rank7__C7__d1 <= 4096
+  [108] 4096*rank0__A0__d0 == 4096*single__A__d0
+  [109] 11008*rank0__A0__d1 == 1376*single__A__d1
+  [110] 4096*rank1__A1__d0 == 4096*single__A__d0
+  [111] 11008*rank1__A1__d1 == 1376*single__A__d1
+  [112] 4096*rank2__A2__d0 == 4096*single__A__d0
+  [113] 11008*rank2__A2__d1 == 1376*single__A__d1
+  [114] 4096*rank3__A3__d0 == 4096*single__A__d0
+  [115] 11008*rank3__A3__d1 == 1376*single__A__d1
+  [116] 4096*rank4__A4__d0 == 4096*single__A__d0
+  [117] 11008*rank4__A4__d1 == 1376*single__A__d1
+  [118] 4096*rank5__A5__d0 == 4096*single__A__d0
+  [119] 11008*rank5__A5__d1 == 1376*single__A__d1
+  [120] 4096*rank6__A6__d0 == 4096*single__A__d0
+  [121] 11008*rank6__A6__d1 == 1376*single__A__d1
+  [122] 4096*rank7__A7__d0 == 4096*single__A__d0
+  [123] 11008*rank7__A7__d1 == 1376*single__A__d1
+  [124] single__A__d1%8 == 0
+  [125] 11008*rank0__B0__d0 == 1376*single__B__d0
+  [126] 4096*rank0__B0__d1 == 4096*single__B__d1
+  [127] 11008*rank1__B1__d0 == 1376*single__B__d0
+  [128] 4096*rank1__B1__d1 == 4096*single__B__d1
+  [129] 11008*rank2__B2__d0 == 1376*single__B__d0
+  [130] 4096*rank2__B2__d1 == 4096*single__B__d1
+  [131] 11008*rank3__B3__d0 == 1376*single__B__d0
+  [132] 4096*rank3__B3__d1 == 4096*single__B__d1
+  [133] 11008*rank4__B4__d0 == 1376*single__B__d0
+  [134] 4096*rank4__B4__d1 == 4096*single__B__d1
+  [135] 11008*rank5__B5__d0 == 1376*single__B__d0
+  [136] 4096*rank5__B5__d1 == 4096*single__B__d1
+  [137] 11008*rank6__B6__d0 == 1376*single__B__d0
+  [138] 4096*rank6__B6__d1 == 4096*single__B__d1
+  [139] 11008*rank7__B7__d0 == 1376*single__B__d0
+  [140] 4096*rank7__B7__d1 == 4096*single__B__d1
+  [141] single__B__d0%8 == 0
+  [142] single__A__d1 == single__B__d0
+  [143] single__C__d0 == single__A__d0
+  [144] single__C__d1 == single__B__d1
+  [145] single__A__d1 >= 2
+  [146] rank0__A0__d1 == rank0__B0__d0
+  [147] rank0__C0__d0 == rank0__A0__d0
+  [148] rank0__C0__d1 == rank0__B0__d1
+  [149] rank0__A0__d1 >= 2
+  [150] rank1__A1__d1 == rank1__B1__d0
+  [151] rank1__C1__d0 == rank1__A1__d0
+  [152] rank1__C1__d1 == rank1__B1__d1
+  [153] rank1__A1__d1 >= 2
+  [154] rank2__A2__d1 == rank2__B2__d0
+  [155] rank2__C2__d0 == rank2__A2__d0
+  [156] rank2__C2__d1 == rank2__B2__d1
+  [157] rank2__A2__d1 >= 2
+  [158] rank3__A3__d1 == rank3__B3__d0
+  [159] rank3__C3__d0 == rank3__A3__d0
+  [160] rank3__C3__d1 == rank3__B3__d1
+  [161] rank3__A3__d1 >= 2
+  [162] rank4__A4__d1 == rank4__B4__d0
+  [163] rank4__C4__d0 == rank4__A4__d0
+  [164] rank4__C4__d1 == rank4__B4__d1
+  [165] rank4__A4__d1 >= 2
+  [166] rank5__A5__d1 == rank5__B5__d0
+  [167] rank5__C5__d0 == rank5__A5__d0
+  [168] rank5__C5__d1 == rank5__B5__d1
+  [169] rank5__A5__d1 >= 2
+  [170] rank6__A6__d1 == rank6__B6__d0
+  [171] rank6__C6__d0 == rank6__A6__d0
+  [172] rank6__C6__d1 == rank6__B6__d1
+  [173] rank6__A6__d1 >= 2
+  [174] rank7__A7__d1 == rank7__B7__d0
+  [175] rank7__C7__d0 == rank7__A7__d0
+  [176] rank7__C7__d1 == rank7__B7__d1
+  [177] rank7__A7__d1 >= 2
+  [178] 4096*rank0__C0__d0 == 4096*single__C__d0
+  [179] 4096*rank0__C0__d1 == 4096*single__C__d1
+  [180] 4096*rank1__C1__d0 == 4096*single__C__d0
+  [181] 4096*rank1__C1__d1 == 4096*single__C__d1
+  [182] 4096*rank2__C2__d0 == 4096*single__C__d0
+  [183] 4096*rank2__C2__d1 == 4096*single__C__d1
+  [184] 4096*rank3__C3__d0 == 4096*single__C__d0
+  [185] 4096*rank3__C3__d1 == 4096*single__C__d1
+  [186] 4096*rank4__C4__d0 == 4096*single__C__d0
+  [187] 4096*rank4__C4__d1 == 4096*single__C__d1
+  [188] 4096*rank5__C5__d0 == 4096*single__C__d0
+  [189] 4096*rank5__C5__d1 == 4096*single__C__d1
+  [190] 4096*rank6__C6__d0 == 4096*single__C__d0
+  [191] 4096*rank6__C6__d1 == 4096*single__C__d1
+  [192] 4096*rank7__C7__d0 == 4096*single__C__d0
+  [193] 4096*rank7__C7__d1 == 4096*single__C__d1
 
 [4] Symbolic Execution
 Single outputs:
@@ -944,6 +1204,7 @@ Example 3: matmul_shard_wrong_replicate
 ============================================================
 
 [1] Input Stage Summary
+Input JSON: matmul_shard_wrong_replicate.json
 Stage name: matmul_shard_wrong_replicate
 World size: 2
 Input relations:
@@ -990,6 +1251,69 @@ Rank 1:
   B1: [2, 1]
   C1: [1, 1]
 Reduced objective: 28
+Normalized shape constraints: 62
+  [0] single__A__d0 >= 1
+  [1] single__A__d0 <= 4
+  [2] single__A__d1 >= 1
+  [3] single__A__d1 <= 8
+  [4] single__B__d0 >= 1
+  [5] single__B__d0 <= 8
+  [6] single__B__d1 >= 1
+  [7] single__B__d1 <= 4
+  [8] single__C__d0 >= 1
+  [9] single__C__d0 <= 4
+  [10] single__C__d1 >= 1
+  [11] single__C__d1 <= 4
+  [12] rank0__A0__d0 >= 1
+  [13] rank0__A0__d0 <= 4
+  [14] rank0__A0__d1 >= 1
+  [15] rank0__A0__d1 <= 4
+  [16] rank0__B0__d0 >= 1
+  [17] rank0__B0__d0 <= 4
+  [18] rank0__B0__d1 >= 1
+  [19] rank0__B0__d1 <= 4
+  [20] rank0__C0__d0 >= 1
+  [21] rank0__C0__d0 <= 4
+  [22] rank0__C0__d1 >= 1
+  [23] rank0__C0__d1 <= 4
+  [24] rank1__A1__d0 >= 1
+  [25] rank1__A1__d0 <= 4
+  [26] rank1__A1__d1 >= 1
+  [27] rank1__A1__d1 <= 4
+  [28] rank1__B1__d0 >= 1
+  [29] rank1__B1__d0 <= 4
+  [30] rank1__B1__d1 >= 1
+  [31] rank1__B1__d1 <= 4
+  [32] rank1__C1__d0 >= 1
+  [33] rank1__C1__d0 <= 4
+  [34] rank1__C1__d1 >= 1
+  [35] rank1__C1__d1 <= 4
+  [36] 4*rank0__A0__d0 == 4*single__A__d0
+  [37] 8*rank0__A0__d1 == 4*single__A__d1
+  [38] 4*rank1__A1__d0 == 4*single__A__d0
+  [39] 8*rank1__A1__d1 == 4*single__A__d1
+  [40] single__A__d1%2 == 0
+  [41] 8*rank0__B0__d0 == 4*single__B__d0
+  [42] 4*rank0__B0__d1 == 4*single__B__d1
+  [43] 8*rank1__B1__d0 == 4*single__B__d0
+  [44] 4*rank1__B1__d1 == 4*single__B__d1
+  [45] single__B__d0%2 == 0
+  [46] single__A__d1 == single__B__d0
+  [47] single__C__d0 == single__A__d0
+  [48] single__C__d1 == single__B__d1
+  [49] single__A__d1 >= 2
+  [50] rank0__A0__d1 == rank0__B0__d0
+  [51] rank0__C0__d0 == rank0__A0__d0
+  [52] rank0__C0__d1 == rank0__B0__d1
+  [53] rank0__A0__d1 >= 2
+  [54] rank1__A1__d1 == rank1__B1__d0
+  [55] rank1__C1__d0 == rank1__A1__d0
+  [56] rank1__C1__d1 == rank1__B1__d1
+  [57] rank1__A1__d1 >= 2
+  [58] 4*rank0__C0__d0 == 4*single__C__d0
+  [59] 4*rank0__C0__d1 == 4*single__C__d1
+  [60] 4*rank1__C1__d0 == 4*single__C__d0
+  [61] 4*rank1__C1__d1 == 4*single__C__d1
 
 [4] Symbolic Execution
 Single outputs:

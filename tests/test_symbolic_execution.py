@@ -25,7 +25,7 @@ from src.symbolic.tensor import (
 )
 
 
-FIXTURE = ROOT / "input" / "matmul_shard_to_partial.json"
+FIXTURE = ROOT / "input" / "matmul_shard_to_partial" / "matmul_shard_to_partial.json"
 
 
 def _program(

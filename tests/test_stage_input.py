@@ -14,7 +14,7 @@ if str(ROOT) not in sys.path:
 from src.stage.loader import StageInputError, load_stage
 
 
-FIXTURE = ROOT / "input" / "matmul_shard_to_partial.json"
+FIXTURE = ROOT / "input" / "matmul_shard_to_partial" / "matmul_shard_to_partial.json"
 
 
 def _fixture_data() -> dict:

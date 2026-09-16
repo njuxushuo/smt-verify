@@ -1,0 +1,281 @@
+SMT-Verify Demo Report
+Each example follows:
+Input -> Shape Reduction -> Symbolic Execution
+-> Relation Encoding -> SMT Verification -> Certified Lemma
+
+============================================================
+Example 1: squeeze_shard_dim_0_proved
+============================================================
+
+[1] Input Stage Summary
+Input JSON: squeeze_shard_dim_0_proved.json
+Stage name: squeeze_shard_dim_0_proved
+World size: 2
+Input relations:
+  X -> Shard(dim=0)
+Single ops:
+  squeeze(X) -> Y attrs={"dim": 1}
+Distributed ops:
+  Rank 0:
+    squeeze(X0) -> Y0 attrs={"dim": 1}
+  Rank 1:
+    squeeze(X1) -> Y1 attrs={"dim": 1}
+Output relation: Y -> Shard(dim=0)
+
+[2] Original Shapes
+Single:
+  X: [4, 1, 6]
+  Y: [4, 6]
+
+Rank 0:
+  X0: [2, 1, 6]
+  Y0: [2, 6]
+
+Rank 1:
+  X1: [2, 1, 6]
+  Y1: [2, 6]
+
+[3] Reduced Shapes
+Single:
+  X: [2, 1, 1]
+  Y: [2, 1]
+
+Rank 0:
+  X0: [1, 1, 1]
+  Y0: [1, 1]
+
+Rank 1:
+  X1: [1, 1, 1]
+  Y1: [1, 1]
+Reduced objective: 17
+Normalized shape constraints: 51
+  [0] single__X__d0 >= 1
+  [1] single__X__d0 <= 4
+  [2] single__X__d1 >= 1
+  [3] single__X__d1 <= 1
+  [4] single__X__d2 >= 1
+  [5] single__X__d2 <= 6
+  [6] single__Y__d0 >= 1
+  [7] single__Y__d0 <= 4
+  [8] single__Y__d1 >= 1
+  [9] single__Y__d1 <= 6
+  [10] rank0__X0__d0 >= 1
+  [11] rank0__X0__d0 <= 2
+  [12] rank0__X0__d1 >= 1
+  [13] rank0__X0__d1 <= 1
+  [14] rank0__X0__d2 >= 1
+  [15] rank0__X0__d2 <= 6
+  [16] rank0__Y0__d0 >= 1
+  [17] rank0__Y0__d0 <= 2
+  [18] rank0__Y0__d1 >= 1
+  [19] rank0__Y0__d1 <= 6
+  [20] rank1__X1__d0 >= 1
+  [21] rank1__X1__d0 <= 2
+  [22] rank1__X1__d1 >= 1
+  [23] rank1__X1__d1 <= 1
+  [24] rank1__X1__d2 >= 1
+  [25] rank1__X1__d2 <= 6
+  [26] rank1__Y1__d0 >= 1
+  [27] rank1__Y1__d0 <= 2
+  [28] rank1__Y1__d1 >= 1
+  [29] rank1__Y1__d1 <= 6
+  [30] 4*rank0__X0__d0 == 2*single__X__d0
+  [31] rank0__X0__d1 == single__X__d1
+  [32] 6*rank0__X0__d2 == 6*single__X__d2
+  [33] 4*rank1__X1__d0 == 2*single__X__d0
+  [34] rank1__X1__d1 == single__X__d1
+  [35] 6*rank1__X1__d2 == 6*single__X__d2
+  [36] single__X__d0%2 == 0
+  [37] single__Y__d0 == single__X__d0
+  [38] single__X__d1 == 1
+  [39] single__Y__d1 == single__X__d2
+  [40] rank0__Y0__d0 == rank0__X0__d0
+  [41] rank0__X0__d1 == 1
+  [42] rank0__Y0__d1 == rank0__X0__d2
+  [43] rank1__Y1__d0 == rank1__X1__d0
+  [44] rank1__X1__d1 == 1
+  [45] rank1__Y1__d1 == rank1__X1__d2
+  [46] 4*rank0__Y0__d0 == 2*single__Y__d0
+  [47] 6*rank0__Y0__d1 == 6*single__Y__d1
+  [48] 4*rank1__Y1__d0 == 2*single__Y__d0
+  [49] 6*rank1__Y1__d1 == 6*single__Y__d1
+  [50] single__Y__d0%2 == 0
+
+[4] Symbolic Execution
+Single outputs:
+  Y[0] = single__X__v0
+  Y[1] = single__X__v1
+Rank 0 outputs:
+  Y0[0] = rank0__X0__v0
+Rank 1 outputs:
+  Y1[0] = rank1__X1__v0
+
+[5] Relation Encoding
+Input constraints: 2
+  [0] rank0__X0__v0 == single__X__v0
+  [1] rank1__X1__v0 == single__X__v1
+Output constraints: 2
+  [0] rank0__X0__v0 == single__X__v0
+  [1] rank1__X1__v0 == single__X__v1
+
+[6] SMT Verification
+SMT query:
+  Rin AND NOT(AND(Rout))
+SMT result: UNSAT
+Verification: PROVED
+Input constraint count: 2
+Output constraint count: 2
+Reduced objective: 17
+
+[7] Counterexample
+Counterexample: None
+
+[8] Certified Lemma
+Lemma: GENERATED
+Lemma ID: lemma_d517a0005430d182
+{
+  "distributed_ops": {
+    "0": [
+      {
+        "inputs": [
+          "X0"
+        ],
+        "outputs": [
+          "Y0"
+        ],
+        "type": "squeeze"
+      }
+    ],
+    "1": [
+      {
+        "inputs": [
+          "X1"
+        ],
+        "outputs": [
+          "Y1"
+        ],
+        "type": "squeeze"
+      }
+    ]
+  },
+  "input_relations": [
+    {
+      "dim": 0,
+      "distributed_tensors": [
+        "X0",
+        "X1"
+      ],
+      "reduce_op": null,
+      "single_tensor": "X",
+      "type": "shard"
+    }
+  ],
+  "lemma_id": "lemma_d517a0005430d182",
+  "original_distributed_shapes": {
+    "0": {
+      "X0": [
+        2,
+        1,
+        6
+      ],
+      "Y0": [
+        2,
+        6
+      ]
+    },
+    "1": {
+      "X1": [
+        2,
+        1,
+        6
+      ],
+      "Y1": [
+        2,
+        6
+      ]
+    }
+  },
+  "original_single_shapes": {
+    "X": [
+      4,
+      1,
+      6
+    ],
+    "Y": [
+      4,
+      6
+    ]
+  },
+  "output_relation": {
+    "dim": 0,
+    "distributed_tensors": [
+      "Y0",
+      "Y1"
+    ],
+    "reduce_op": null,
+    "single_tensor": "Y",
+    "type": "shard"
+  },
+  "reduced_shapes": {
+    "distributed": {
+      "0": {
+        "X0": [
+          1,
+          1,
+          1
+        ],
+        "Y0": [
+          1,
+          1
+        ]
+      },
+      "1": {
+        "X1": [
+          1,
+          1,
+          1
+        ],
+        "Y1": [
+          1,
+          1
+        ]
+      }
+    },
+    "objective_value": 17,
+    "single": {
+      "X": [
+        2,
+        1,
+        1
+      ],
+      "Y": [
+        2,
+        1
+      ]
+    },
+    "stage_name": "squeeze_shard_dim_0_proved"
+  },
+  "single_ops": [
+    {
+      "inputs": [
+        "X"
+      ],
+      "outputs": [
+        "Y"
+      ],
+      "type": "squeeze"
+    }
+  ],
+  "source_stage_name": "squeeze_shard_dim_0_proved",
+  "world_size": 2
+}
+
+
+============================================================
+Summary
+============================================================
+
+squeeze_shard_dim_0_proved
+  Verification: PROVED
+  Lemma: GENERATED
+  Lemma ID: lemma_d517a0005430d182

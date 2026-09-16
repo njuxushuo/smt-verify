@@ -17,8 +17,8 @@ from src.stage.loader import load_stage
 from src.stage.model import OpSpec, ProgramSpec, RelationSpec, StageSpec, TensorSpec
 
 
-STANDARD_FIXTURE = ROOT / "input" / "matmul_shard_to_partial.json"
-LARGE_FIXTURE = ROOT / "input" / "matmul_shard_to_partial_large.json"
+STANDARD_FIXTURE = ROOT / "input" / "matmul_shard_to_partial" / "matmul_shard_to_partial.json"
+LARGE_FIXTURE = ROOT / "input" / "matmul_shard_to_partial_large" / "matmul_shard_to_partial_large.json"
 
 
 def _solver_for(stage: StageSpec) -> tuple[z3.Solver, object]:

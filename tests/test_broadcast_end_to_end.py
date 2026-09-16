@@ -18,16 +18,16 @@ from src.verification.verifier import VerificationStatus, verify_stage
 
 BROADCAST_INPUTS = ROOT / "input" / "broadcast" / "element_wise"
 POSITIVE_FIXTURES = (
-    BROADCAST_INPUTS / "add_rank_mismatch_shard_replicate_to_shard.json",
-    BROADCAST_INPUTS / "add_singleton_shard_replicate_to_shard.json",
-    BROADCAST_INPUTS / "mul_4d_shard_replicate_to_shard.json",
-    BROADCAST_INPUTS / "mul_4d_shard_shard_to_shard.json",
+    BROADCAST_INPUTS / "add_rank_mismatch_shard_replicate_to_shard" / "add_rank_mismatch_shard_replicate_to_shard.json",
+    BROADCAST_INPUTS / "add_singleton_shard_replicate_to_shard" / "add_singleton_shard_replicate_to_shard.json",
+    BROADCAST_INPUTS / "mul_4d_shard_replicate_to_shard" / "mul_4d_shard_replicate_to_shard.json",
+    BROADCAST_INPUTS / "mul_4d_shard_shard_to_shard" / "mul_4d_shard_shard_to_shard.json",
 )
-INVALID_FIXTURE = BROADCAST_INPUTS / "add_incompatible_shapes_rejected.json"
+INVALID_FIXTURE = BROADCAST_INPUTS / "add_incompatible_shapes_rejected" / "add_incompatible_shapes_rejected.json"
 WRONG_RELATION_FIXTURE = (
-    BROADCAST_INPUTS / "add_replicate_inputs_wrong_partial_disproved.json"
+    BROADCAST_INPUTS / "add_replicate_inputs_wrong_partial_disproved" / "add_replicate_inputs_wrong_partial_disproved.json"
 )
-SHARDED_BIAS_FIXTURE = BROADCAST_INPUTS / "add_hidden_sharded_bias_to_shard.json"
+SHARDED_BIAS_FIXTURE = BROADCAST_INPUTS / "add_hidden_sharded_bias_to_shard" / "add_hidden_sharded_bias_to_shard.json"
 
 
 @pytest.mark.parametrize("fixture", POSITIVE_FIXTURES)
@@ -45,7 +45,11 @@ def test_broadcast_example_runs_complete_pipeline_and_is_proved(fixture: Path) -
 
 
 def test_singleton_example_reduction_preserves_broadcast_pattern() -> None:
-    stage = load_stage(BROADCAST_INPUTS / "add_singleton_shard_replicate_to_shard.json")
+    stage = load_stage(
+        BROADCAST_INPUTS
+        / "add_singleton_shard_replicate_to_shard"
+        / "add_singleton_shard_replicate_to_shard.json"
+    )
     reduced = reduce_shapes(stage)
 
     assert reduced.single["A"][1] == 1

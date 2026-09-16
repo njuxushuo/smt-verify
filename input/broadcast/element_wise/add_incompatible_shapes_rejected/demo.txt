@@ -1,0 +1,27 @@
+SMT-Verify Demo Report
+Each example follows:
+Input -> Shape Reduction -> Symbolic Execution
+-> Relation Encoding -> SMT Verification -> Certified Lemma
+
+============================================================
+Example 1: add_incompatible_shapes_rejected
+============================================================
+
+[1] Input Stage Summary
+Input JSON: add_incompatible_shapes_rejected.json
+Stage loading: REJECTED
+
+[2] Pipeline Failure
+Failure phase: Stage loading and static validation
+Error: single.ops[0]: add: shapes (2, 3, 4) and (5,) are not broadcast-compatible at aligned axis 2
+
+Remaining pipeline stages: NOT RUN
+
+
+============================================================
+Summary
+============================================================
+
+add_incompatible_shapes_rejected
+  Verification: REJECTED
+  Lemma: NOT GENERATED

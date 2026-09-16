@@ -59,8 +59,8 @@ TrainVerify 的 `rxshape.py` 启发了本实现的 symbolic dimensions、validit
 在 `smt` 环境中运行：
 
 ```bash
-python scripts/reduce_shapes.py input/matmul_shard_to_partial.json
-python scripts/reduce_shapes.py input/matmul_shard_to_partial_large.json
+python scripts/reduce_shapes.py input/matmul_shard_to_partial/matmul_shard_to_partial.json
+python scripts/reduce_shapes.py input/matmul_shard_to_partial_large/matmul_shard_to_partial_large.json
 ```
 
 命令打印 original/reduced shape、目标值及 `Shape reduction: PASS`；shape 约束不可满足或遇到未支持算子时打印失败原因并返回退出码 1。

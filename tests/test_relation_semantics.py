@@ -28,8 +28,8 @@ from src.symbolic.executor import execute_stage
 from src.symbolic.tensor import SymbolicTensor, create_symbolic_input_tensor
 
 
-STANDARD_FIXTURE = ROOT / "input" / "matmul_shard_to_partial.json"
-LARGE_FIXTURE = ROOT / "input" / "matmul_shard_to_partial_large.json"
+STANDARD_FIXTURE = ROOT / "input" / "matmul_shard_to_partial" / "matmul_shard_to_partial.json"
+LARGE_FIXTURE = ROOT / "input" / "matmul_shard_to_partial_large" / "matmul_shard_to_partial_large.json"
 
 
 def _relation(

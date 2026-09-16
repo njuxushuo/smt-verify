@@ -1,0 +1,27 @@
+SMT-Verify Demo Report
+Each example follows:
+Input -> Shape Reduction -> Symbolic Execution
+-> Relation Encoding -> SMT Verification -> Certified Lemma
+
+============================================================
+Example 1: matmul_invalid_batch_broadcast_rejected
+============================================================
+
+[1] Input Stage Summary
+Input JSON: matmul_invalid_batch_broadcast_rejected.json
+Stage loading: REJECTED
+
+[2] Pipeline Failure
+Failure phase: Stage loading and static validation
+Error: single.ops[0]: matmul batch: shapes (2, 3) and (4, 3) are not broadcast-compatible at aligned axis 0
+
+Remaining pipeline stages: NOT RUN
+
+
+============================================================
+Summary
+============================================================
+
+matmul_invalid_batch_broadcast_rejected
+  Verification: REJECTED
+  Lemma: NOT GENERATED

@@ -9,7 +9,11 @@ from .constraints import build_shape_constraints, create_symbolic_shapes
 from .model import ReducedShapeResult, ShapeReductionError, TensorRef
 
 
-def _simplify_and_deduplicate(constraints: list[z3.BoolRef]) -> list[z3.BoolRef]:
+def normalize_shape_constraints(
+    constraints: list[z3.BoolRef],
+) -> list[z3.BoolRef]:
+    """Simplify and stably deduplicate constraints before optimization."""
+
     unique: dict[str, z3.BoolRef] = {}
     for constraint in constraints:
         simplified = z3.simplify(constraint)
@@ -27,7 +31,7 @@ def reduce_shapes(stage: StageSpec) -> ReducedShapeResult:
     """Find minimum legal concrete shapes without modifying ``stage``."""
 
     shapes = create_symbolic_shapes(stage)
-    constraints = _simplify_and_deduplicate(build_shape_constraints(stage, shapes))
+    constraints = normalize_shape_constraints(build_shape_constraints(stage, shapes))
     dimensions = [dimension for shape in shapes.shapes.values() for dimension in shape]
 
     optimizer = z3.Optimize()

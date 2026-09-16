@@ -8,9 +8,15 @@
 
 - `docs/`：项目背景、设计讨论、方案文档，以及论文和相关仓库的阅读笔记。
 - `src/`：后续 SMT verifier 的正式实现；当前不预设内部模块结构。
-- `input/`：供 verifier 直接读取的结构化 stage 输入；具体中间描述格式待后续确定。
+- `input/`：结构化 Stage 输入。每个 case 使用独立目录，目录内包含同名 JSON 和由真实验证流水线生成的 `demo.txt`。
 - `scripts/`：运行、输入生成或转换、调试等辅助脚本。
 - `examples/`：少量可读的验证案例及其预期行为。
 - `tests/`：后续单元测试和功能测试。
 
 项目背景和当前约束见 [`docs/distributed_equivalence_smt_project_overview.md`](docs/distributed_equivalence_smt_project_overview.md)。
+
+重新生成全部输入 case 的报告：
+
+```bash
+conda run -n smt python scripts/export_input_demos.py
+```

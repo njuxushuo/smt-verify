@@ -1,4 +1,4 @@
-"""Export the three current Stage examples as one real Stage 1–6 demo report."""
+"""Export Stage JSON inputs as real pipeline reports."""
 
 from __future__ import annotations
 
@@ -15,16 +15,23 @@ if str(PROJECT_ROOT) not in sys.path:
 
 from src.lemma import certify_stage, lemma_to_dict
 from src.verification.relation_encoder import encode_stage_relations
-from src.shape.reducer import reduce_shapes
-from src.stage.loader import load_stage
+from src.shape.constraints import build_shape_constraints, create_symbolic_shapes
+from src.shape.reducer import normalize_shape_constraints, reduce_shapes
+from src.stage.loader import StageInputError, load_stage
 from src.symbolic.executor import execute_stage
 from src.verification.verifier import VerificationStatus, verify_stage
 
 
 DEFAULT_INPUTS = (
-    PROJECT_ROOT / "input" / "matmul_shard_to_partial.json",
-    PROJECT_ROOT / "input" / "matmul_shard_to_partial_large.json",
-    PROJECT_ROOT / "input" / "matmul_shard_wrong_replicate.json",
+    PROJECT_ROOT / "input" / "matmul_shard_to_partial" / "matmul_shard_to_partial.json",
+    PROJECT_ROOT
+    / "input"
+    / "matmul_shard_to_partial_large"
+    / "matmul_shard_to_partial_large.json",
+    PROJECT_ROOT
+    / "input"
+    / "matmul_shard_wrong_replicate"
+    / "matmul_shard_wrong_replicate.json",
 )
 DEFAULT_OUTPUT = PROJECT_ROOT / "examples" / "demo_report.txt"
 DIVIDER = "=" * 60
@@ -39,7 +46,10 @@ def _relation_label(relation) -> str:
 
 
 def _operation_label(op) -> str:
-    return f"{op.type}({', '.join(op.inputs)}) -> {', '.join(op.outputs)}"
+    label = f"{op.type}({', '.join(op.inputs)}) -> {', '.join(op.outputs)}"
+    if op.attrs:
+        label += f" attrs={json.dumps(op.attrs, ensure_ascii=False, sort_keys=True)}"
+    return label
 
 
 def _append_shapes(lines: list[str], single, distributed) -> None:
@@ -91,8 +101,14 @@ def _append_counterexample(lines: list[str], verification) -> None:
     lines.append(f"  {counterexample.failed_output_constraints}")
 
 
-def _append_example(lines: list[str], number: int, input_path: Path) -> tuple[str, VerificationStatus, str | None]:
+def _append_example(
+    lines: list[str], number: int, input_path: Path
+) -> tuple[str, str, str | None]:
     stage = load_stage(input_path)
+    symbolic_shapes = create_symbolic_shapes(stage)
+    shape_constraints = normalize_shape_constraints(
+        build_shape_constraints(stage, symbolic_shapes)
+    )
     reduced = reduce_shapes(stage)
     symbolic = execute_stage(stage, reduced)
     encoded = encode_stage_relations(stage, symbolic)
@@ -101,6 +117,7 @@ def _append_example(lines: list[str], number: int, input_path: Path) -> tuple[st
 
     lines.extend((DIVIDER, f"Example {number}: {stage.name}", DIVIDER, ""))
     lines.append("[1] Input Stage Summary")
+    lines.append(f"Input JSON: {input_path.name}")
     lines.append(f"Stage name: {stage.name}")
     lines.append(f"World size: {stage.world_size}")
     lines.append("Input relations:")
@@ -132,6 +149,9 @@ def _append_example(lines: list[str], number: int, input_path: Path) -> tuple[st
     lines.append("[3] Reduced Shapes")
     _append_shapes(lines, reduced.single, reduced.distributed)
     lines.append(f"Reduced objective: {reduced.objective_value}")
+    lines.append(f"Normalized shape constraints: {len(shape_constraints)}")
+    for index, constraint in enumerate(shape_constraints):
+        lines.append(f"  [{index}] {constraint}")
     lines.append("")
 
     lines.append("[4] Symbolic Execution")
@@ -181,7 +201,25 @@ def _append_example(lines: list[str], number: int, input_path: Path) -> tuple[st
         )
         lemma_id = certification.lemma.lemma_id
     lines.extend(("", ""))
-    return stage.name, verification.status, lemma_id
+    return stage.name, verification.status.value, lemma_id
+
+
+def _append_rejected_example(
+    lines: list[str], number: int, input_path: Path, error: StageInputError
+) -> tuple[str, str, None]:
+    name = input_path.stem
+    lines.extend((DIVIDER, f"Example {number}: {name}", DIVIDER, ""))
+    lines.append("[1] Input Stage Summary")
+    lines.append(f"Input JSON: {input_path.name}")
+    lines.append("Stage loading: REJECTED")
+    lines.append("")
+    lines.append("[2] Pipeline Failure")
+    lines.append("Failure phase: Stage loading and static validation")
+    lines.append(f"Error: {error}")
+    lines.append("")
+    lines.append("Remaining pipeline stages: NOT RUN")
+    lines.extend(("", ""))
+    return name, "REJECTED", None
 
 
 def build_demo_report(input_paths: tuple[Path, ...] = DEFAULT_INPUTS) -> str:
@@ -194,11 +232,16 @@ def build_demo_report(input_paths: tuple[Path, ...] = DEFAULT_INPUTS) -> str:
         "-> Relation Encoding -> SMT Verification -> Certified Lemma",
         "",
     ]
-    summary = [_append_example(lines, number, path) for number, path in enumerate(input_paths, 1)]
+    summary = []
+    for number, path in enumerate(input_paths, 1):
+        try:
+            summary.append(_append_example(lines, number, path))
+        except StageInputError as exc:
+            summary.append(_append_rejected_example(lines, number, path, exc))
     lines.extend((DIVIDER, "Summary", DIVIDER, ""))
     for name, status, lemma_id in summary:
         lines.append(name)
-        lines.append(f"  Verification: {status.value}")
+        lines.append(f"  Verification: {status}")
         lines.append(f"  Lemma: {'GENERATED' if lemma_id is not None else 'NOT GENERATED'}")
         if lemma_id is not None:
             lines.append(f"  Lemma ID: {lemma_id}")

@@ -13,8 +13,8 @@ from src.stage.loader import load_stage
 from src.verification.verifier import VerificationError, VerificationStatus, verify_stage
 
 
-STANDARD_FIXTURE = ROOT / "input" / "matmul_shard_to_partial.json"
-WRONG_FIXTURE = ROOT / "input" / "matmul_shard_wrong_replicate.json"
+STANDARD_FIXTURE = ROOT / "input" / "matmul_shard_to_partial" / "matmul_shard_to_partial.json"
+WRONG_FIXTURE = ROOT / "input" / "matmul_shard_wrong_replicate" / "matmul_shard_wrong_replicate.json"
 
 
 def test_correct_candidate_is_proved_with_expected_constraint_counts() -> None:

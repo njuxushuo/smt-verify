@@ -10,6 +10,7 @@ _EXPORTS = {
     "UnsupportedShapeSemanticsError": (".model", "UnsupportedShapeSemanticsError"),
     "build_shape_constraints": (".constraints", "build_shape_constraints"),
     "create_symbolic_shapes": (".constraints", "create_symbolic_shapes"),
+    "normalize_shape_constraints": (".reducer", "normalize_shape_constraints"),
     "reduce_shapes": (".reducer", "reduce_shapes"),
 }
 
