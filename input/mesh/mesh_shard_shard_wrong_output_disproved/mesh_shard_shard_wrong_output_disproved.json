@@ -1,0 +1,39 @@
+{
+  "name": "mesh_shard_shard_wrong_output_disproved",
+  "world_size": 4,
+  "mesh": {"shape": [2, 2]},
+  "single": {
+    "tensors": {"X": {"shape": [4, 6]}, "Y": {"shape": [6, 4]}},
+    "ops": [{"type": "transpose", "inputs": ["X"], "outputs": ["Y"], "attrs": {"dim0": 0, "dim1": 1}}]
+  },
+  "distributed": {
+    "ranks": {
+      "0": {
+        "tensors": {"X0": {"shape": [2, 3]}, "Y0": {"shape": [3, 2]}},
+        "ops": [{"type": "transpose", "inputs": ["X0"], "outputs": ["Y0"], "attrs": {"dim0": 0, "dim1": 1}}]
+      },
+      "1": {
+        "tensors": {"X1": {"shape": [2, 3]}, "Y1": {"shape": [3, 2]}},
+        "ops": [{"type": "transpose", "inputs": ["X1"], "outputs": ["Y1"], "attrs": {"dim0": 0, "dim1": 1}}]
+      },
+      "2": {
+        "tensors": {"X2": {"shape": [2, 3]}, "Y2": {"shape": [3, 2]}},
+        "ops": [{"type": "transpose", "inputs": ["X2"], "outputs": ["Y2"], "attrs": {"dim0": 0, "dim1": 1}}]
+      },
+      "3": {
+        "tensors": {"X3": {"shape": [2, 3]}, "Y3": {"shape": [3, 2]}},
+        "ops": [{"type": "transpose", "inputs": ["X3"], "outputs": ["Y3"], "attrs": {"dim0": 0, "dim1": 1}}]
+      }
+    }
+  },
+  "input_relations": [{
+    "single_tensor": "X",
+    "distributed_tensors": ["X0", "X1", "X2", "X3"],
+    "placements": [{"type": "shard", "dim": 0}, {"type": "shard", "dim": 1}]
+  }],
+  "output_relation": {
+    "single_tensor": "Y",
+    "distributed_tensors": ["Y0", "Y1", "Y2", "Y3"],
+    "placements": [{"type": "shard", "dim": 0}, {"type": "shard", "dim": 1}]
+  }
+}

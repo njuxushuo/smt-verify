@@ -6,7 +6,7 @@ from dataclasses import dataclass
 
 import z3
 
-from ..semantics.relations import RelationEncodingError, get_relation
+from ..semantics.relations import COMPOSITE_RELATION, RelationEncodingError
 from ..stage.model import RelationSpec, StageSpec
 from ..symbolic.tensor import SymbolicStageResult, SymbolicTensor
 
@@ -58,12 +58,11 @@ def _encode_one_relation(
     symbolic: SymbolicStageResult,
     context: str,
 ) -> list[z3.BoolRef]:
-    """Delegate one resolved Stage relation to its registered value semantics."""
+    """Delegate one resolved Stage relation to composite placement semantics."""
 
-    semantics = get_relation(relation.type, context)
     single_tensor, local_tensors = _resolve_relation_tensors(relation, symbolic, context)
-    return semantics.value_constraints(
-        relation, single_tensor, local_tensors, stage.world_size, context
+    return COMPOSITE_RELATION.value_constraints(
+        relation, single_tensor, local_tensors, stage.mesh, context
     )
 
 

@@ -3,15 +3,22 @@
 from importlib import import_module
 
 _EXPORTS = {
+    "DeviceMeshError": (".mesh", "DeviceMeshError"),
+    "DeviceMeshSpec": (".model", "DeviceMeshSpec"),
     "OpSpec": (".model", "OpSpec"),
     "ProgramAnalysisError": (".analysis", "ProgramAnalysisError"),
     "ProgramSpec": (".model", "ProgramSpec"),
+    "PlacementSpec": (".model", "PlacementSpec"),
     "RelationSpec": (".model", "RelationSpec"),
     "StageInputError": (".loader", "StageInputError"),
     "StageSpec": (".model", "StageSpec"),
     "TensorSpec": (".model", "TensorSpec"),
+    "coordinate_to_rank": (".mesh", "coordinate_to_rank"),
+    "enumerate_coordinate_group": (".mesh", "enumerate_coordinate_group"),
     "find_program_inputs": (".analysis", "find_program_inputs"),
     "load_stage": (".loader", "load_stage"),
+    "mesh_size": (".mesh", "mesh_size"),
+    "rank_to_coordinate": (".mesh", "rank_to_coordinate"),
     "validate_program_dataflow": (".analysis", "validate_program_dataflow"),
     "validate_stage": (".validator", "validate_stage"),
 }

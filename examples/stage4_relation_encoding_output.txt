@@ -3,22 +3,22 @@ Stage: matmul_shard_to_partial
 Relation encoding:
 
 Input relations:
-  [0] A: shard(dim=1)
+  [0] A: [shard(dim=1)]
     constraints: 4
-    [0] rank0__A0__v0 == single__A__v0
-    [1] rank0__A0__v1 == single__A__v1
-    [2] rank1__A1__v0 == single__A__v2
-    [3] rank1__A1__v1 == single__A__v3
+    [0] single__A__v0 == rank0__A0__v0
+    [1] single__A__v1 == rank0__A0__v1
+    [2] single__A__v2 == rank1__A1__v0
+    [3] single__A__v3 == rank1__A1__v1
 
-  [1] B: shard(dim=0)
+  [1] B: [shard(dim=0)]
     constraints: 4
-    [0] rank0__B0__v0 == single__B__v0
-    [1] rank0__B0__v1 == single__B__v1
-    [2] rank1__B1__v0 == single__B__v2
-    [3] rank1__B1__v1 == single__B__v3
+    [0] single__B__v0 == rank0__B0__v0
+    [1] single__B__v1 == rank0__B0__v1
+    [2] single__B__v2 == rank1__B1__v0
+    [3] single__B__v3 == rank1__B1__v1
 
 Output relation:
-  C: partial(sum)
+  C: [partial(sum)]
     constraints: 1
     [0] single__A__v0*single__B__v0 +
 single__A__v1*single__B__v1 +

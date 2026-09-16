@@ -3,10 +3,11 @@
 from __future__ import annotations
 
 from ..semantics.operators import ConcreteShapeError, DECLARED_OPERATOR_TYPES, OPERATOR_REGISTRY
-from ..semantics.relations import ConcreteRelationError, DECLARED_RELATION_TYPES, get_relation
+from ..semantics.relations import COMPOSITE_RELATION, ConcreteRelationError
 from .analysis import ProgramAnalysisError, find_program_inputs, validate_program_dataflow
 from .loader import StageInputError
-from .model import OpSpec, ProgramSpec, RelationSpec, StageSpec, TensorSpec
+from .mesh import DeviceMeshError, mesh_size
+from .model import DeviceMeshSpec, OpSpec, ProgramSpec, RelationSpec, StageSpec, TensorSpec
 
 
 def _is_integer(value: object) -> bool:
@@ -97,9 +98,6 @@ def _validate_relation(stage: StageSpec, relation: object, context: str) -> None
             f"{context}.distributed_tensors: expected {stage.world_size} tensors, "
             f"found {len(relation.distributed_tensors)}"
         )
-    if not isinstance(relation.type, str) or relation.type not in DECLARED_RELATION_TYPES:
-        raise StageInputError(f"{context}.type: unsupported relation {relation.type!r}")
-
     single_shape = stage.single.tensors[relation.single_tensor].shape
     local_shapes: list[tuple[int, ...]] = []
     for rank, tensor_name in enumerate(relation.distributed_tensors):
@@ -115,10 +113,9 @@ def _validate_relation(stage: StageSpec, relation: object, context: str) -> None
             )
         local_shapes.append(rank_tensors[tensor_name].shape)
 
-    semantics = get_relation(relation.type, context)
     try:
-        semantics.validate_concrete_shapes(
-            relation, single_shape, tuple(local_shapes), stage.world_size, context
+        COMPOSITE_RELATION.validate_concrete_shapes(
+            relation, single_shape, tuple(local_shapes), stage.mesh, context
         )
     except ConcreteRelationError as exc:
         raise StageInputError(str(exc)) from exc
@@ -151,6 +148,16 @@ def validate_stage(stage: StageSpec) -> None:
         raise StageInputError("stage.name: must be a non-empty string")
     if not _is_integer(stage.world_size) or stage.world_size < 1:
         raise StageInputError("stage.world_size: must be an integer greater than or equal to 1")
+    if not isinstance(stage.mesh, DeviceMeshSpec):
+        raise StageInputError("stage.mesh: expected DeviceMeshSpec")
+    try:
+        found_mesh_size = mesh_size(stage.mesh)
+    except DeviceMeshError as exc:
+        raise StageInputError(f"stage.{exc}") from exc
+    if found_mesh_size != stage.world_size:
+        raise StageInputError(
+            f"stage.mesh: size {found_mesh_size} does not match world_size {stage.world_size}"
+        )
     if not isinstance(stage.distributed, dict):
         raise StageInputError("distributed: expected rank mapping")
     expected_ranks = set(range(stage.world_size))

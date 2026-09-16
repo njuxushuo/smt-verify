@@ -11,8 +11,9 @@ Example 1: expand_on_shard_axis_wrong_replicate_disproved
 Input JSON: expand_on_shard_axis_wrong_replicate_disproved.json
 Stage name: expand_on_shard_axis_wrong_replicate_disproved
 World size: 2
+Mesh shape: [2]
 Input relations:
-  X -> Shard(dim=1)
+  X -> [Shard(dim=1)]
 Single ops:
   expand(X) -> Y attrs={"shape": [4, 2, 6]}
 Distributed ops:
@@ -20,7 +21,7 @@ Distributed ops:
     expand(X0) -> Y0 attrs={"shape": [4, 2, 6]}
   Rank 1:
     expand(X1) -> Y1 attrs={"shape": [4, 2, 6]}
-Output relation: Y -> Replicate
+Output relation: Y -> [Replicate]
 
 [2] Original Shapes
 Single:
@@ -48,7 +49,7 @@ Rank 1:
   X1: [1, 1, 1]
   Y1: [1, 2, 1]
 Reduced objective: 22
-Normalized shape constraints: 58
+Normalized shape constraints: 59
   [0] single__X__d0 >= 1
   [1] single__X__d0 <= 4
   [2] single__X__d1 >= 1
@@ -85,28 +86,29 @@ Normalized shape constraints: 58
   [33] rank1__Y1__d1 <= 2
   [34] rank1__Y1__d2 >= 1
   [35] rank1__Y1__d2 <= 6
-  [36] 4*rank0__X0__d0 == 4*single__X__d0
-  [37] 2*rank0__X0__d1 == single__X__d1
-  [38] 6*rank0__X0__d2 == 6*single__X__d2
-  [39] 4*rank1__X1__d0 == 4*single__X__d0
-  [40] 2*rank1__X1__d1 == single__X__d1
-  [41] 6*rank1__X1__d2 == 6*single__X__d2
-  [42] single__X__d1%2 == 0
-  [43] single__X__d0 == single__Y__d0
-  [44] single__X__d1 == single__Y__d1
-  [45] single__X__d2 == single__Y__d2
-  [46] rank0__X0__d0 == rank0__Y0__d0
-  [47] rank0__X0__d1 == 1
-  [48] rank0__X0__d2 == rank0__Y0__d2
-  [49] rank1__X1__d0 == rank1__Y1__d0
-  [50] rank1__X1__d1 == 1
-  [51] rank1__X1__d2 == rank1__Y1__d2
-  [52] 4*rank0__Y0__d0 == 4*single__Y__d0
-  [53] 2*rank0__Y0__d1 == 2*single__Y__d1
-  [54] 6*rank0__Y0__d2 == 6*single__Y__d2
-  [55] 4*rank1__Y1__d0 == 4*single__Y__d0
-  [56] 2*rank1__Y1__d1 == 2*single__Y__d1
-  [57] 6*rank1__Y1__d2 == 6*single__Y__d2
+  [36] True
+  [37] single__X__d1%2 == 0
+  [38] rank0__X0__d0 == single__X__d0
+  [39] 2*rank0__X0__d1 == single__X__d1
+  [40] rank0__X0__d2 == single__X__d2
+  [41] rank1__X1__d0 == single__X__d0
+  [42] 2*rank1__X1__d1 == single__X__d1
+  [43] rank1__X1__d2 == single__X__d2
+  [44] single__X__d0 == single__Y__d0
+  [45] single__X__d1 == single__Y__d1
+  [46] single__X__d2 == single__Y__d2
+  [47] rank0__X0__d0 == rank0__Y0__d0
+  [48] rank0__X0__d1 == 1
+  [49] rank0__X0__d2 == rank0__Y0__d2
+  [50] rank1__X1__d0 == rank1__Y1__d0
+  [51] rank1__X1__d1 == 1
+  [52] rank1__X1__d2 == rank1__Y1__d2
+  [53] rank0__Y0__d0 == single__Y__d0
+  [54] rank0__Y0__d1 == single__Y__d1
+  [55] rank0__Y0__d2 == single__Y__d2
+  [56] rank1__Y1__d0 == single__Y__d0
+  [57] rank1__Y1__d1 == single__Y__d1
+  [58] rank1__Y1__d2 == single__Y__d2
 
 [4] Symbolic Execution
 Single outputs:
@@ -121,13 +123,13 @@ Rank 1 outputs:
 
 [5] Relation Encoding
 Input constraints: 2
-  [0] rank0__X0__v0 == single__X__v0
-  [1] rank1__X1__v0 == single__X__v1
+  [0] single__X__v0 == rank0__X0__v0
+  [1] single__X__v1 == rank1__X1__v0
 Output constraints: 4
-  [0] rank0__X0__v0 == single__X__v0
-  [1] rank0__X0__v0 == single__X__v1
-  [2] rank1__X1__v0 == single__X__v0
-  [3] rank1__X1__v0 == single__X__v1
+  [0] single__X__v0 == rank0__X0__v0
+  [1] single__X__v1 == rank0__X0__v0
+  [2] single__X__v0 == rank1__X1__v0
+  [3] single__X__v1 == rank1__X1__v0
 
 [6] SMT Verification
 SMT query:

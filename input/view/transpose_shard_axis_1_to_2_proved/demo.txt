@@ -11,8 +11,9 @@ Example 1: transpose_shard_axis_1_to_2_proved
 Input JSON: transpose_shard_axis_1_to_2_proved.json
 Stage name: transpose_shard_axis_1_to_2_proved
 World size: 2
+Mesh shape: [2]
 Input relations:
-  X -> Shard(dim=1)
+  X -> [Shard(dim=1)]
 Single ops:
   transpose(X) -> Y attrs={"dim0": 1, "dim1": 2}
 Distributed ops:
@@ -20,7 +21,7 @@ Distributed ops:
     transpose(X0) -> Y0 attrs={"dim0": 1, "dim1": 2}
   Rank 1:
     transpose(X1) -> Y1 attrs={"dim0": 1, "dim1": 2}
-Output relation: Y -> Shard(dim=2)
+Output relation: Y -> [Shard(dim=2)]
 
 [2] Original Shapes
 Single:
@@ -48,7 +49,7 @@ Rank 1:
   X1: [1, 1, 1]
   Y1: [1, 1, 1]
 Reduced objective: 20
-Normalized shape constraints: 59
+Normalized shape constraints: 60
   [0] single__X__d0 >= 1
   [1] single__X__d0 <= 2
   [2] single__X__d1 >= 1
@@ -85,29 +86,30 @@ Normalized shape constraints: 59
   [33] rank1__Y1__d1 <= 6
   [34] rank1__Y1__d2 >= 1
   [35] rank1__Y1__d2 <= 2
-  [36] 2*rank0__X0__d0 == 2*single__X__d0
-  [37] 4*rank0__X0__d1 == 2*single__X__d1
-  [38] 6*rank0__X0__d2 == 6*single__X__d2
-  [39] 2*rank1__X1__d0 == 2*single__X__d0
-  [40] 4*rank1__X1__d1 == 2*single__X__d1
-  [41] 6*rank1__X1__d2 == 6*single__X__d2
-  [42] single__X__d1%2 == 0
-  [43] single__Y__d0 == single__X__d0
-  [44] single__Y__d1 == single__X__d2
-  [45] single__Y__d2 == single__X__d1
-  [46] rank0__Y0__d0 == rank0__X0__d0
-  [47] rank0__Y0__d1 == rank0__X0__d2
-  [48] rank0__Y0__d2 == rank0__X0__d1
-  [49] rank1__Y1__d0 == rank1__X1__d0
-  [50] rank1__Y1__d1 == rank1__X1__d2
-  [51] rank1__Y1__d2 == rank1__X1__d1
-  [52] 2*rank0__Y0__d0 == 2*single__Y__d0
-  [53] 6*rank0__Y0__d1 == 6*single__Y__d1
-  [54] 4*rank0__Y0__d2 == 2*single__Y__d2
-  [55] 2*rank1__Y1__d0 == 2*single__Y__d0
-  [56] 6*rank1__Y1__d1 == 6*single__Y__d1
-  [57] 4*rank1__Y1__d2 == 2*single__Y__d2
-  [58] single__Y__d2%2 == 0
+  [36] True
+  [37] single__X__d1%2 == 0
+  [38] rank0__X0__d0 == single__X__d0
+  [39] 2*rank0__X0__d1 == single__X__d1
+  [40] rank0__X0__d2 == single__X__d2
+  [41] rank1__X1__d0 == single__X__d0
+  [42] 2*rank1__X1__d1 == single__X__d1
+  [43] rank1__X1__d2 == single__X__d2
+  [44] single__Y__d0 == single__X__d0
+  [45] single__Y__d1 == single__X__d2
+  [46] single__Y__d2 == single__X__d1
+  [47] rank0__Y0__d0 == rank0__X0__d0
+  [48] rank0__Y0__d1 == rank0__X0__d2
+  [49] rank0__Y0__d2 == rank0__X0__d1
+  [50] rank1__Y1__d0 == rank1__X1__d0
+  [51] rank1__Y1__d1 == rank1__X1__d2
+  [52] rank1__Y1__d2 == rank1__X1__d1
+  [53] single__Y__d2%2 == 0
+  [54] rank0__Y0__d0 == single__Y__d0
+  [55] rank0__Y0__d1 == single__Y__d1
+  [56] 2*rank0__Y0__d2 == single__Y__d2
+  [57] rank1__Y1__d0 == single__Y__d0
+  [58] rank1__Y1__d1 == single__Y__d1
+  [59] 2*rank1__Y1__d2 == single__Y__d2
 
 [4] Symbolic Execution
 Single outputs:
@@ -120,11 +122,11 @@ Rank 1 outputs:
 
 [5] Relation Encoding
 Input constraints: 2
-  [0] rank0__X0__v0 == single__X__v0
-  [1] rank1__X1__v0 == single__X__v1
+  [0] single__X__v0 == rank0__X0__v0
+  [1] single__X__v1 == rank1__X1__v0
 Output constraints: 2
-  [0] rank0__X0__v0 == single__X__v0
-  [1] rank1__X1__v0 == single__X__v1
+  [0] single__X__v0 == rank0__X0__v0
+  [1] single__X__v1 == rank1__X1__v0
 
 [6] SMT Verification
 SMT query:
@@ -140,11 +142,15 @@ Counterexample: None
 
 [8] Certified Lemma
 Lemma: GENERATED
-Lemma ID: lemma_a118418d8377841a
+Lemma ID: lemma_aa8062a93d8d612c
 {
   "distributed_ops": {
     "0": [
       {
+        "attrs": {
+          "dim0": 1,
+          "dim1": 2
+        },
         "inputs": [
           "X0"
         ],
@@ -156,6 +162,10 @@ Lemma ID: lemma_a118418d8377841a
     ],
     "1": [
       {
+        "attrs": {
+          "dim0": 1,
+          "dim1": 2
+        },
         "inputs": [
           "X1"
         ],
@@ -168,17 +178,25 @@ Lemma ID: lemma_a118418d8377841a
   },
   "input_relations": [
     {
-      "dim": 1,
       "distributed_tensors": [
         "X0",
         "X1"
       ],
-      "reduce_op": null,
-      "single_tensor": "X",
-      "type": "shard"
+      "placements": [
+        {
+          "dim": 1,
+          "type": "shard"
+        }
+      ],
+      "single_tensor": "X"
     }
   ],
-  "lemma_id": "lemma_a118418d8377841a",
+  "lemma_id": "lemma_aa8062a93d8d612c",
+  "mesh": {
+    "shape": [
+      2
+    ]
+  },
   "original_distributed_shapes": {
     "0": {
       "X0": [
@@ -218,14 +236,17 @@ Lemma ID: lemma_a118418d8377841a
     ]
   },
   "output_relation": {
-    "dim": 2,
     "distributed_tensors": [
       "Y0",
       "Y1"
     ],
-    "reduce_op": null,
-    "single_tensor": "Y",
-    "type": "shard"
+    "placements": [
+      {
+        "dim": 2,
+        "type": "shard"
+      }
+    ],
+    "single_tensor": "Y"
   },
   "reduced_shapes": {
     "distributed": {
@@ -271,6 +292,10 @@ Lemma ID: lemma_a118418d8377841a
   },
   "single_ops": [
     {
+      "attrs": {
+        "dim0": 1,
+        "dim1": 2
+      },
       "inputs": [
         "X"
       ],
@@ -292,4 +317,4 @@ Summary
 transpose_shard_axis_1_to_2_proved
   Verification: PROVED
   Lemma: GENERATED
-  Lemma ID: lemma_a118418d8377841a
+  Lemma ID: lemma_aa8062a93d8d612c

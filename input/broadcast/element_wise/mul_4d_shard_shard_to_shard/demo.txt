@@ -11,9 +11,10 @@ Example 1: mul_4d_shard_shard_to_shard
 Input JSON: mul_4d_shard_shard_to_shard.json
 Stage name: mul_4d_shard_shard_to_shard
 World size: 2
+Mesh shape: [2]
 Input relations:
-  A -> Shard(dim=3)
-  B -> Shard(dim=3)
+  A -> [Shard(dim=3)]
+  B -> [Shard(dim=3)]
 Single ops:
   mul(A, B) -> C
 Distributed ops:
@@ -21,7 +22,7 @@ Distributed ops:
     mul(A0, B0) -> C0
   Rank 1:
     mul(A1, B1) -> C1
-Output relation: C -> Shard(dim=3)
+Output relation: C -> [Shard(dim=3)]
 
 [2] Original Shapes
 Single:
@@ -55,7 +56,7 @@ Rank 1:
   B1: [1, 1, 1, 1]
   C1: [1, 1, 1, 1]
 Reduced objective: 39
-Normalized shape constraints: 123
+Normalized shape constraints: 124
   [0] single__A__d0 >= 1
   [1] single__A__d0 <= 2
   [2] single__A__d1 >= 1
@@ -128,57 +129,58 @@ Normalized shape constraints: 123
   [69] rank1__C1__d2 <= 4
   [70] rank1__C1__d3 >= 1
   [71] rank1__C1__d3 <= 4
-  [72] 2*rank0__A0__d0 == 2*single__A__d0
-  [73] 3*rank0__A0__d1 == 3*single__A__d1
-  [74] 4*rank0__A0__d2 == 4*single__A__d2
-  [75] 8*rank0__A0__d3 == 4*single__A__d3
-  [76] 2*rank1__A1__d0 == 2*single__A__d0
-  [77] 3*rank1__A1__d1 == 3*single__A__d1
-  [78] 4*rank1__A1__d2 == 4*single__A__d2
-  [79] 8*rank1__A1__d3 == 4*single__A__d3
-  [80] single__A__d3%2 == 0
-  [81] rank0__B0__d0 == single__B__d0
-  [82] 3*rank0__B0__d1 == 3*single__B__d1
-  [83] rank0__B0__d2 == single__B__d2
-  [84] 8*rank0__B0__d3 == 4*single__B__d3
-  [85] rank1__B1__d0 == single__B__d0
-  [86] 3*rank1__B1__d1 == 3*single__B__d1
-  [87] rank1__B1__d2 == single__B__d2
-  [88] 8*rank1__B1__d3 == 4*single__B__d3
-  [89] single__B__d3%2 == 0
-  [90] single__B__d0 == 1
-  [91] single__C__d0 == single__A__d0
-  [92] single__A__d1 == single__B__d1
-  [93] single__C__d1 == single__A__d1
-  [94] single__B__d2 == 1
-  [95] single__C__d2 == single__A__d2
-  [96] single__A__d3 == single__B__d3
-  [97] single__C__d3 == single__A__d3
-  [98] rank0__B0__d0 == 1
-  [99] rank0__C0__d0 == rank0__A0__d0
-  [100] rank0__A0__d1 == rank0__B0__d1
-  [101] rank0__C0__d1 == rank0__A0__d1
-  [102] rank0__B0__d2 == 1
-  [103] rank0__C0__d2 == rank0__A0__d2
-  [104] rank0__A0__d3 == rank0__B0__d3
-  [105] rank0__C0__d3 == rank0__A0__d3
-  [106] rank1__B1__d0 == 1
-  [107] rank1__C1__d0 == rank1__A1__d0
-  [108] rank1__A1__d1 == rank1__B1__d1
-  [109] rank1__C1__d1 == rank1__A1__d1
-  [110] rank1__B1__d2 == 1
-  [111] rank1__C1__d2 == rank1__A1__d2
-  [112] rank1__A1__d3 == rank1__B1__d3
-  [113] rank1__C1__d3 == rank1__A1__d3
-  [114] 2*rank0__C0__d0 == 2*single__C__d0
-  [115] 3*rank0__C0__d1 == 3*single__C__d1
-  [116] 4*rank0__C0__d2 == 4*single__C__d2
-  [117] 8*rank0__C0__d3 == 4*single__C__d3
-  [118] 2*rank1__C1__d0 == 2*single__C__d0
-  [119] 3*rank1__C1__d1 == 3*single__C__d1
-  [120] 4*rank1__C1__d2 == 4*single__C__d2
-  [121] 8*rank1__C1__d3 == 4*single__C__d3
-  [122] single__C__d3%2 == 0
+  [72] True
+  [73] single__A__d3%2 == 0
+  [74] rank0__A0__d0 == single__A__d0
+  [75] rank0__A0__d1 == single__A__d1
+  [76] rank0__A0__d2 == single__A__d2
+  [77] 2*rank0__A0__d3 == single__A__d3
+  [78] rank1__A1__d0 == single__A__d0
+  [79] rank1__A1__d1 == single__A__d1
+  [80] rank1__A1__d2 == single__A__d2
+  [81] 2*rank1__A1__d3 == single__A__d3
+  [82] single__B__d3%2 == 0
+  [83] rank0__B0__d0 == single__B__d0
+  [84] rank0__B0__d1 == single__B__d1
+  [85] rank0__B0__d2 == single__B__d2
+  [86] 2*rank0__B0__d3 == single__B__d3
+  [87] rank1__B1__d0 == single__B__d0
+  [88] rank1__B1__d1 == single__B__d1
+  [89] rank1__B1__d2 == single__B__d2
+  [90] 2*rank1__B1__d3 == single__B__d3
+  [91] single__B__d0 == 1
+  [92] single__C__d0 == single__A__d0
+  [93] single__A__d1 == single__B__d1
+  [94] single__C__d1 == single__A__d1
+  [95] single__B__d2 == 1
+  [96] single__C__d2 == single__A__d2
+  [97] single__A__d3 == single__B__d3
+  [98] single__C__d3 == single__A__d3
+  [99] rank0__B0__d0 == 1
+  [100] rank0__C0__d0 == rank0__A0__d0
+  [101] rank0__A0__d1 == rank0__B0__d1
+  [102] rank0__C0__d1 == rank0__A0__d1
+  [103] rank0__B0__d2 == 1
+  [104] rank0__C0__d2 == rank0__A0__d2
+  [105] rank0__A0__d3 == rank0__B0__d3
+  [106] rank0__C0__d3 == rank0__A0__d3
+  [107] rank1__B1__d0 == 1
+  [108] rank1__C1__d0 == rank1__A1__d0
+  [109] rank1__A1__d1 == rank1__B1__d1
+  [110] rank1__C1__d1 == rank1__A1__d1
+  [111] rank1__B1__d2 == 1
+  [112] rank1__C1__d2 == rank1__A1__d2
+  [113] rank1__A1__d3 == rank1__B1__d3
+  [114] rank1__C1__d3 == rank1__A1__d3
+  [115] single__C__d3%2 == 0
+  [116] rank0__C0__d0 == single__C__d0
+  [117] rank0__C0__d1 == single__C__d1
+  [118] rank0__C0__d2 == single__C__d2
+  [119] 2*rank0__C0__d3 == single__C__d3
+  [120] rank1__C1__d0 == single__C__d0
+  [121] rank1__C1__d1 == single__C__d1
+  [122] rank1__C1__d2 == single__C__d2
+  [123] 2*rank1__C1__d3 == single__C__d3
 
 [4] Symbolic Execution
 Single outputs:
@@ -191,13 +193,13 @@ Rank 1 outputs:
 
 [5] Relation Encoding
 Input constraints: 4
-  [0] rank0__A0__v0 == single__A__v0
-  [1] rank1__A1__v0 == single__A__v1
-  [2] rank0__B0__v0 == single__B__v0
-  [3] rank1__B1__v0 == single__B__v1
+  [0] single__A__v0 == rank0__A0__v0
+  [1] single__A__v1 == rank1__A1__v0
+  [2] single__B__v0 == rank0__B0__v0
+  [3] single__B__v1 == rank1__B1__v0
 Output constraints: 2
-  [0] rank0__A0__v0*rank0__B0__v0 == single__A__v0*single__B__v0
-  [1] rank1__A1__v0*rank1__B1__v0 == single__A__v1*single__B__v1
+  [0] single__A__v0*single__B__v0 == rank0__A0__v0*rank0__B0__v0
+  [1] single__A__v1*single__B__v1 == rank1__A1__v0*rank1__B1__v0
 
 [6] SMT Verification
 SMT query:
@@ -213,7 +215,7 @@ Counterexample: None
 
 [8] Certified Lemma
 Lemma: GENERATED
-Lemma ID: lemma_87afa2463300a005
+Lemma ID: lemma_29a38832c8607041
 {
   "distributed_ops": {
     "0": [
@@ -243,27 +245,38 @@ Lemma ID: lemma_87afa2463300a005
   },
   "input_relations": [
     {
-      "dim": 3,
       "distributed_tensors": [
         "A0",
         "A1"
       ],
-      "reduce_op": null,
-      "single_tensor": "A",
-      "type": "shard"
+      "placements": [
+        {
+          "dim": 3,
+          "type": "shard"
+        }
+      ],
+      "single_tensor": "A"
     },
     {
-      "dim": 3,
       "distributed_tensors": [
         "B0",
         "B1"
       ],
-      "reduce_op": null,
-      "single_tensor": "B",
-      "type": "shard"
+      "placements": [
+        {
+          "dim": 3,
+          "type": "shard"
+        }
+      ],
+      "single_tensor": "B"
     }
   ],
-  "lemma_id": "lemma_87afa2463300a005",
+  "lemma_id": "lemma_29a38832c8607041",
+  "mesh": {
+    "shape": [
+      2
+    ]
+  },
   "original_distributed_shapes": {
     "0": {
       "A0": [
@@ -327,14 +340,17 @@ Lemma ID: lemma_87afa2463300a005
     ]
   },
   "output_relation": {
-    "dim": 3,
     "distributed_tensors": [
       "C0",
       "C1"
     ],
-    "reduce_op": null,
-    "single_tensor": "C",
-    "type": "shard"
+    "placements": [
+      {
+        "dim": 3,
+        "type": "shard"
+      }
+    ],
+    "single_tensor": "C"
   },
   "reduced_shapes": {
     "distributed": {
@@ -426,4 +442,4 @@ Summary
 mul_4d_shard_shard_to_shard
   Verification: PROVED
   Lemma: GENERATED
-  Lemma ID: lemma_87afa2463300a005
+  Lemma ID: lemma_29a38832c8607041

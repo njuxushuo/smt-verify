@@ -4,13 +4,14 @@ Stage 4.5 clarifies two preconditions for later local verification. It does not 
 
 ## Original-structure-preserving reduction
 
-Reduced dimensions are still symbolic positive integers optimized by Stage 2, but relation reduction is no longer an arbitrary minimum satisfying only relation names. For each rank and dimension, `relations.py` retains the original local-to-single ratio using integer cross multiplication:
+Reduced dimensions are still symbolic positive integers optimized by Stage 2. For tensor dimension `d`, `relations.py` computes the composite shard factor `F_d` from the mesh placements and requires:
 
 ```text
-local_reduced * original_single == single_reduced * original_local
+single_reduced[d] % F_d == 0
+local_reduced[rank,d] * F_d == single_reduced[d]
 ```
 
-This avoids Z3 Real division. Replicate and Partial have original ratio one; regular Shard preserves its original equal-size ratio and retains reduced shard divisibility. The current covered structure includes MatMul matrix/batch equations, Add/Mul broadcast patterns, View axis mappings, Reshape contiguous factorization groups, and Expand unary broadcast patterns. This is not a claim about physical stride/layout, memory aliasing, uneven/interleaved shards, or unsupported operators.
+Replicate and Partial contribute factor one; a regular Shard contributes its mesh-axis extent. The current milestone rejects repeated Shard placements on the same tensor dimension. The covered operator structure remains MatMul matrix/batch equations, Add/Mul broadcast patterns, View axis mappings, Reshape contiguous factorization groups, and Expand unary broadcast patterns. This is not a claim about physical stride/layout, memory aliasing, uneven/interleaved shards, or unsupported operators.
 
 Concrete legality is checked during `validate_stage()`: each implemented operator receives its original shapes and attrs before reduction. This includes exact View output metadata, negative-axis bounds, positive resolved Reshape/Expand targets, singleton requirements, and element-count checks. Thus an invalid original program cannot be repaired by reduction.
 

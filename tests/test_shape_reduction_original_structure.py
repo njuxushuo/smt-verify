@@ -15,7 +15,14 @@ from src.shape.constraints import build_shape_constraints, create_symbolic_shape
 from src.shape.model import TensorRef
 from src.shape.reducer import reduce_shapes
 from src.stage.loader import StageInputError, load_stage
-from src.stage.model import ProgramSpec, RelationSpec, StageSpec, TensorSpec
+from src.stage.model import (
+    DeviceMeshSpec,
+    PlacementSpec,
+    ProgramSpec,
+    RelationSpec,
+    StageSpec,
+    TensorSpec,
+)
 
 
 STANDARD_FIXTURE = ROOT / "input" / "matmul_shard_to_partial" / "matmul_shard_to_partial.json"
@@ -98,10 +105,15 @@ def _ratio_stage(
     dim: int | None = None,
     reduce_op: str | None = None,
 ) -> StageSpec:
-    relation = RelationSpec("X", ("X0", "X1"), relation_type, dim, reduce_op)
+    relation = RelationSpec(
+        "X",
+        ("X0", "X1"),
+        (PlacementSpec(relation_type, dim=dim, reduce_op=reduce_op),),
+    )
     return StageSpec(
         name=f"{relation_type}_ratio",
         world_size=2,
+        mesh=DeviceMeshSpec((2,)),
         single=ProgramSpec({"X": TensorSpec("X", single_shape)}, ()),
         distributed={
             0: ProgramSpec({"X0": TensorSpec("X0", local_shapes[0])}, ()),

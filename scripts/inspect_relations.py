@@ -20,13 +20,16 @@ from src.symbolic.executor import execute_stage
 from src.symbolic.tensor import SymbolicExecutionError
 
 
-def _relation_label(relation_type: str, dim: int | None, reduce_op: str | None) -> str:
-    labels = {
-        "replicate": "replicate",
-        "shard": f"shard(dim={dim})",
-        "partial": f"partial({reduce_op})",
-    }
-    return labels[relation_type]
+def _relation_label(relation) -> str:
+    labels = []
+    for placement in relation.placements:
+        if placement.type == "shard":
+            labels.append(f"shard(dim={placement.dim})")
+        elif placement.type == "partial":
+            labels.append(f"partial({placement.reduce_op})")
+        else:
+            labels.append("replicate")
+    return f"[{', '.join(labels)}]"
 
 
 def _print_constraints(constraints: tuple[z3.BoolRef, ...]) -> None:
@@ -55,7 +58,7 @@ def _print_success(stage_path: str) -> None:
         offset += len(display_constraints)
         print(
             f"  [{index}] {relation.single_tensor}: "
-            f"{_relation_label(relation.type, relation.dim, relation.reduce_op)}"
+            f"{_relation_label(relation)}"
         )
         _print_constraints(constraints)
         print()
@@ -64,7 +67,7 @@ def _print_success(stage_path: str) -> None:
     print("Output relation:")
     print(
         f"  {relation.single_tensor}: "
-        f"{_relation_label(relation.type, relation.dim, relation.reduce_op)}"
+        f"{_relation_label(relation)}"
     )
     _print_constraints(encoded.output_constraints)
     print()

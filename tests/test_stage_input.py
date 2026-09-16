@@ -27,6 +27,33 @@ def _load_data(tmp_path: Path, data: dict):
     return load_stage(path)
 
 
+def _mesh_relation_case() -> dict:
+    return {
+        "name": "mesh_relation_case",
+        "world_size": 4,
+        "mesh": {"shape": [2, 2]},
+        "single": {"tensors": {"X": {"shape": [4, 6]}}, "ops": []},
+        "distributed": {
+            "ranks": {
+                str(rank): {
+                    "tensors": {f"X{rank}": {"shape": [2, 3]}},
+                    "ops": [],
+                }
+                for rank in range(4)
+            }
+        },
+        "input_relations": [],
+        "output_relation": {
+            "single_tensor": "X",
+            "distributed_tensors": [f"X{rank}" for rank in range(4)],
+            "placements": [
+                {"type": "shard", "dim": 0},
+                {"type": "shard", "dim": 1},
+            ],
+        },
+    }
+
+
 def test_loads_standard_matmul_shard_to_partial_case():
     stage = load_stage(FIXTURE)
 
@@ -34,14 +61,15 @@ def test_loads_standard_matmul_shard_to_partial_case():
     assert stage.single.ops[0].attrs == {}
     assert all(program.ops[0].attrs == {} for program in stage.distributed.values())
     assert stage.world_size == 2
+    assert stage.mesh.shape == (2,)
     assert sorted(stage.distributed) == [0, 1]
     assert len(stage.input_relations) == 2
-    assert stage.input_relations[0].type == "shard"
-    assert stage.input_relations[0].dim == 1
-    assert stage.input_relations[1].type == "shard"
-    assert stage.input_relations[1].dim == 0
-    assert stage.output_relation.type == "partial"
-    assert stage.output_relation.reduce_op == "sum"
+    assert stage.input_relations[0].placements[0].type == "shard"
+    assert stage.input_relations[0].placements[0].dim == 1
+    assert stage.input_relations[1].placements[0].type == "shard"
+    assert stage.input_relations[1].placements[0].dim == 0
+    assert stage.output_relation.placements[0].type == "partial"
+    assert stage.output_relation.placements[0].reduce_op == "sum"
 
 
 def test_rejects_non_object_operator_attrs(tmp_path: Path) -> None:
@@ -97,7 +125,7 @@ def test_rejects_incorrect_shard_local_shape(tmp_path: Path):
     data = _fixture_data()
     data["distributed"]["ranks"]["0"]["tensors"]["A0"]["shape"] = [4, 5]
 
-    with pytest.raises(StageInputError, match="shard tensor on rank 0"):
+    with pytest.raises(StageInputError, match="local tensor on rank 0"):
         _load_data(tmp_path, data)
 
 
@@ -105,7 +133,7 @@ def test_rejects_non_divisible_shard_dimension(tmp_path: Path):
     data = _fixture_data()
     data["single"]["tensors"]["A"]["shape"] = [4, 7]
 
-    with pytest.raises(StageInputError, match="not divisible by world_size"):
+    with pytest.raises(StageInputError, match="not divisible by shard factor"):
         _load_data(tmp_path, data)
 
 
@@ -113,7 +141,7 @@ def test_rejects_partial_shape_mismatch(tmp_path: Path):
     data = _fixture_data()
     data["distributed"]["ranks"]["1"]["tensors"]["C1"]["shape"] = [2, 4]
 
-    with pytest.raises(StageInputError, match="partial tensor on rank 1"):
+    with pytest.raises(StageInputError, match="local tensor on rank 1"):
         _load_data(tmp_path, data)
 
 
@@ -125,7 +153,7 @@ def test_rejects_replicate_shape_mismatch(tmp_path: Path):
         "type": "replicate",
     }
 
-    with pytest.raises(StageInputError, match="replicate tensor on rank 0"):
+    with pytest.raises(StageInputError, match="local tensor on rank 0"):
         _load_data(tmp_path, data)
 
 
@@ -142,4 +170,95 @@ def test_rejects_duplicate_input_relation_for_single_tensor(tmp_path: Path):
     data["input_relations"].append(deepcopy(data["input_relations"][0]))
 
     with pytest.raises(StageInputError, match="duplicate input relation"):
+        _load_data(tmp_path, data)
+
+
+def test_loads_explicit_multidimensional_mesh_and_placements(tmp_path: Path) -> None:
+    stage = _load_data(tmp_path, _mesh_relation_case())
+
+    assert stage.mesh.shape == (2, 2)
+    assert tuple(placement.type for placement in stage.output_relation.placements) == (
+        "shard",
+        "shard",
+    )
+    assert tuple(placement.dim for placement in stage.output_relation.placements) == (0, 1)
+
+
+def test_rejects_mesh_size_world_size_mismatch(tmp_path: Path) -> None:
+    data = _mesh_relation_case()
+    data["mesh"]["shape"] = [2, 3]
+
+    with pytest.raises(StageInputError, match="does not match world_size"):
+        _load_data(tmp_path, data)
+
+
+def test_rejects_multid_mesh_legacy_relation_shorthand(tmp_path: Path) -> None:
+    data = _mesh_relation_case()
+    data["output_relation"].pop("placements")
+    data["output_relation"]["type"] = "shard"
+    data["output_relation"]["dim"] = 0
+
+    with pytest.raises(StageInputError, match="must define placements"):
+        _load_data(tmp_path, data)
+
+
+def test_rejects_mixed_legacy_and_canonical_relation_fields(tmp_path: Path) -> None:
+    data = _mesh_relation_case()
+    data["output_relation"]["type"] = "shard"
+
+    with pytest.raises(StageInputError, match="cannot be combined"):
+        _load_data(tmp_path, data)
+
+
+def test_rejects_placement_count_different_from_mesh_rank(tmp_path: Path) -> None:
+    data = _mesh_relation_case()
+    data["output_relation"]["placements"].pop()
+
+    with pytest.raises(StageInputError, match="expected 2 placements"):
+        _load_data(tmp_path, data)
+
+
+def test_rejects_repeated_same_tensor_dimension_sharding(tmp_path: Path) -> None:
+    data = _mesh_relation_case()
+    data["output_relation"]["placements"][1]["dim"] = 0
+    for rank in range(4):
+        data["distributed"]["ranks"][str(rank)]["tensors"][f"X{rank}"]["shape"] = [1, 6]
+
+    with pytest.raises(StageInputError, match="sharded by multiple mesh axes"):
+        _load_data(tmp_path, data)
+
+
+def test_rejects_unknown_placement_fields(tmp_path: Path) -> None:
+    data = _mesh_relation_case()
+    data["output_relation"]["placements"][0]["axis_name"] = "dp"
+
+    with pytest.raises(StageInputError, match="unknown placement fields"):
+        _load_data(tmp_path, data)
+
+
+@pytest.mark.parametrize("shape", [[], [2, 0], [2, True]])
+def test_rejects_invalid_mesh_shape(tmp_path: Path, shape: list[object]) -> None:
+    data = _mesh_relation_case()
+    data["mesh"]["shape"] = shape
+
+    with pytest.raises(StageInputError, match="mesh shape"):
+        _load_data(tmp_path, data)
+
+
+@pytest.mark.parametrize(
+    ("placement", "message"),
+    [
+        ({"type": "unknown"}, "unsupported placement"),
+        ({"type": "replicate", "dim": 0}, "must not define"),
+        ({"type": "shard", "dim": True}, "dim must be an integer"),
+        ({"type": "partial", "reduce_op": "max"}, "must be 'sum'"),
+    ],
+)
+def test_rejects_invalid_placement_schema(
+    tmp_path: Path, placement: dict[str, object], message: str
+) -> None:
+    data = _mesh_relation_case()
+    data["output_relation"]["placements"][0] = placement
+
+    with pytest.raises(StageInputError, match=message):
         _load_data(tmp_path, data)

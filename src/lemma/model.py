@@ -7,7 +7,7 @@ import hashlib
 import json
 
 from ..shape.model import ReducedShapeResult
-from ..stage.model import OpSpec, RelationSpec, StageSpec
+from ..stage.model import DeviceMeshSpec, OpSpec, PlacementSpec, RelationSpec, StageSpec
 from ..verification.verifier import VerificationResult, VerificationStatus, verify_stage
 
 
@@ -22,6 +22,7 @@ class CertifiedLemma:
     lemma_id: str
     source_stage_name: str
     world_size: int
+    mesh: DeviceMeshSpec
 
     input_relations: tuple[RelationSpec, ...]
     single_ops: tuple[OpSpec, ...]
@@ -42,22 +43,34 @@ class CertificationResult:
     lemma: CertifiedLemma | None
 
 
+def _placement_to_dict(placement: PlacementSpec) -> dict[str, object]:
+    result: dict[str, object] = {"type": placement.type}
+    if placement.dim is not None:
+        result["dim"] = placement.dim
+    if placement.reduce_op is not None:
+        result["reduce_op"] = placement.reduce_op
+    return result
+
+
 def _relation_to_dict(relation: RelationSpec) -> dict[str, object]:
     return {
         "single_tensor": relation.single_tensor,
         "distributed_tensors": list(relation.distributed_tensors),
-        "type": relation.type,
-        "dim": relation.dim,
-        "reduce_op": relation.reduce_op,
+        "placements": [
+            _placement_to_dict(placement) for placement in relation.placements
+        ],
     }
 
 
 def _op_to_dict(op: OpSpec) -> dict[str, object]:
-    return {
+    result: dict[str, object] = {
         "type": op.type,
         "inputs": list(op.inputs),
         "outputs": list(op.outputs),
     }
+    if op.attrs:
+        result["attrs"] = op.attrs
+    return result
 
 
 def _shape_map_to_dict(shapes: dict[str, tuple[int, ...]]) -> dict[str, list[int]]:
@@ -98,6 +111,7 @@ def semantic_identity_payload(stage: StageSpec) -> dict[str, object]:
 
     return {
         "world_size": stage.world_size,
+        "mesh": {"shape": list(stage.mesh.shape)},
         "input_relations": [_relation_to_dict(relation) for relation in stage.input_relations],
         "single_ops": [_op_to_dict(op) for op in stage.single.ops],
         "distributed_ops": _distributed_ops_to_dict(
@@ -140,6 +154,7 @@ def lemma_to_dict(lemma: CertifiedLemma) -> dict[str, object]:
         "lemma_id": lemma.lemma_id,
         "source_stage_name": lemma.source_stage_name,
         "world_size": lemma.world_size,
+        "mesh": {"shape": list(lemma.mesh.shape)},
         "input_relations": [_relation_to_dict(relation) for relation in lemma.input_relations],
         "single_ops": [_op_to_dict(op) for op in lemma.single_ops],
         "distributed_ops": _distributed_ops_to_dict(lemma.distributed_ops),
@@ -173,6 +188,7 @@ def build_certified_lemma(
         lemma_id=lemma_id_for_stage(stage),
         source_stage_name=stage.name,
         world_size=stage.world_size,
+        mesh=stage.mesh,
         input_relations=stage.input_relations,
         single_ops=stage.single.ops,
         distributed_ops={rank: program.ops for rank, program in stage.distributed.items()},

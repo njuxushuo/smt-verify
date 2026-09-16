@@ -1,9 +1,11 @@
-"""Operator and distributed tensor relation semantics registries."""
+"""Operator, broadcast, and composite distributed relation semantics."""
 
 from importlib import import_module
 
 _EXPORTS = {
     "BroadcastShapeError": (".broadcast", "BroadcastShapeError"),
+    "COMPOSITE_RELATION": (".relations", "COMPOSITE_RELATION"),
+    "CompositeRelationSemantics": (".relations", "CompositeRelationSemantics"),
     "broadcast_index": (".broadcast", "broadcast_index"),
     "broadcast_shape_constraints": (".broadcast", "broadcast_shape_constraints"),
     "get_operator": (".operators", "get_operator"),

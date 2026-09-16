@@ -12,17 +12,24 @@ if str(ROOT) not in sys.path:
 
 from src.verification.relation_encoder import encode_stage_relations
 from src.semantics.relations import (
-    PartialRelation,
+    COMPOSITE_RELATION,
+    CompositeRelationSemantics,
     RelationEncodingError,
-    ReplicateRelation,
-    ShardRelation,
     get_relation,
 )
 from src.shape.model import ReducedShapeResult
 from src.shape.reducer import reduce_shapes
 from src.stage.loader import load_stage
 from src.stage.loader import StageInputError
-from src.stage.model import OpSpec, ProgramSpec, RelationSpec, StageSpec, TensorSpec
+from src.stage.model import (
+    DeviceMeshSpec,
+    OpSpec,
+    PlacementSpec,
+    ProgramSpec,
+    RelationSpec,
+    StageSpec,
+    TensorSpec,
+)
 from src.stage.validator import validate_stage
 from src.symbolic.executor import execute_stage
 from src.symbolic.tensor import SymbolicTensor, create_symbolic_input_tensor
@@ -40,9 +47,7 @@ def _relation(
     return RelationSpec(
         single_tensor="X",
         distributed_tensors=("X0", "X1"),
-        type=relation_type,
-        dim=dim,
-        reduce_op=reduce_op,
+        placements=(PlacementSpec(relation_type, dim=dim, reduce_op=reduce_op),),
     )
 
 
@@ -66,10 +71,9 @@ def _program(
     )
 
 
-def test_relation_registry_returns_implemented_semantics() -> None:
-    assert isinstance(get_relation("replicate"), ReplicateRelation)
-    assert isinstance(get_relation("shard"), ShardRelation)
-    assert isinstance(get_relation("partial"), PartialRelation)
+def test_relation_registry_returns_composite_semantics() -> None:
+    assert get_relation() is COMPOSITE_RELATION
+    assert isinstance(get_relation(), CompositeRelationSemantics)
 
 
 def test_stage_two_shape_reduction_results_are_preserved() -> None:
@@ -86,8 +90,12 @@ def test_replicate_value_constraints_imply_each_rank_matches_single() -> None:
     single = _tensor("X", (2, 2))
     local_zero = _tensor("X0", (2, 2))
     local_one = _tensor("X1", (2, 2))
-    constraints = get_relation("replicate").value_constraints(
-        _relation("replicate"), single, (local_zero, local_one), 2, "test"
+    constraints = COMPOSITE_RELATION.value_constraints(
+        _relation("replicate"),
+        single,
+        (local_zero, local_one),
+        DeviceMeshSpec((2,)),
+        "test",
     )
 
     _assert_implied(constraints, local_zero.at((1, 0)) == single.at((1, 0)))
@@ -98,8 +106,12 @@ def test_shard_dim_zero_maps_contiguous_rows() -> None:
     single = _tensor("X", (4, 2))
     local_zero = _tensor("X0", (2, 2))
     local_one = _tensor("X1", (2, 2))
-    constraints = get_relation("shard").value_constraints(
-        _relation("shard", dim=0), single, (local_zero, local_one), 2, "test"
+    constraints = COMPOSITE_RELATION.value_constraints(
+        _relation("shard", dim=0),
+        single,
+        (local_zero, local_one),
+        DeviceMeshSpec((2,)),
+        "test",
     )
 
     _assert_implied(constraints, local_zero.at((0, 0)) == single.at((0, 0)))
@@ -112,8 +124,12 @@ def test_shard_dim_one_maps_contiguous_columns_on_every_row() -> None:
     single = _tensor("X", (2, 4))
     local_zero = _tensor("X0", (2, 2))
     local_one = _tensor("X1", (2, 2))
-    constraints = get_relation("shard").value_constraints(
-        _relation("shard", dim=1), single, (local_zero, local_one), 2, "test"
+    constraints = COMPOSITE_RELATION.value_constraints(
+        _relation("shard", dim=1),
+        single,
+        (local_zero, local_one),
+        DeviceMeshSpec((2,)),
+        "test",
     )
 
     _assert_implied(constraints, local_zero.at((0, 0)) == single.at((0, 0)))
@@ -128,8 +144,12 @@ def test_partial_sum_value_constraints() -> None:
     single = _tensor("X", (2,))
     local_zero = _tensor("X0", (2,))
     local_one = _tensor("X1", (2,))
-    constraints = get_relation("partial").value_constraints(
-        _relation("partial", reduce_op="sum"), single, (local_zero, local_one), 2, "test"
+    constraints = COMPOSITE_RELATION.value_constraints(
+        _relation("partial", reduce_op="sum"),
+        single,
+        (local_zero, local_one),
+        DeviceMeshSpec((2,)),
+        "test",
     )
 
     _assert_implied(constraints, single.at((0,)) == local_zero.at((0,)) + local_one.at((0,)))
@@ -151,11 +171,11 @@ def test_relation_value_shape_mismatches_are_rejected(
     local_shapes: tuple[tuple[int, ...], ...],
 ) -> None:
     with pytest.raises(RelationEncodingError):
-        get_relation(relation.type).value_constraints(
+        COMPOSITE_RELATION.value_constraints(
             relation,
             _tensor("X", single_shape),
             tuple(_tensor(f"X{rank}", shape) for rank, shape in enumerate(local_shapes)),
-            2,
+            DeviceMeshSpec((2,)),
             "test",
         )
 
@@ -170,18 +190,22 @@ def test_relation_value_shape_mismatches_are_rejected(
 )
 def test_relation_value_constraints_reject_wrong_rank_count(relation: RelationSpec) -> None:
     with pytest.raises(RelationEncodingError, match="expected 2 local tensors"):
-        get_relation(relation.type).value_constraints(
-            relation, _tensor("X", (2,)), (_tensor("X0", (2,)),), 2, "test"
+        COMPOSITE_RELATION.value_constraints(
+            relation,
+            _tensor("X", (2,)),
+            (_tensor("X0", (2,)),),
+            DeviceMeshSpec((2,)),
+            "test",
         )
 
 
 def test_partial_value_constraints_reject_non_sum_reduce_op() -> None:
     with pytest.raises(RelationEncodingError, match="reduce_op"):
-        get_relation("partial").value_constraints(
+        COMPOSITE_RELATION.value_constraints(
             _relation("partial", reduce_op="max"),
             _tensor("X", (1,)),
             (_tensor("X0", (1,)), _tensor("X1", (1,))),
-            2,
+            DeviceMeshSpec((2,)),
             "test",
         )
 
@@ -204,10 +228,13 @@ def _produced_relation_stage() -> tuple[StageSpec, ReducedShapeResult]:
         )
         for rank in range(2)
     }
-    produced = RelationSpec("C", ("C0", "C1"), "replicate")
+    produced = RelationSpec(
+        "C", ("C0", "C1"), (PlacementSpec("replicate"),)
+    )
     stage = StageSpec(
         name="produced_input_relation",
         world_size=2,
+        mesh=DeviceMeshSpec((2,)),
         single=single,
         distributed=distributed,
         input_relations=(produced,),
@@ -236,10 +263,13 @@ def test_output_relation_can_reference_an_input_tensor() -> None:
     stage = StageSpec(
         name="identity_output_relation",
         world_size=2,
+        mesh=DeviceMeshSpec((2,)),
         single=_program({"X": (1,)}),
         distributed={0: _program({"X0": (1,)}), 1: _program({"X1": (1,)})},
         input_relations=(),
-        output_relation=RelationSpec("X", ("X0", "X1"), "replicate"),
+        output_relation=RelationSpec(
+            "X", ("X0", "X1"), (PlacementSpec("replicate"),)
+        ),
     )
     reduced = ReducedShapeResult(
         stage_name=stage.name,
@@ -275,12 +305,14 @@ def test_standard_case_input_premises_imply_partial_output_candidate() -> None:
 
 def test_wrong_replicate_output_candidate_is_not_implied() -> None:
     stage, symbolic, encoded = _standard_encoded()
-    wrong_candidate = RelationSpec("C", ("C0", "C1"), "replicate")
-    wrong_constraints = get_relation("replicate").value_constraints(
+    wrong_candidate = RelationSpec(
+        "C", ("C0", "C1"), (PlacementSpec("replicate"),)
+    )
+    wrong_constraints = COMPOSITE_RELATION.value_constraints(
         wrong_candidate,
         symbolic.single.tensors["C"],
         (symbolic.distributed[0].tensors["C0"], symbolic.distributed[1].tensors["C1"]),
-        stage.world_size,
+        stage.mesh,
         "wrong_output_relation",
     )
     solver = z3.Solver()

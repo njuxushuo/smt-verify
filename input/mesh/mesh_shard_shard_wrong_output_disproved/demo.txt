@@ -1,0 +1,205 @@
+SMT-Verify Demo Report
+Each example follows:
+Input -> Shape Reduction -> Symbolic Execution
+-> Relation Encoding -> SMT Verification -> Certified Lemma
+
+============================================================
+Example 1: mesh_shard_shard_wrong_output_disproved
+============================================================
+
+[1] Input Stage Summary
+Input JSON: mesh_shard_shard_wrong_output_disproved.json
+Stage name: mesh_shard_shard_wrong_output_disproved
+World size: 4
+Mesh shape: [2, 2]
+Input relations:
+  X -> [Shard(dim=0), Shard(dim=1)]
+Single ops:
+  transpose(X) -> Y attrs={"dim0": 0, "dim1": 1}
+Distributed ops:
+  Rank 0:
+    transpose(X0) -> Y0 attrs={"dim0": 0, "dim1": 1}
+  Rank 1:
+    transpose(X1) -> Y1 attrs={"dim0": 0, "dim1": 1}
+  Rank 2:
+    transpose(X2) -> Y2 attrs={"dim0": 0, "dim1": 1}
+  Rank 3:
+    transpose(X3) -> Y3 attrs={"dim0": 0, "dim1": 1}
+Output relation: Y -> [Shard(dim=0), Shard(dim=1)]
+
+[2] Original Shapes
+Single:
+  X: [4, 6]
+  Y: [6, 4]
+
+Rank 0:
+  X0: [2, 3]
+  Y0: [3, 2]
+
+Rank 1:
+  X1: [2, 3]
+  Y1: [3, 2]
+
+Rank 2:
+  X2: [2, 3]
+  Y2: [3, 2]
+
+Rank 3:
+  X3: [2, 3]
+  Y3: [3, 2]
+
+[3] Reduced Shapes
+Single:
+  X: [2, 2]
+  Y: [2, 2]
+
+Rank 0:
+  X0: [1, 1]
+  Y0: [1, 1]
+
+Rank 1:
+  X1: [1, 1]
+  Y1: [1, 1]
+
+Rank 2:
+  X2: [1, 1]
+  Y2: [1, 1]
+
+Rank 3:
+  X3: [1, 1]
+  Y3: [1, 1]
+Reduced objective: 24
+Normalized shape constraints: 70
+  [0] single__X__d0 >= 1
+  [1] single__X__d0 <= 4
+  [2] single__X__d1 >= 1
+  [3] single__X__d1 <= 6
+  [4] single__Y__d0 >= 1
+  [5] single__Y__d0 <= 6
+  [6] single__Y__d1 >= 1
+  [7] single__Y__d1 <= 4
+  [8] rank0__X0__d0 >= 1
+  [9] rank0__X0__d0 <= 2
+  [10] rank0__X0__d1 >= 1
+  [11] rank0__X0__d1 <= 3
+  [12] rank0__Y0__d0 >= 1
+  [13] rank0__Y0__d0 <= 3
+  [14] rank0__Y0__d1 >= 1
+  [15] rank0__Y0__d1 <= 2
+  [16] rank1__X1__d0 >= 1
+  [17] rank1__X1__d0 <= 2
+  [18] rank1__X1__d1 >= 1
+  [19] rank1__X1__d1 <= 3
+  [20] rank1__Y1__d0 >= 1
+  [21] rank1__Y1__d0 <= 3
+  [22] rank1__Y1__d1 >= 1
+  [23] rank1__Y1__d1 <= 2
+  [24] rank2__X2__d0 >= 1
+  [25] rank2__X2__d0 <= 2
+  [26] rank2__X2__d1 >= 1
+  [27] rank2__X2__d1 <= 3
+  [28] rank2__Y2__d0 >= 1
+  [29] rank2__Y2__d0 <= 3
+  [30] rank2__Y2__d1 >= 1
+  [31] rank2__Y2__d1 <= 2
+  [32] rank3__X3__d0 >= 1
+  [33] rank3__X3__d0 <= 2
+  [34] rank3__X3__d1 >= 1
+  [35] rank3__X3__d1 <= 3
+  [36] rank3__Y3__d0 >= 1
+  [37] rank3__Y3__d0 <= 3
+  [38] rank3__Y3__d1 >= 1
+  [39] rank3__Y3__d1 <= 2
+  [40] single__X__d0%2 == 0
+  [41] single__X__d1%2 == 0
+  [42] 2*rank0__X0__d0 == single__X__d0
+  [43] 2*rank0__X0__d1 == single__X__d1
+  [44] 2*rank1__X1__d0 == single__X__d0
+  [45] 2*rank1__X1__d1 == single__X__d1
+  [46] 2*rank2__X2__d0 == single__X__d0
+  [47] 2*rank2__X2__d1 == single__X__d1
+  [48] 2*rank3__X3__d0 == single__X__d0
+  [49] 2*rank3__X3__d1 == single__X__d1
+  [50] single__Y__d0 == single__X__d1
+  [51] single__Y__d1 == single__X__d0
+  [52] rank0__Y0__d0 == rank0__X0__d1
+  [53] rank0__Y0__d1 == rank0__X0__d0
+  [54] rank1__Y1__d0 == rank1__X1__d1
+  [55] rank1__Y1__d1 == rank1__X1__d0
+  [56] rank2__Y2__d0 == rank2__X2__d1
+  [57] rank2__Y2__d1 == rank2__X2__d0
+  [58] rank3__Y3__d0 == rank3__X3__d1
+  [59] rank3__Y3__d1 == rank3__X3__d0
+  [60] single__Y__d0%2 == 0
+  [61] single__Y__d1%2 == 0
+  [62] 2*rank0__Y0__d0 == single__Y__d0
+  [63] 2*rank0__Y0__d1 == single__Y__d1
+  [64] 2*rank1__Y1__d0 == single__Y__d0
+  [65] 2*rank1__Y1__d1 == single__Y__d1
+  [66] 2*rank2__Y2__d0 == single__Y__d0
+  [67] 2*rank2__Y2__d1 == single__Y__d1
+  [68] 2*rank3__Y3__d0 == single__Y__d0
+  [69] 2*rank3__Y3__d1 == single__Y__d1
+
+[4] Symbolic Execution
+Single outputs:
+  Y[0] = single__X__v0
+  Y[1] = single__X__v2
+  Y[2] = single__X__v1
+  Y[3] = single__X__v3
+Rank 0 outputs:
+  Y0[0] = rank0__X0__v0
+Rank 1 outputs:
+  Y1[0] = rank1__X1__v0
+Rank 2 outputs:
+  Y2[0] = rank2__X2__v0
+Rank 3 outputs:
+  Y3[0] = rank3__X3__v0
+
+[5] Relation Encoding
+Input constraints: 4
+  [0] single__X__v0 == rank0__X0__v0
+  [1] single__X__v1 == rank1__X1__v0
+  [2] single__X__v2 == rank2__X2__v0
+  [3] single__X__v3 == rank3__X3__v0
+Output constraints: 4
+  [0] single__X__v0 == rank0__X0__v0
+  [1] single__X__v2 == rank1__X1__v0
+  [2] single__X__v1 == rank2__X2__v0
+  [3] single__X__v3 == rank3__X3__v0
+
+[6] SMT Verification
+SMT query:
+  Rin AND NOT(AND(Rout))
+SMT result: SAT
+Verification: DISPROVED
+Input constraint count: 4
+Output constraint count: 4
+Reduced objective: 24
+
+[7] Counterexample
+Single inputs:
+  X = ('2', '3', '4', '5')
+Distributed inputs:
+  Rank 0:
+    X0 = ('2',)
+  Rank 1:
+    X1 = ('3',)
+  Rank 2:
+    X2 = ('4',)
+  Rank 3:
+    X3 = ('5',)
+Failed output constraints:
+  (1, 2)
+
+[8] Certified Lemma
+Lemma: NOT GENERATED
+
+
+============================================================
+Summary
+============================================================
+
+mesh_shard_shard_wrong_output_disproved
+  Verification: DISPROVED
+  Lemma: NOT GENERATED

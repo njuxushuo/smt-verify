@@ -11,8 +11,9 @@ Example 1: unsqueeze_shard_dim_0_proved
 Input JSON: unsqueeze_shard_dim_0_proved.json
 Stage name: unsqueeze_shard_dim_0_proved
 World size: 2
+Mesh shape: [2]
 Input relations:
-  X -> Shard(dim=0)
+  X -> [Shard(dim=0)]
 Single ops:
   unsqueeze(X) -> Y attrs={"dim": 1}
 Distributed ops:
@@ -20,7 +21,7 @@ Distributed ops:
     unsqueeze(X0) -> Y0 attrs={"dim": 1}
   Rank 1:
     unsqueeze(X1) -> Y1 attrs={"dim": 1}
-Output relation: Y -> Shard(dim=0)
+Output relation: Y -> [Shard(dim=0)]
 
 [2] Original Shapes
 Single:
@@ -48,7 +49,7 @@ Rank 1:
   X1: [1, 1]
   Y1: [1, 1, 1]
 Reduced objective: 17
-Normalized shape constraints: 51
+Normalized shape constraints: 52
   [0] single__X__d0 >= 1
   [1] single__X__d0 <= 4
   [2] single__X__d1 >= 1
@@ -79,27 +80,28 @@ Normalized shape constraints: 51
   [27] rank1__Y1__d1 <= 1
   [28] rank1__Y1__d2 >= 1
   [29] rank1__Y1__d2 <= 6
-  [30] 4*rank0__X0__d0 == 2*single__X__d0
-  [31] 6*rank0__X0__d1 == 6*single__X__d1
-  [32] 4*rank1__X1__d0 == 2*single__X__d0
-  [33] 6*rank1__X1__d1 == 6*single__X__d1
-  [34] single__X__d0%2 == 0
-  [35] single__Y__d1 == 1
-  [36] single__Y__d0 == single__X__d0
-  [37] single__Y__d2 == single__X__d1
-  [38] rank0__Y0__d1 == 1
-  [39] rank0__Y0__d0 == rank0__X0__d0
-  [40] rank0__Y0__d2 == rank0__X0__d1
-  [41] rank1__Y1__d1 == 1
-  [42] rank1__Y1__d0 == rank1__X1__d0
-  [43] rank1__Y1__d2 == rank1__X1__d1
-  [44] 4*rank0__Y0__d0 == 2*single__Y__d0
-  [45] rank0__Y0__d1 == single__Y__d1
-  [46] 6*rank0__Y0__d2 == 6*single__Y__d2
-  [47] 4*rank1__Y1__d0 == 2*single__Y__d0
-  [48] rank1__Y1__d1 == single__Y__d1
-  [49] 6*rank1__Y1__d2 == 6*single__Y__d2
-  [50] single__Y__d0%2 == 0
+  [30] single__X__d0%2 == 0
+  [31] True
+  [32] 2*rank0__X0__d0 == single__X__d0
+  [33] rank0__X0__d1 == single__X__d1
+  [34] 2*rank1__X1__d0 == single__X__d0
+  [35] rank1__X1__d1 == single__X__d1
+  [36] single__Y__d1 == 1
+  [37] single__Y__d0 == single__X__d0
+  [38] single__Y__d2 == single__X__d1
+  [39] rank0__Y0__d1 == 1
+  [40] rank0__Y0__d0 == rank0__X0__d0
+  [41] rank0__Y0__d2 == rank0__X0__d1
+  [42] rank1__Y1__d1 == 1
+  [43] rank1__Y1__d0 == rank1__X1__d0
+  [44] rank1__Y1__d2 == rank1__X1__d1
+  [45] single__Y__d0%2 == 0
+  [46] 2*rank0__Y0__d0 == single__Y__d0
+  [47] rank0__Y0__d1 == single__Y__d1
+  [48] rank0__Y0__d2 == single__Y__d2
+  [49] 2*rank1__Y1__d0 == single__Y__d0
+  [50] rank1__Y1__d1 == single__Y__d1
+  [51] rank1__Y1__d2 == single__Y__d2
 
 [4] Symbolic Execution
 Single outputs:
@@ -112,11 +114,11 @@ Rank 1 outputs:
 
 [5] Relation Encoding
 Input constraints: 2
-  [0] rank0__X0__v0 == single__X__v0
-  [1] rank1__X1__v0 == single__X__v1
+  [0] single__X__v0 == rank0__X0__v0
+  [1] single__X__v1 == rank1__X1__v0
 Output constraints: 2
-  [0] rank0__X0__v0 == single__X__v0
-  [1] rank1__X1__v0 == single__X__v1
+  [0] single__X__v0 == rank0__X0__v0
+  [1] single__X__v1 == rank1__X1__v0
 
 [6] SMT Verification
 SMT query:
@@ -132,11 +134,14 @@ Counterexample: None
 
 [8] Certified Lemma
 Lemma: GENERATED
-Lemma ID: lemma_a07c909cf4c8ae28
+Lemma ID: lemma_10a95e0f21a22ad1
 {
   "distributed_ops": {
     "0": [
       {
+        "attrs": {
+          "dim": 1
+        },
         "inputs": [
           "X0"
         ],
@@ -148,6 +153,9 @@ Lemma ID: lemma_a07c909cf4c8ae28
     ],
     "1": [
       {
+        "attrs": {
+          "dim": 1
+        },
         "inputs": [
           "X1"
         ],
@@ -160,17 +168,25 @@ Lemma ID: lemma_a07c909cf4c8ae28
   },
   "input_relations": [
     {
-      "dim": 0,
       "distributed_tensors": [
         "X0",
         "X1"
       ],
-      "reduce_op": null,
-      "single_tensor": "X",
-      "type": "shard"
+      "placements": [
+        {
+          "dim": 0,
+          "type": "shard"
+        }
+      ],
+      "single_tensor": "X"
     }
   ],
-  "lemma_id": "lemma_a07c909cf4c8ae28",
+  "lemma_id": "lemma_10a95e0f21a22ad1",
+  "mesh": {
+    "shape": [
+      2
+    ]
+  },
   "original_distributed_shapes": {
     "0": {
       "X0": [
@@ -207,14 +223,17 @@ Lemma ID: lemma_a07c909cf4c8ae28
     ]
   },
   "output_relation": {
-    "dim": 0,
     "distributed_tensors": [
       "Y0",
       "Y1"
     ],
-    "reduce_op": null,
-    "single_tensor": "Y",
-    "type": "shard"
+    "placements": [
+      {
+        "dim": 0,
+        "type": "shard"
+      }
+    ],
+    "single_tensor": "Y"
   },
   "reduced_shapes": {
     "distributed": {
@@ -257,6 +276,9 @@ Lemma ID: lemma_a07c909cf4c8ae28
   },
   "single_ops": [
     {
+      "attrs": {
+        "dim": 1
+      },
       "inputs": [
         "X"
       ],
@@ -278,4 +300,4 @@ Summary
 unsqueeze_shard_dim_0_proved
   Verification: PROVED
   Lemma: GENERATED
-  Lemma ID: lemma_a07c909cf4c8ae28
+  Lemma ID: lemma_10a95e0f21a22ad1

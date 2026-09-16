@@ -2,19 +2,21 @@
 
 Stage 4 encodes the value relationship between a single symbolic tensor and its distributed rank-local tensors. It consumes `StageSpec` and the Stage 3 `SymbolicStageResult`, then returns separate input-premise and output-candidate Z3 constraints. It does not perform a proof or expose a verifier status API.
 
-## RelationSemantics
+## Composite relation semantics
 
-[`src/semantics/relations.py`](../src/semantics/relations.py) is the single source of relation-specific symbolic semantics. `RelationSemantics` supplies both `shape_constraints(...)` and `value_constraints(...)`, with the registry providing `replicate`, `shard`, and `partial` implementations.
+[`src/semantics/relations.py`](../src/semantics/relations.py) is the single source of relation semantics. `CompositeRelationSemantics` composes exactly one placement per mesh axis; Replicate, Shard, and Partial are not independently encoded whole-tensor relations.
 
-- **Replicate** requires equal shapes and encodes every `local[r][i] == single[i]`.
-- **Shard(dim)** requires regular contiguous equal-size one-axis shards. It constrains non-shard dimensions to match, requires `world_size * local_dim == single_dim` and divisibility, then maps local index `i` to global index `rank * local_dim + i` on the shard axis.
-- **Partial(sum)** requires equal shapes and encodes `single[i] == Sum(local[0][i], ..., local[P-1][i])`.
+- **Shard(dim)** maps a local index to `mesh_coordinate[axis] * local_extent[dim] + local_index[dim]` on its tensor dimension.
+- **Replicate** preserves the shard mapping established by other axes. Ranks that differ only on a Replicate axis encode equal replicas of the same global shard.
+- **Partial(sum)** sums only ranks whose coordinates differ on Partial axes while all non-Partial coordinates remain fixed. Multiple Partial axes use their Cartesian product.
+
+Flat ranks remain the storage/API representation. [`src/stage/mesh.py`](../src/stage/mesh.py) provides the row-major flat-rank/coordinate conversion and coordinate-group enumeration.
 
 ## Shape and value orchestration
 
-`shape_constraints.py` resolves symbolic dimension tuples and delegates relation shape semantics through `get_relation()`. It no longer contains concrete Replicate/Shard/Partial formulas or a separate shard divisibility pass.
+`shape_constraints.py` resolves symbolic dimension tuples and delegates to the composite semantics. For tensor dimension `d`, shard factor `F_d` is the product of mesh extents whose placement is `Shard(d)`. Reduction requires `single'[d] % F_d == 0` and `local'[rank,d] * F_d == single'[d]`.
 
-`relation_encoder.py` resolves Stage 3 tensors, delegates value constraints through the same registry, and returns:
+`relation_encoder.py` resolves Stage 3 tensors by flat rank, passes `stage.mesh` to the composite value semantics, and returns:
 
 ```python
 EncodedRelations(

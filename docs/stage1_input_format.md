@@ -4,12 +4,13 @@
 
 ## 顶层结构
 
-每个文件是 UTF-8 JSON，必须包含 `name`、`world_size`、`single`、`distributed`、`input_relations` 和 `output_relation`：
+每个文件是 UTF-8 JSON，必须包含 `name`、`world_size`、`single`、`distributed`、`input_relations` 和 `output_relation`。`mesh` 可省略以兼容旧的 1-D 输入：
 
 ```json
 {
   "name": "case_name",
   "world_size": 2,
+  "mesh": {"shape": [2]},
   "single": {"tensors": {}, "ops": []},
   "distributed": {"ranks": {}},
   "input_relations": [],
@@ -17,7 +18,7 @@
 }
 ```
 
-`world_size` 至少为 1，且 `distributed.ranks` 必须恰好列出从 `"0"` 到 `"world_size - 1"` 的所有 rank。
+`mesh.shape` 必须是非空正整数列表，且其乘积必须等于 `world_size`。省略 `mesh` 时 loader 将其规范化为 `[world_size]`。`distributed.ranks` 必须恰好列出从 `"0"` 到 `"world_size - 1"` 的所有 flat rank；flat rank 与 mesh coordinate 使用 row-major 映射。
 
 ## Tensor 与 operator
 
@@ -33,22 +34,28 @@ Tensor 由当前 scope 的名字和正整数 shape 描述，例如 `"A": {"shape
 
 ## Relation
 
-Relation 关联一个单机 tensor 与按 rank 顺序排列的 local tensor：
+Relation 关联一个单机 tensor 与按 flat rank 顺序排列的 local tensor，并为每个 mesh axis 声明一个 placement：
 
 ```json
 {
   "single_tensor": "A",
   "distributed_tensors": ["A0", "A1"],
-  "type": "shard",
-  "dim": 1
+  "placements": [
+    {"type": "replicate"},
+    {"type": "shard", "dim": 1}
+  ]
 }
 ```
 
-支持三类 relation：
+每个 placement 支持三种类型：
 
-- `replicate`：不含 `dim` 或 `reduce_op`，每个 local shape 与单机 shape 完全相同。
-- `shard`：必须有合法的 `dim`，使用规则连续等大小切分；全局该维可被 world size 整除，且每个 local shape 与切分结果一致。
-- `partial`：不含 `dim`，必须是 `"reduce_op": "sum"`，每个 local shape 与单机 shape 完全相同。其后续语义为单机 tensor 等于各 rank local tensor 之和。
+- `replicate`：不含 `dim` 或 `reduce_op`；它复制由其他 mesh axis 的 Shard 确定的 global shard，并不一定表示完整 tensor。
+- `shard`：必须有合法的 `dim`，该 tensor 维按对应 mesh axis extent 做规则连续等分。
+- `partial`：不含 `dim`，必须是 `"reduce_op": "sum"`；只沿该 Partial mesh axis（或多个 Partial axes 的笛卡尔积）分组求和。
+
+`placements` 长度必须等于 mesh rank。同一 tensor dimension 当前最多由一个 mesh axis Shard。Replicate 与 Partial 不改变 local shape；每个 tensor dimension 的 local extent 等于 single extent 除以该维的 composite shard factor。
+
+旧 JSON 没有 `mesh` 时仍可使用顶层 `type`、`dim`、`reduce_op` relation shorthand，loader 会将其转换为单 placement。显式多维 mesh 必须使用 `placements`，且新旧 relation 字段不能混用。
 
 `input_relations` 是可为空的 relation 列表，同一个单机 tensor 最多出现一次。`output_relation` 是一个单独的候选 relation。
 
@@ -76,7 +83,7 @@ Relation 关联一个单机 tensor 与按 rank 顺序排列的 local tensor：
 }
 ```
 
-完整的可运行样例见 [`../input/matmul_shard_to_partial/matmul_shard_to_partial.json`](../input/matmul_shard_to_partial/matmul_shard_to_partial.json)。
+上面的完整示例刻意保留 legacy 1-D relation 写法，用于验证 backward compatibility。多维格式的可运行样例见 [`../input/mesh/mesh_shard_shard_transpose_proved/mesh_shard_shard_transpose_proved.json`](../input/mesh/mesh_shard_shard_transpose_proved/mesh_shard_shard_transpose_proved.json)。
 每个输入 case 位于以 JSON stem 命名的独立目录中；同目录 `demo.txt` 记录其真实 shape reduction、symbolic execution、relation encoding 和验证结果。运行 `conda run -n smt python scripts/export_input_demos.py` 可批量重建全部报告。静态非法 case 的报告会记录 `REJECTED` 和具体 validation error，不会伪造未执行的后续阶段。
 
 ## 当前限制

@@ -25,19 +25,30 @@ class ProgramSpec:
     ops: tuple[OpSpec, ...]
 
 
-@dataclass
-class RelationSpec:
-    single_tensor: str
-    distributed_tensors: tuple[str, ...]
+@dataclass(frozen=True)
+class DeviceMeshSpec:
+    shape: tuple[int, ...]
+
+
+@dataclass(frozen=True)
+class PlacementSpec:
     type: str
     dim: int | None = None
     reduce_op: str | None = None
 
 
 @dataclass
+class RelationSpec:
+    single_tensor: str
+    distributed_tensors: tuple[str, ...]
+    placements: tuple[PlacementSpec, ...]
+
+
+@dataclass
 class StageSpec:
     name: str
     world_size: int
+    mesh: DeviceMeshSpec
     single: ProgramSpec
     distributed: dict[int, ProgramSpec]
     input_relations: tuple[RelationSpec, ...]

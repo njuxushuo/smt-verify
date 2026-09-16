@@ -6,7 +6,15 @@ import json
 from pathlib import Path
 from typing import Any
 
-from .model import OpSpec, ProgramSpec, RelationSpec, StageSpec, TensorSpec
+from .model import (
+    DeviceMeshSpec,
+    OpSpec,
+    PlacementSpec,
+    ProgramSpec,
+    RelationSpec,
+    StageSpec,
+    TensorSpec,
+)
 
 
 class StageInputError(ValueError):
@@ -72,17 +80,64 @@ def _parse_program(value: Any, context: str) -> ProgramSpec:
     return ProgramSpec(tensors=tensors, ops=tuple(ops))
 
 
-def _parse_relation(value: Any, context: str) -> RelationSpec:
+def _parse_mesh(value: Any, context: str) -> DeviceMeshSpec:
+    raw_mesh = _mapping(value, context)
+    shape = _list(_required(raw_mesh, "shape", context), f"{context}.shape")
+    return DeviceMeshSpec(shape=tuple(shape))
+
+
+def _parse_placement(value: Any, context: str) -> PlacementSpec:
+    raw_placement = _mapping(value, context)
+    unexpected = set(raw_placement) - {"type", "dim", "reduce_op"}
+    if unexpected:
+        raise StageInputError(
+            f"{context}: unknown placement fields {sorted(unexpected)}"
+        )
+    return PlacementSpec(
+        type=_required(raw_placement, "type", context),
+        dim=raw_placement.get("dim"),
+        reduce_op=raw_placement.get("reduce_op"),
+    )
+
+
+def _parse_relation(
+    value: Any,
+    context: str,
+    mesh: DeviceMeshSpec,
+    *,
+    mesh_was_explicit: bool,
+) -> RelationSpec:
     raw_relation = _mapping(value, context)
+    legacy_fields = {"type", "dim", "reduce_op"}.intersection(raw_relation)
+    if "placements" in raw_relation and legacy_fields:
+        raise StageInputError(
+            f"{context}: placements cannot be combined with legacy relation fields"
+        )
+    if "placements" in raw_relation:
+        raw_placements = _list(raw_relation["placements"], f"{context}.placements")
+        placements = tuple(
+            _parse_placement(placement, f"{context}.placements[{index}]")
+            for index, placement in enumerate(raw_placements)
+        )
+    else:
+        if mesh_was_explicit and len(mesh.shape) > 1:
+            raise StageInputError(
+                f"{context}: explicit multi-dimensional mesh relations must define placements"
+            )
+        placements = (
+            PlacementSpec(
+                type=_required(raw_relation, "type", context),
+                dim=raw_relation.get("dim"),
+                reduce_op=raw_relation.get("reduce_op"),
+            ),
+        )
     return RelationSpec(
         single_tensor=_required(raw_relation, "single_tensor", context),
         distributed_tensors=_string_list(
             _required(raw_relation, "distributed_tensors", context),
             f"{context}.distributed_tensors",
         ),
-        type=_required(raw_relation, "type", context),
-        dim=raw_relation.get("dim"),
-        reduce_op=raw_relation.get("reduce_op"),
+        placements=placements,
     )
 
 
@@ -113,18 +168,34 @@ def _parse_distributed(value: Any) -> dict[int, ProgramSpec]:
 
 def _parse_stage(raw_stage: Any) -> StageSpec:
     raw = _mapping(raw_stage, "stage")
+    world_size = _required(raw, "world_size", "stage")
+    mesh_was_explicit = "mesh" in raw
+    mesh = (
+        _parse_mesh(raw["mesh"], "mesh")
+        if mesh_was_explicit
+        else DeviceMeshSpec(shape=(world_size,))
+    )
     input_relations = _list(_required(raw, "input_relations", "stage"), "input_relations")
     return StageSpec(
         name=_required(raw, "name", "stage"),
-        world_size=_required(raw, "world_size", "stage"),
+        world_size=world_size,
+        mesh=mesh,
         single=_parse_program(_required(raw, "single", "stage"), "single"),
         distributed=_parse_distributed(_required(raw, "distributed", "stage")),
         input_relations=tuple(
-            _parse_relation(relation, f"input_relations[{index}]")
+            _parse_relation(
+                relation,
+                f"input_relations[{index}]",
+                mesh,
+                mesh_was_explicit=mesh_was_explicit,
+            )
             for index, relation in enumerate(input_relations)
         ),
         output_relation=_parse_relation(
-            _required(raw, "output_relation", "stage"), "output_relation"
+            _required(raw, "output_relation", "stage"),
+            "output_relation",
+            mesh,
+            mesh_was_explicit=mesh_was_explicit,
         ),
     )
 

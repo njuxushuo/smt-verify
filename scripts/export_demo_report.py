@@ -38,11 +38,15 @@ DIVIDER = "=" * 60
 
 
 def _relation_label(relation) -> str:
-    if relation.type == "shard":
-        return f"Shard(dim={relation.dim})"
-    if relation.type == "partial":
-        return f"Partial({relation.reduce_op})"
-    return relation.type.capitalize()
+    labels = []
+    for placement in relation.placements:
+        if placement.type == "shard":
+            labels.append(f"Shard(dim={placement.dim})")
+        elif placement.type == "partial":
+            labels.append(f"Partial({placement.reduce_op})")
+        else:
+            labels.append("Replicate")
+    return f"[{', '.join(labels)}]"
 
 
 def _operation_label(op) -> str:
@@ -120,6 +124,7 @@ def _append_example(
     lines.append(f"Input JSON: {input_path.name}")
     lines.append(f"Stage name: {stage.name}")
     lines.append(f"World size: {stage.world_size}")
+    lines.append(f"Mesh shape: {list(stage.mesh.shape)}")
     lines.append("Input relations:")
     for relation in stage.input_relations:
         lines.append(f"  {relation.single_tensor} -> {_relation_label(relation)}")

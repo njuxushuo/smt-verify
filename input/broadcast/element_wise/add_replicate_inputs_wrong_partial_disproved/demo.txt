@@ -11,9 +11,10 @@ Example 1: add_replicate_inputs_wrong_partial_disproved
 Input JSON: add_replicate_inputs_wrong_partial_disproved.json
 Stage name: add_replicate_inputs_wrong_partial_disproved
 World size: 2
+Mesh shape: [2]
 Input relations:
-  A -> Replicate
-  B -> Replicate
+  A -> [Replicate]
+  B -> [Replicate]
 Single ops:
   add(A, B) -> C
 Distributed ops:
@@ -21,7 +22,7 @@ Distributed ops:
     add(A0, B0) -> C0
   Rank 1:
     add(A1, B1) -> C1
-Output relation: C -> Partial(sum)
+Output relation: C -> [Partial(sum)]
 
 [2] Original Shapes
 Single:
@@ -55,7 +56,7 @@ Rank 1:
   B1: [1, 1, 1]
   C1: [1, 1, 1]
 Reduced objective: 27
-Normalized shape constraints: 90
+Normalized shape constraints: 91
   [0] single__A__d0 >= 1
   [1] single__A__d0 <= 2
   [2] single__A__d1 >= 1
@@ -110,42 +111,43 @@ Normalized shape constraints: 90
   [51] rank1__C1__d1 <= 3
   [52] rank1__C1__d2 >= 1
   [53] rank1__C1__d2 <= 4
-  [54] 2*rank0__A0__d0 == 2*single__A__d0
-  [55] rank0__A0__d1 == single__A__d1
-  [56] 4*rank0__A0__d2 == 4*single__A__d2
-  [57] 2*rank1__A1__d0 == 2*single__A__d0
-  [58] rank1__A1__d1 == single__A__d1
-  [59] 4*rank1__A1__d2 == 4*single__A__d2
-  [60] rank0__B0__d0 == single__B__d0
-  [61] 3*rank0__B0__d1 == 3*single__B__d1
-  [62] 4*rank0__B0__d2 == 4*single__B__d2
-  [63] rank1__B1__d0 == single__B__d0
-  [64] 3*rank1__B1__d1 == 3*single__B__d1
-  [65] 4*rank1__B1__d2 == 4*single__B__d2
-  [66] single__B__d0 == 1
-  [67] single__C__d0 == single__A__d0
-  [68] single__A__d1 == 1
-  [69] single__C__d1 == single__B__d1
-  [70] single__A__d2 == single__B__d2
-  [71] single__C__d2 == single__A__d2
-  [72] rank0__B0__d0 == 1
-  [73] rank0__C0__d0 == rank0__A0__d0
-  [74] rank0__A0__d1 == 1
-  [75] rank0__C0__d1 == rank0__B0__d1
-  [76] rank0__A0__d2 == rank0__B0__d2
-  [77] rank0__C0__d2 == rank0__A0__d2
-  [78] rank1__B1__d0 == 1
-  [79] rank1__C1__d0 == rank1__A1__d0
-  [80] rank1__A1__d1 == 1
-  [81] rank1__C1__d1 == rank1__B1__d1
-  [82] rank1__A1__d2 == rank1__B1__d2
-  [83] rank1__C1__d2 == rank1__A1__d2
-  [84] 2*rank0__C0__d0 == 2*single__C__d0
-  [85] 3*rank0__C0__d1 == 3*single__C__d1
-  [86] 4*rank0__C0__d2 == 4*single__C__d2
-  [87] 2*rank1__C1__d0 == 2*single__C__d0
-  [88] 3*rank1__C1__d1 == 3*single__C__d1
-  [89] 4*rank1__C1__d2 == 4*single__C__d2
+  [54] True
+  [55] rank0__A0__d0 == single__A__d0
+  [56] rank0__A0__d1 == single__A__d1
+  [57] rank0__A0__d2 == single__A__d2
+  [58] rank1__A1__d0 == single__A__d0
+  [59] rank1__A1__d1 == single__A__d1
+  [60] rank1__A1__d2 == single__A__d2
+  [61] rank0__B0__d0 == single__B__d0
+  [62] rank0__B0__d1 == single__B__d1
+  [63] rank0__B0__d2 == single__B__d2
+  [64] rank1__B1__d0 == single__B__d0
+  [65] rank1__B1__d1 == single__B__d1
+  [66] rank1__B1__d2 == single__B__d2
+  [67] single__B__d0 == 1
+  [68] single__C__d0 == single__A__d0
+  [69] single__A__d1 == 1
+  [70] single__C__d1 == single__B__d1
+  [71] single__A__d2 == single__B__d2
+  [72] single__C__d2 == single__A__d2
+  [73] rank0__B0__d0 == 1
+  [74] rank0__C0__d0 == rank0__A0__d0
+  [75] rank0__A0__d1 == 1
+  [76] rank0__C0__d1 == rank0__B0__d1
+  [77] rank0__A0__d2 == rank0__B0__d2
+  [78] rank0__C0__d2 == rank0__A0__d2
+  [79] rank1__B1__d0 == 1
+  [80] rank1__C1__d0 == rank1__A1__d0
+  [81] rank1__A1__d1 == 1
+  [82] rank1__C1__d1 == rank1__B1__d1
+  [83] rank1__A1__d2 == rank1__B1__d2
+  [84] rank1__C1__d2 == rank1__A1__d2
+  [85] rank0__C0__d0 == single__C__d0
+  [86] rank0__C0__d1 == single__C__d1
+  [87] rank0__C0__d2 == single__C__d2
+  [88] rank1__C1__d0 == single__C__d0
+  [89] rank1__C1__d1 == single__C__d1
+  [90] rank1__C1__d2 == single__C__d2
 
 [4] Symbolic Execution
 Single outputs:
@@ -157,10 +159,10 @@ Rank 1 outputs:
 
 [5] Relation Encoding
 Input constraints: 4
-  [0] rank0__A0__v0 == single__A__v0
-  [1] rank1__A1__v0 == single__A__v0
-  [2] rank0__B0__v0 == single__B__v0
-  [3] rank1__B1__v0 == single__B__v0
+  [0] single__A__v0 == rank0__A0__v0
+  [1] single__A__v0 == rank1__A1__v0
+  [2] single__B__v0 == rank0__B0__v0
+  [3] single__B__v0 == rank1__B1__v0
 Output constraints: 1
   [0] single__A__v0 + single__B__v0 ==
 rank0__A0__v0 +

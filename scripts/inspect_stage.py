@@ -14,11 +14,15 @@ from src.stage.model import RelationSpec
 
 
 def _format_relation(relation: RelationSpec) -> str:
-    if relation.type == "replicate":
-        return "Replicate"
-    if relation.type == "shard":
-        return f"Shard(dim={relation.dim})"
-    return f"Partial({relation.reduce_op})"
+    labels = []
+    for placement in relation.placements:
+        if placement.type == "replicate":
+            labels.append("Replicate")
+        elif placement.type == "shard":
+            labels.append(f"Shard(dim={placement.dim})")
+        else:
+            labels.append(f"Partial({placement.reduce_op})")
+    return f"[{', '.join(labels)}]"
 
 
 def _print_summary(stage_path: str) -> None:
@@ -27,6 +31,7 @@ def _print_summary(stage_path: str) -> None:
     distributed_ops = sum(len(program.ops) for program in stage.distributed.values())
     print(f"Stage: {stage.name}")
     print(f"World size: {stage.world_size}")
+    print(f"Mesh shape: {list(stage.mesh.shape)}")
     print(f"Single tensors: {len(stage.single.tensors)}")
     print(f"Single ops: {len(stage.single.ops)}")
     print(f"Distributed ranks: {len(stage.distributed)}")

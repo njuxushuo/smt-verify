@@ -20,9 +20,9 @@ No second reduction, symbolic execution, relation encoding, or SMT query is impl
 
 ## Concrete artifact and identity
 
-The persisted lemma includes input relations, single and rank-local operator sequences, output relation, original single/rank shapes, reduced proof shapes, world size, and source Stage name. It is concrete: tensor names, shape values, rank-specific operators, and world size are retained.
+The persisted lemma includes mesh shape, canonical placement tuples, input relations, single and rank-local operator sequences (including non-empty attrs), output relation, original single/rank shapes, reduced proof shapes, world size, and source Stage name. It is concrete: tensor names, shape values, rank-specific operators, mesh, placements, and world size are retained.
 
-The deterministic ID is `lemma_<first 16 hex chars of sha256>`. The SHA-256 payload is canonical JSON with sorted keys and compact separators `(',', ':')`; it contains world size, input/output relations, single/distributed operator sequences, and original shapes. It intentionally excludes `source_stage_name` and `reduced_shapes`, so a renamed but semantically identical Stage has the same ID.
+The deterministic ID is `lemma_<first 16 hex chars of sha256>`. The SHA-256 payload is canonical JSON with sorted keys and compact separators `(',', ':')`; it contains world size, mesh shape, canonical input/output placements, single/distributed operator sequences with attrs, and original shapes. It intentionally excludes `source_stage_name` and `reduced_shapes`, so a renamed but semantically identical Stage has the same ID. Different meshes, placements, or non-empty operator attrs produce different identities.
 
 ## Persistence
 

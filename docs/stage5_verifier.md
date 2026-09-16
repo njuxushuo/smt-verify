@@ -30,10 +30,10 @@ $$
 K' \ge \min(2, K).
 $$
 
-Relations preserve each original single/local ratio with integer cross multiplication:
+Relations preserve each composite regular-shard factor `F_d`:
 
 $$
-local' \cdot original\_single = single' \cdot original\_local.
+single'[d] \bmod F_d = 0, \qquad local'[rank,d] \cdot F_d = single'[d].
 $$
 
 Under the documented assumptions, this supports the TrainVerify-style lifting argument:
@@ -42,4 +42,4 @@ $$
 Valid(S_{reduced}) \Rightarrow Valid(S_{original}).
 $$
 
-This is a scoped design argument, not a mechanically checked theorem. The supported fragment includes rank >= 2 batched MatMul, arbitrary-rank Add/Mul broadcasting, logical Transpose/Reshape/Squeeze/Unsqueeze/Expand index remapping, and Replicate, regular contiguous equal-size Shard(dim), and Partial(sum). It excludes physical storage/stride semantics, aliasing, rank-1 MatMul, uneven or interleaved shards, unsupported operators, communication value semantics, and whole-graph reasoning.
+This is a scoped design argument, not a mechanically checked theorem. The supported fragment includes rank >= 2 batched MatMul, arbitrary-rank Add/Mul broadcasting, logical Transpose/Reshape/Squeeze/Unsqueeze/Expand index remapping, and arbitrary-rank device meshes composed from Replicate, regular contiguous equal-size Shard(dim), and Partial(sum). It excludes repeated same-dimension sharding, physical storage/stride semantics, aliasing, rank-1 MatMul, uneven or interleaved shards, unsupported operators, communication value semantics, and whole-graph reasoning.

@@ -5,7 +5,7 @@ from __future__ import annotations
 import z3
 
 from ..semantics.operators import get_operator
-from ..semantics.relations import get_relation
+from ..semantics.relations import COMPOSITE_RELATION
 from ..stage.model import ProgramSpec, RelationSpec, StageSpec
 from .model import SymbolicShapeBook, TensorRef
 
@@ -52,14 +52,13 @@ def _relation_constraints(
         stage.distributed[rank].tensors[local_name].shape
         for rank, local_name in enumerate(relation.distributed_tensors)
     )
-    semantics = get_relation(relation.type, context)
-    return semantics.shape_constraints(
+    return COMPOSITE_RELATION.shape_constraints(
         relation,
         single_shape,
         local_shapes,
         original_single_shape,
         original_local_shapes,
-        stage.world_size,
+        stage.mesh,
         context,
     )
 

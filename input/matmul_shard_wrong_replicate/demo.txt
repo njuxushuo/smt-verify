@@ -11,9 +11,10 @@ Example 1: matmul_shard_wrong_replicate
 Input JSON: matmul_shard_wrong_replicate.json
 Stage name: matmul_shard_wrong_replicate
 World size: 2
+Mesh shape: [2]
 Input relations:
-  A -> Shard(dim=1)
-  B -> Shard(dim=0)
+  A -> [Shard(dim=1)]
+  B -> [Shard(dim=0)]
 Single ops:
   matmul(A, B) -> C
 Distributed ops:
@@ -21,7 +22,7 @@ Distributed ops:
     matmul(A0, B0) -> C0
   Rank 1:
     matmul(A1, B1) -> C1
-Output relation: C -> Replicate
+Output relation: C -> [Replicate]
 
 [2] Original Shapes
 Single:
@@ -55,7 +56,7 @@ Rank 1:
   B1: [2, 1]
   C1: [1, 1]
 Reduced objective: 28
-Normalized shape constraints: 62
+Normalized shape constraints: 63
   [0] single__A__d0 >= 1
   [1] single__A__d0 <= 4
   [2] single__A__d1 >= 1
@@ -92,32 +93,33 @@ Normalized shape constraints: 62
   [33] rank1__C1__d0 <= 4
   [34] rank1__C1__d1 >= 1
   [35] rank1__C1__d1 <= 4
-  [36] 4*rank0__A0__d0 == 4*single__A__d0
-  [37] 8*rank0__A0__d1 == 4*single__A__d1
-  [38] 4*rank1__A1__d0 == 4*single__A__d0
-  [39] 8*rank1__A1__d1 == 4*single__A__d1
-  [40] single__A__d1%2 == 0
-  [41] 8*rank0__B0__d0 == 4*single__B__d0
-  [42] 4*rank0__B0__d1 == 4*single__B__d1
-  [43] 8*rank1__B1__d0 == 4*single__B__d0
-  [44] 4*rank1__B1__d1 == 4*single__B__d1
-  [45] single__B__d0%2 == 0
-  [46] single__A__d1 == single__B__d0
-  [47] single__C__d0 == single__A__d0
-  [48] single__C__d1 == single__B__d1
-  [49] single__A__d1 >= 2
-  [50] rank0__A0__d1 == rank0__B0__d0
-  [51] rank0__C0__d0 == rank0__A0__d0
-  [52] rank0__C0__d1 == rank0__B0__d1
-  [53] rank0__A0__d1 >= 2
-  [54] rank1__A1__d1 == rank1__B1__d0
-  [55] rank1__C1__d0 == rank1__A1__d0
-  [56] rank1__C1__d1 == rank1__B1__d1
-  [57] rank1__A1__d1 >= 2
-  [58] 4*rank0__C0__d0 == 4*single__C__d0
-  [59] 4*rank0__C0__d1 == 4*single__C__d1
-  [60] 4*rank1__C1__d0 == 4*single__C__d0
-  [61] 4*rank1__C1__d1 == 4*single__C__d1
+  [36] True
+  [37] single__A__d1%2 == 0
+  [38] rank0__A0__d0 == single__A__d0
+  [39] 2*rank0__A0__d1 == single__A__d1
+  [40] rank1__A1__d0 == single__A__d0
+  [41] 2*rank1__A1__d1 == single__A__d1
+  [42] single__B__d0%2 == 0
+  [43] 2*rank0__B0__d0 == single__B__d0
+  [44] rank0__B0__d1 == single__B__d1
+  [45] 2*rank1__B1__d0 == single__B__d0
+  [46] rank1__B1__d1 == single__B__d1
+  [47] single__A__d1 == single__B__d0
+  [48] single__C__d0 == single__A__d0
+  [49] single__C__d1 == single__B__d1
+  [50] single__A__d1 >= 2
+  [51] rank0__A0__d1 == rank0__B0__d0
+  [52] rank0__C0__d0 == rank0__A0__d0
+  [53] rank0__C0__d1 == rank0__B0__d1
+  [54] rank0__A0__d1 >= 2
+  [55] rank1__A1__d1 == rank1__B1__d0
+  [56] rank1__C1__d0 == rank1__A1__d0
+  [57] rank1__C1__d1 == rank1__B1__d1
+  [58] rank1__A1__d1 >= 2
+  [59] rank0__C0__d0 == single__C__d0
+  [60] rank0__C0__d1 == single__C__d1
+  [61] rank1__C1__d0 == single__C__d0
+  [62] rank1__C1__d1 == single__C__d1
 
 [4] Symbolic Execution
 Single outputs:
@@ -132,25 +134,25 @@ Rank 1 outputs:
 
 [5] Relation Encoding
 Input constraints: 8
-  [0] rank0__A0__v0 == single__A__v0
-  [1] rank0__A0__v1 == single__A__v1
-  [2] rank1__A1__v0 == single__A__v2
-  [3] rank1__A1__v1 == single__A__v3
-  [4] rank0__B0__v0 == single__B__v0
-  [5] rank0__B0__v1 == single__B__v1
-  [6] rank1__B1__v0 == single__B__v2
-  [7] rank1__B1__v1 == single__B__v3
+  [0] single__A__v0 == rank0__A0__v0
+  [1] single__A__v1 == rank0__A0__v1
+  [2] single__A__v2 == rank1__A1__v0
+  [3] single__A__v3 == rank1__A1__v1
+  [4] single__B__v0 == rank0__B0__v0
+  [5] single__B__v1 == rank0__B0__v1
+  [6] single__B__v2 == rank1__B1__v0
+  [7] single__B__v3 == rank1__B1__v1
 Output constraints: 2
-  [0] rank0__A0__v0*rank0__B0__v0 + rank0__A0__v1*rank0__B0__v1 ==
-single__A__v0*single__B__v0 +
+  [0] single__A__v0*single__B__v0 +
 single__A__v1*single__B__v1 +
 single__A__v2*single__B__v2 +
-single__A__v3*single__B__v3
-  [1] rank1__A1__v0*rank1__B1__v0 + rank1__A1__v1*rank1__B1__v1 ==
-single__A__v0*single__B__v0 +
+single__A__v3*single__B__v3 ==
+rank0__A0__v0*rank0__B0__v0 + rank0__A0__v1*rank0__B0__v1
+  [1] single__A__v0*single__B__v0 +
 single__A__v1*single__B__v1 +
 single__A__v2*single__B__v2 +
-single__A__v3*single__B__v3
+single__A__v3*single__B__v3 ==
+rank1__A1__v0*rank1__B1__v0 + rank1__A1__v1*rank1__B1__v1
 
 [6] SMT Verification
 SMT query:

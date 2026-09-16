@@ -66,9 +66,9 @@ def test_expand_on_shard_axis_reaches_smt_and_disproves_replicate() -> None:
 
     assert stage.single.tensors["X"].shape == (4, 2, 6)
     assert stage.single.tensors["Y"].shape == (4, 2, 6)
-    assert stage.input_relations[0].type == "shard"
-    assert stage.input_relations[0].dim == 1
-    assert stage.output_relation.type == "replicate"
+    assert stage.input_relations[0].placements[0].type == "shard"
+    assert stage.input_relations[0].placements[0].dim == 1
+    assert stage.output_relation.placements[0].type == "replicate"
     for rank in range(stage.world_size):
         assert stage.distributed[rank].tensors[f"X{rank}"].shape == (4, 1, 6)
         assert stage.distributed[rank].tensors[f"Y{rank}"].shape == (4, 2, 6)

@@ -14,7 +14,15 @@ from src.shape.constraints import build_shape_constraints, create_symbolic_shape
 from src.shape.model import TensorRef
 from src.shape.reducer import reduce_shapes
 from src.stage.loader import load_stage
-from src.stage.model import OpSpec, ProgramSpec, RelationSpec, StageSpec, TensorSpec
+from src.stage.model import (
+    DeviceMeshSpec,
+    OpSpec,
+    PlacementSpec,
+    ProgramSpec,
+    RelationSpec,
+    StageSpec,
+    TensorSpec,
+)
 
 
 STANDARD_FIXTURE = ROOT / "input" / "matmul_shard_to_partial" / "matmul_shard_to_partial.json"
@@ -74,16 +82,19 @@ def _k_one_stage() -> StageSpec:
         ops=(OpSpec("matmul", ("A0", "B0"), ("C0",)),),
     )
     inputs = (
-        RelationSpec("A", ("A0",), "replicate"),
-        RelationSpec("B", ("B0",), "replicate"),
+        RelationSpec("A", ("A0",), (PlacementSpec("replicate"),)),
+        RelationSpec("B", ("B0",), (PlacementSpec("replicate"),)),
     )
     return StageSpec(
         name="matmul_k_one",
         world_size=1,
+        mesh=DeviceMeshSpec((1,)),
         single=single,
         distributed={0: local},
         input_relations=inputs,
-        output_relation=RelationSpec("C", ("C0",), "replicate"),
+        output_relation=RelationSpec(
+            "C", ("C0",), (PlacementSpec("replicate"),)
+        ),
     )
 
 
@@ -114,10 +125,15 @@ def test_stage_four_point_five_original_ratio_constraints_remain_implied(
     relation_type = "shard" if relation.startswith("shard") else relation
     dimension = 0 if relation == "shard0" else 1 if relation == "shard1" else None
     reduce_op = "sum" if relation == "partial" else None
-    relation_spec = RelationSpec("X", ("X0", "X1"), relation_type, dimension, reduce_op)
+    relation_spec = RelationSpec(
+        "X",
+        ("X0", "X1"),
+        (PlacementSpec(relation_type, dim=dimension, reduce_op=reduce_op),),
+    )
     stage = StageSpec(
         name=f"{relation}_ratio",
         world_size=2,
+        mesh=DeviceMeshSpec((2,)),
         single=ProgramSpec({"X": TensorSpec("X", single_shape)}, ()),
         distributed={
             0: ProgramSpec({"X0": TensorSpec("X0", local_shapes[0])}, ()),

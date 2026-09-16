@@ -15,9 +15,11 @@ from src.lemma import (
     build_certified_lemma,
     certify_stage,
     lemma_id_for_stage,
+    lemma_to_dict,
+    semantic_identity_payload,
 )
 from src.stage.loader import load_stage
-from src.stage.model import RelationSpec
+from src.stage.model import DeviceMeshSpec, PlacementSpec, RelationSpec
 from src.verification.verifier import VerificationStatus
 
 
@@ -38,6 +40,7 @@ def test_proved_stage_materializes_complete_concrete_lemma() -> None:
 
     assert lemma.source_stage_name == stage.name
     assert lemma.world_size == stage.world_size
+    assert lemma.mesh == stage.mesh
     assert lemma.input_relations == stage.input_relations
     assert lemma.single_ops == stage.single.ops
     assert lemma.distributed_ops == {rank: program.ops for rank, program in stage.distributed.items()}
@@ -50,6 +53,11 @@ def test_proved_stage_materializes_complete_concrete_lemma() -> None:
         for rank, program in stage.distributed.items()
     }
     assert lemma.reduced_shapes == verification.reduced_shapes
+    serialized = lemma_to_dict(lemma)
+    assert serialized["mesh"] == {"shape": [2]}
+    assert serialized["input_relations"][0]["placements"] == [
+        {"type": "shard", "dim": 1}
+    ]
 
 
 def test_certify_stage_keeps_disproved_counterexample_and_emits_no_lemma() -> None:
@@ -102,7 +110,34 @@ def test_changed_output_relation_changes_semantic_identity_without_reverificatio
     stage, _, _ = _proved_stage_and_verification()
     changed = replace(
         stage,
-        output_relation=RelationSpec("C", ("C0", "C1"), "replicate"),
+        output_relation=RelationSpec(
+            "C", ("C0", "C1"), (PlacementSpec("replicate"),)
+        ),
     )
 
+    assert lemma_id_for_stage(changed) != lemma_id_for_stage(stage)
+
+
+def test_operator_attrs_change_semantic_identity() -> None:
+    stage = load_stage(
+        ROOT
+        / "input"
+        / "view"
+        / "transpose_shard_axis_1_to_2_proved"
+        / "transpose_shard_axis_1_to_2_proved.json"
+    )
+    changed_op = replace(stage.single.ops[0], attrs={"dim0": 0, "dim1": 1})
+    changed = replace(
+        stage,
+        single=replace(stage.single, ops=(changed_op,)),
+    )
+
+    assert lemma_id_for_stage(changed) != lemma_id_for_stage(stage)
+
+
+def test_mesh_shape_is_part_of_semantic_identity() -> None:
+    stage, _, _ = _proved_stage_and_verification()
+    changed = replace(stage, mesh=DeviceMeshSpec((1, 2)))
+
+    assert semantic_identity_payload(stage)["mesh"] == {"shape": [2]}
     assert lemma_id_for_stage(changed) != lemma_id_for_stage(stage)
