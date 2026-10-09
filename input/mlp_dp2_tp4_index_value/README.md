@@ -6,16 +6,17 @@ Full field definitions and relation composition:
 
 These five files are manually designed stages, not captured AutoVerify exports.
 The target contract is shared with `input/`; all fixtures now omit identity-only
-terms, as listed in the contract's audit. The existing backend
-still needs adaptation. No SMT proof is claimed.
+terms, as listed in the contract's audit. The new backend proves all five stages
+over their original shapes in exact-real/shared-GELU semantics. The frontend
+adapter remains separate work.
 
 | File | Distributed computation | Output relation |
 | --- | --- | --- |
-| [01 AllGather](mlp_dp2_tp4_sp_01_allgather.json) | Gather SP sequence shards on shared TP groups | DP batch map; sequence identity and replicas are implied |
-| [02 FC1/GELU](mlp_dp2_tp4_02_fc1_gelu.json) | Column-parallel matmul, GELU | DP batch map + TP feature map |
-| [03 FC2](mlp_dp2_tp4_03_fc2_partial.json) | Row-parallel local matmul | DP batch map + TP Partial(sum) |
-| [04 ReduceScatter](mlp_dp2_tp4_sp_04_reduce_scatter.json) | Sum TP partials, scatter SP sequence | DP batch map + SP sequence map |
-| [04 AllReduce](mlp_dp2_tp4_04_allreduce.json) | Sum within TP | DP batch map; equal images imply TP replicas |
+| [01 AllGather](mlp_dp2_tp4_sp_01_allgather.json) / [demo](mlp_dp2_tp4_sp_01_allgather/demo.txt) | Gather SP sequence shards on shared TP groups | DP batch map; sequence identity and replicas are implied |
+| [02 FC1/GELU](mlp_dp2_tp4_02_fc1_gelu.json) / [demo](mlp_dp2_tp4_02_fc1_gelu/demo.txt) | Column-parallel matmul, GELU | DP batch map + TP feature map |
+| [03 FC2](mlp_dp2_tp4_03_fc2_partial.json) / [demo](mlp_dp2_tp4_03_fc2_partial/demo.txt) | Row-parallel local matmul | DP batch map + TP Partial(sum) |
+| [04 ReduceScatter](mlp_dp2_tp4_sp_04_reduce_scatter.json) / [demo](mlp_dp2_tp4_sp_04_reduce_scatter/demo.txt) | Sum TP partials, scatter SP sequence | DP batch map + SP sequence map |
+| [04 AllReduce](mlp_dp2_tp4_04_allreduce.json) / [demo](mlp_dp2_tp4_04_allreduce/demo.txt) | Sum within TP | DP batch map; equal images imply TP replicas |
 
 The SP chain is 01 -> 02 -> 03 -> ReduceScatter. AllReduce is an alternative
 ending after 03. Without SP, enter at 02 with the full per-DP sequence.
@@ -40,3 +41,5 @@ Activation relations keep DP terms where they actually map the batch dimension.
 W1/W2 只保留覆盖全部 rank 的 TP term，不添加冗余 DP 复制项。
 IndexPhi 的 dim 位于 expr 层，只记录非恒等维度；完整相等使用 terms: []，不使用空 maps 占位。
 精确实数和共享逐元素 GELU 抽象、通信顺序及完整字段含义以链接的规范为准。
+每个 JSON 的验证报告位于同名子目录的 demo.txt。物理 shape 未缩小，报告记录的是覆盖原始
+索引范围的符号约简；所有原始 contraction 项均保留。

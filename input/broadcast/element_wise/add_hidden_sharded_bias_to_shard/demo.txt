@@ -1,0 +1,207 @@
+Stage: add_hidden_sharded_bias_to_shard
+Verification: PROVED
+Proof scope: ORIGINAL_SHAPES_EXACT_REAL
+Z3 version: 4.15.1
+Arithmetic: exact real; GELU: shared unary uninterpreted function.
+No claim of IEEE floating-point kernel equivalence or whole-program correctness.
+Canonical input SHA256: bf6b78b09980ecd6bda806a397c41015ad800243b9fa4e65e0d925d527d39c78
+
+1. Parsed models / JSON parsing
+===============================
+StageSpec(name='add_hidden_sharded_bias_to_shard', world_size=2)
+Group mesh_axis_0_group_0: ordered ranks=(0, 1)
+Family mesh_axis_0: groups=('mesh_axis_0_group_0',)
+Logical SP/TP families may alias actual groups; they are not extra rank axes.
+single: inputs=('A', 'B'), outputs=('C',)
+  TensorSpec A: original shape=(2, 3, 8), elements=48
+  TensorSpec B: original shape=(8,), elements=8
+  TensorSpec C: original shape=(2, 3, 8), elements=48
+  OpCall 0: add inputs=('A', 'B') outputs=('C',) attrs={}
+rank0: inputs=('A0', 'B0'), outputs=('C0',)
+  TensorSpec A0: original shape=(2, 3, 4), elements=24
+  TensorSpec B0: original shape=(4,), elements=4
+  TensorSpec C0: original shape=(2, 3, 4), elements=24
+  OpCall 0: add inputs=('A0', 'B0') outputs=('C0',) attrs={}
+rank1: inputs=('A1', 'B1'), outputs=('C1',)
+  TensorSpec A1: original shape=(2, 3, 4), elements=24
+  TensorSpec B1: original shape=(4,), elements=4
+  TensorSpec C1: original shape=(2, 3, 4), elements=24
+  OpCall 0: add inputs=('A1', 'B1') outputs=('C1',) attrs={}
+
+2. Validation checks
+====================
+Topology: each family partitions world; group member order preserved.
+single: SSA, explicit boundaries and 1 operator shapes checked.
+rank0: SSA, explicit boundaries and 1 operator shapes checked.
+rank1: SSA, explicit boundaries and 1 operator shapes checked.
+input: 2 bindings; rank/extent/range/domain constraints checked.
+output: 1 bindings; rank/extent/range/domain constraints checked.
+Checks include unknown fields, duplicate JSON keys, boundary references, SSA order, operator attrs/shapes,
+full rank coverage, extents, local interval coverage, disjoint target pieces and Partial image compatibility.
+
+3. Normalized input assumptions and output goals
+================================================
+INPUT PREMISE[0]: single.A(2, 3, 8)
+  rank0.A0(2, 3, 4)
+  rank1.A1(2, 3, 4)
+  family=mesh_axis_0, IndexPhi dim=2
+    rank 0: local [0,4) -> single [0,4)
+    rank 1: local [0,4) -> single [4,8)
+  Other dimensions: identity; matching extents checked.
+  Equation: D_r[i] = S[Phi_r(i)] for every valid local i and every rank.
+  rank 0 single-image intervals by dimension: (((0, 2),), ((0, 3),), ((0, 4),))
+  rank 1 single-image intervals by dimension: (((0, 2),), ((0, 3),), ((4, 8),))
+INPUT PREMISE[1]: single.B(8,)
+  rank0.B0(4,)
+  rank1.B1(4,)
+  family=mesh_axis_0, IndexPhi dim=0
+    rank 0: local [0,4) -> single [0,4)
+    rank 1: local [0,4) -> single [4,8)
+  Other dimensions: identity; matching extents checked.
+  Equation: D_r[i] = S[Phi_r(i)] for every valid local i and every rank.
+  rank 0 single-image intervals by dimension: (((0, 4),),)
+  rank 1 single-image intervals by dimension: (((4, 8),),)
+OUTPUT GOAL (never assumed)[0]: single.C(2, 3, 8)
+  rank0.C0(2, 3, 4)
+  rank1.C1(2, 3, 4)
+  family=mesh_axis_0, IndexPhi dim=2
+    rank 0: local [0,4) -> single [0,4)
+    rank 1: local [0,4) -> single [4,8)
+  Other dimensions: identity; matching extents checked.
+  Equation: D_r[i] = S[Phi_r(i)] for every valid local i and every rank.
+  rank 0 single-image intervals by dimension: (((0, 2),), ((0, 3),), ((0, 4),))
+  rank 1 single-image intervals by dimension: (((0, 2),), ((0, 3),), ((4, 8),))
+
+4. Shape/index-domain reduction and its justification
+=====================================================
+Method: SYMBOLIC_INDEX_DOMAIN
+Original tensor shapes and all map intervals remain unchanged.
+Replace enumeration of output elements by arbitrary integer coordinates i[d].
+Each query asserts 0 <= i[d] < original local extent[d]. No coordinate is fixed to a sample.
+For Partial, a representative member enumerates the common image; every group member contributes.
+MatMul contraction sums retain all original K terms. No reduced-K lifting assumption.
+SAT is an original-shape counterexample; UNSAT for all domains proves all original output elements.
+48 output relation elements -> 2 symbolic-index domains.
+Physical shape reduction: NONE. No optimizer picks smaller dimensions; original shapes are retained.
+Reduction constraints are exact original index bounds, not sample-size constraints.
+  Domain 0: relation=0, group=(0,): 0 <= goal0_i0 < 2 AND 0 <= goal0_i1 < 3 AND 0 <= goal0_i2 < 4
+  Domain 1: relation=0, group=(1,): 0 <= goal1_i0 < 2 AND 0 <= goal1_i1 < 3 AND 0 <= goal1_i2 < 4
+
+5. Input equalities and exact elimination
+=========================================
+The following universal equalities define Rin before elimination:
+Rin[0] SMT-LIB:
+(forall ((rin0_r0_i0 Int) (rin0_r0_i1 Int) (rin0_r0_i2 Int))
+  (=> (and (>= rin0_r0_i0 0)
+           (< rin0_r0_i0 2)
+           (>= rin0_r0_i1 0)
+           (< rin0_r0_i1 3)
+           (>= rin0_r0_i2 0)
+           (< rin0_r0_i2 4))
+      (= (input_2 rin0_r0_i0 rin0_r0_i1 rin0_r0_i2)
+         (input_0 rin0_r0_i0 rin0_r0_i1 rin0_r0_i2))))
+Rin[1] SMT-LIB:
+(forall ((rin0_r1_i0 Int) (rin0_r1_i1 Int) (rin0_r1_i2 Int))
+  (=> (and (>= rin0_r1_i0 0)
+           (< rin0_r1_i0 2)
+           (>= rin0_r1_i1 0)
+           (< rin0_r1_i1 3)
+           (>= rin0_r1_i2 0)
+           (< rin0_r1_i2 4))
+      (= (input_4 rin0_r1_i0 rin0_r1_i1 rin0_r1_i2)
+         (input_0 rin0_r1_i0 rin0_r1_i1 (+ 4 rin0_r1_i2)))))
+Rin[2] SMT-LIB:
+(forall ((rin1_r0_i0 Int))
+  (=> (and (>= rin1_r0_i0 0) (< rin1_r0_i0 4))
+      (= (input_3 rin1_r0_i0) (input_1 rin1_r0_i0))))
+Rin[3] SMT-LIB:
+(forall ((rin1_r1_i0 Int))
+  (=> (and (>= rin1_r1_i0 0) (< rin1_r1_i0 4))
+      (= (input_5 rin1_r1_i0) (input_1 (+ 4 rin1_r1_i0)))))
+Free function symbols corresponding to original input tensors:
+  input_0: single.A
+  input_1: single.B
+  input_2: rank0.A0
+  input_3: rank0.B0
+  input_4: rank1.A1
+  input_5: rank1.B1
+Substitutions applied to the local input environment:
+  rank0.A0[i] := single.A[Phi_0(i)]
+  rank1.A1[i] := single.A[Phi_1(i)]
+  rank0.B0[i] := single.B[Phi_0(i)]
+  rank1.B1[i] := single.B[Phi_1(i)]
+Justification: equality inputs are determined by S and Phi. For each Partial group,
+choose every non-pivot contribution freely and define the pivot as S minus their sum.
+Each original solution restricts to these free functions, and each such assignment reconstructs a solution.
+Unique local preimages and disjoint input bindings were checked. Functions outside valid domains are irrelevant.
+Thus Rin is enforced by exact parameterization, not dropped or replaced with sampled numeric inputs.
+No extra replica equalities are inserted. Unbound program inputs remain independent free functions.
+
+6. Symbolic execution and collective matching
+=============================================
+single op 0: add('A', 'B') -> ('C',) shape=(2, 3, 8) attrs={}
+rank0 op 0: add('A0', 'B0') -> ('C0',) shape=(2, 3, 4) attrs={}
+rank1 op 0: add('A1', 'B1') -> ('C1',) shape=(2, 3, 4) attrs={}
+Local outputs are lazy element expressions; no concrete tensor values are used.
+MatMul: Out[batch,i,j] = Sum_k Left[broadcast(batch),i,k]*Right[broadcast(batch),k,j], all original k.
+Add/Mul broadcast indices; Transpose permutes indices; Reshape uses row-major ravel/unravel; Expand broadcasts.
+GELU uses shared_gelu(x). AllGather concatenates in actual group order; AllReduce sums;
+ReduceScatter sums then assigns contiguous axis chunks in actual group order.
+
+7. Actual solver obligations after substitution
+===============================================
+Query 0: output[0] group=(0,); result=UNSAT
+Meaning: EXISTS valid original output index where single and distributed results disagree.
+Guard: (and (>= goal0_i0 0)
+     (< goal0_i0 2)
+     (>= goal0_i1 0)
+     (< goal0_i1 3)
+     (>= goal0_i2 0)
+     (< goal0_i2 4))
+Simplified disequality: false
+A false disequality means exact symbolic simplification made the two expressions identical.
+BEGIN SMT-LIB (complete query)
+; benchmark generated from python API
+(set-info :status unknown)
+(declare-fun goal0_i2 () Int)
+(declare-fun goal0_i1 () Int)
+(declare-fun goal0_i0 () Int)
+(assert
+ (let (($x36 (>= goal0_i2 0)))
+ (let (($x49 (>= goal0_i1 0)))
+ (let (($x45 (>= goal0_i0 0)))
+ (and $x45 (< goal0_i0 2) $x49 (< goal0_i1 3) $x36 (< goal0_i2 4))))))
+(assert
+ false)
+(check-sat)
+END SMT-LIB
+Query 1: output[0] group=(1,); result=UNSAT
+Meaning: EXISTS valid original output index where single and distributed results disagree.
+Guard: (and (>= goal1_i0 0)
+     (< goal1_i0 2)
+     (>= goal1_i1 0)
+     (< goal1_i1 3)
+     (>= goal1_i2 0)
+     (< goal1_i2 4))
+Simplified disequality: false
+A false disequality means exact symbolic simplification made the two expressions identical.
+BEGIN SMT-LIB (complete query)
+; benchmark generated from python API
+(set-info :status unknown)
+(declare-fun goal1_i2 () Int)
+(declare-fun goal1_i1 () Int)
+(declare-fun goal1_i0 () Int)
+(assert
+ (let (($x60 (>= goal1_i2 0)))
+ (let (($x66 (>= goal1_i1 0)))
+ (let (($x57 (>= goal1_i0 0)))
+ (and $x57 (< goal1_i0 2) $x66 (< goal1_i1 3) $x60 (< goal1_i2 4))))))
+(assert
+ false)
+(check-sat)
+END SMT-LIB
+
+Final result
+============
+Verification: PROVED
+Every output domain was UNSAT over original shapes, conditional on the stated input relations.

@@ -1,0 +1,640 @@
+Stage: mlp_dp2_tp4_02_fc1_gelu
+Verification: PROVED
+Proof scope: ORIGINAL_SHAPES_EXACT_REAL
+Z3 version: 4.15.1
+Arithmetic: exact real; GELU: shared unary uninterpreted function.
+No claim of IEEE floating-point kernel equivalence or whole-program correctness.
+Canonical input SHA256: 8071d8a5ee41354f09b315f2ca3f8a55117ad9c6308ef5e66647fdcd2daa1587
+
+1. Parsed models / JSON parsing
+===============================
+StageSpec(name='mlp_dp2_tp4_02_fc1_gelu', world_size=8)
+Group tp_0: ordered ranks=(0, 1, 2, 3)
+Group tp_1: ordered ranks=(4, 5, 6, 7)
+Group dp_0: ordered ranks=(0, 4)
+Group dp_1: ordered ranks=(1, 5)
+Group dp_2: ordered ranks=(2, 6)
+Group dp_3: ordered ranks=(3, 7)
+Family tp: groups=('tp_0', 'tp_1')
+Family dp: groups=('dp_0', 'dp_1', 'dp_2', 'dp_3')
+Family sp: groups=('tp_0', 'tp_1')
+Logical SP/TP families may alias actual groups; they are not extra rank axes.
+single: inputs=('X', 'W1'), outputs=('Z',)
+  TensorSpec X: original shape=(4, 128, 256), elements=131072
+  TensorSpec W1: original shape=(256, 1024), elements=262144
+  TensorSpec T: original shape=(4, 128, 1024), elements=524288
+  TensorSpec Z: original shape=(4, 128, 1024), elements=524288
+  OpCall 0: matmul inputs=('X', 'W1') outputs=('T',) attrs={}
+  OpCall 1: gelu inputs=('T',) outputs=('Z',) attrs={}
+rank0: inputs=('X0', 'W1_0'), outputs=('Z0',)
+  TensorSpec X0: original shape=(2, 128, 256), elements=65536
+  TensorSpec W1_0: original shape=(256, 256), elements=65536
+  TensorSpec T0: original shape=(2, 128, 256), elements=65536
+  TensorSpec Z0: original shape=(2, 128, 256), elements=65536
+  OpCall 0: matmul inputs=('X0', 'W1_0') outputs=('T0',) attrs={}
+  OpCall 1: gelu inputs=('T0',) outputs=('Z0',) attrs={}
+rank1: inputs=('X1', 'W1_1'), outputs=('Z1',)
+  TensorSpec X1: original shape=(2, 128, 256), elements=65536
+  TensorSpec W1_1: original shape=(256, 256), elements=65536
+  TensorSpec T1: original shape=(2, 128, 256), elements=65536
+  TensorSpec Z1: original shape=(2, 128, 256), elements=65536
+  OpCall 0: matmul inputs=('X1', 'W1_1') outputs=('T1',) attrs={}
+  OpCall 1: gelu inputs=('T1',) outputs=('Z1',) attrs={}
+rank2: inputs=('X2', 'W1_2'), outputs=('Z2',)
+  TensorSpec X2: original shape=(2, 128, 256), elements=65536
+  TensorSpec W1_2: original shape=(256, 256), elements=65536
+  TensorSpec T2: original shape=(2, 128, 256), elements=65536
+  TensorSpec Z2: original shape=(2, 128, 256), elements=65536
+  OpCall 0: matmul inputs=('X2', 'W1_2') outputs=('T2',) attrs={}
+  OpCall 1: gelu inputs=('T2',) outputs=('Z2',) attrs={}
+rank3: inputs=('X3', 'W1_3'), outputs=('Z3',)
+  TensorSpec X3: original shape=(2, 128, 256), elements=65536
+  TensorSpec W1_3: original shape=(256, 256), elements=65536
+  TensorSpec T3: original shape=(2, 128, 256), elements=65536
+  TensorSpec Z3: original shape=(2, 128, 256), elements=65536
+  OpCall 0: matmul inputs=('X3', 'W1_3') outputs=('T3',) attrs={}
+  OpCall 1: gelu inputs=('T3',) outputs=('Z3',) attrs={}
+rank4: inputs=('X4', 'W1_4'), outputs=('Z4',)
+  TensorSpec X4: original shape=(2, 128, 256), elements=65536
+  TensorSpec W1_4: original shape=(256, 256), elements=65536
+  TensorSpec T4: original shape=(2, 128, 256), elements=65536
+  TensorSpec Z4: original shape=(2, 128, 256), elements=65536
+  OpCall 0: matmul inputs=('X4', 'W1_4') outputs=('T4',) attrs={}
+  OpCall 1: gelu inputs=('T4',) outputs=('Z4',) attrs={}
+rank5: inputs=('X5', 'W1_5'), outputs=('Z5',)
+  TensorSpec X5: original shape=(2, 128, 256), elements=65536
+  TensorSpec W1_5: original shape=(256, 256), elements=65536
+  TensorSpec T5: original shape=(2, 128, 256), elements=65536
+  TensorSpec Z5: original shape=(2, 128, 256), elements=65536
+  OpCall 0: matmul inputs=('X5', 'W1_5') outputs=('T5',) attrs={}
+  OpCall 1: gelu inputs=('T5',) outputs=('Z5',) attrs={}
+rank6: inputs=('X6', 'W1_6'), outputs=('Z6',)
+  TensorSpec X6: original shape=(2, 128, 256), elements=65536
+  TensorSpec W1_6: original shape=(256, 256), elements=65536
+  TensorSpec T6: original shape=(2, 128, 256), elements=65536
+  TensorSpec Z6: original shape=(2, 128, 256), elements=65536
+  OpCall 0: matmul inputs=('X6', 'W1_6') outputs=('T6',) attrs={}
+  OpCall 1: gelu inputs=('T6',) outputs=('Z6',) attrs={}
+rank7: inputs=('X7', 'W1_7'), outputs=('Z7',)
+  TensorSpec X7: original shape=(2, 128, 256), elements=65536
+  TensorSpec W1_7: original shape=(256, 256), elements=65536
+  TensorSpec T7: original shape=(2, 128, 256), elements=65536
+  TensorSpec Z7: original shape=(2, 128, 256), elements=65536
+  OpCall 0: matmul inputs=('X7', 'W1_7') outputs=('T7',) attrs={}
+  OpCall 1: gelu inputs=('T7',) outputs=('Z7',) attrs={}
+
+2. Validation checks
+====================
+Topology: each family partitions world; group member order preserved.
+single: SSA, explicit boundaries and 2 operator shapes checked.
+rank0: SSA, explicit boundaries and 2 operator shapes checked.
+rank1: SSA, explicit boundaries and 2 operator shapes checked.
+rank2: SSA, explicit boundaries and 2 operator shapes checked.
+rank3: SSA, explicit boundaries and 2 operator shapes checked.
+rank4: SSA, explicit boundaries and 2 operator shapes checked.
+rank5: SSA, explicit boundaries and 2 operator shapes checked.
+rank6: SSA, explicit boundaries and 2 operator shapes checked.
+rank7: SSA, explicit boundaries and 2 operator shapes checked.
+input: 2 bindings; rank/extent/range/domain constraints checked.
+output: 1 bindings; rank/extent/range/domain constraints checked.
+Checks include unknown fields, duplicate JSON keys, boundary references, SSA order, operator attrs/shapes,
+full rank coverage, extents, local interval coverage, disjoint target pieces and Partial image compatibility.
+
+3. Normalized input assumptions and output goals
+================================================
+INPUT PREMISE[0]: single.X(4, 128, 256)
+  rank0.X0(2, 128, 256)
+  rank1.X1(2, 128, 256)
+  rank2.X2(2, 128, 256)
+  rank3.X3(2, 128, 256)
+  rank4.X4(2, 128, 256)
+  rank5.X5(2, 128, 256)
+  rank6.X6(2, 128, 256)
+  rank7.X7(2, 128, 256)
+  family=dp, IndexPhi dim=0
+    rank 0: local [0,2) -> single [0,2)
+    rank 1: local [0,2) -> single [0,2)
+    rank 2: local [0,2) -> single [0,2)
+    rank 3: local [0,2) -> single [0,2)
+    rank 4: local [0,2) -> single [2,4)
+    rank 5: local [0,2) -> single [2,4)
+    rank 6: local [0,2) -> single [2,4)
+    rank 7: local [0,2) -> single [2,4)
+  Other dimensions: identity; matching extents checked.
+  Equation: D_r[i] = S[Phi_r(i)] for every valid local i and every rank.
+  rank 0 single-image intervals by dimension: (((0, 2),), ((0, 128),), ((0, 256),))
+  rank 1 single-image intervals by dimension: (((0, 2),), ((0, 128),), ((0, 256),))
+  rank 2 single-image intervals by dimension: (((0, 2),), ((0, 128),), ((0, 256),))
+  rank 3 single-image intervals by dimension: (((0, 2),), ((0, 128),), ((0, 256),))
+  rank 4 single-image intervals by dimension: (((2, 4),), ((0, 128),), ((0, 256),))
+  rank 5 single-image intervals by dimension: (((2, 4),), ((0, 128),), ((0, 256),))
+  rank 6 single-image intervals by dimension: (((2, 4),), ((0, 128),), ((0, 256),))
+  rank 7 single-image intervals by dimension: (((2, 4),), ((0, 128),), ((0, 256),))
+INPUT PREMISE[1]: single.W1(256, 1024)
+  rank0.W1_0(256, 256)
+  rank1.W1_1(256, 256)
+  rank2.W1_2(256, 256)
+  rank3.W1_3(256, 256)
+  rank4.W1_4(256, 256)
+  rank5.W1_5(256, 256)
+  rank6.W1_6(256, 256)
+  rank7.W1_7(256, 256)
+  family=tp, IndexPhi dim=1
+    rank 0: local [0,256) -> single [0,256)
+    rank 1: local [0,256) -> single [256,512)
+    rank 2: local [0,256) -> single [512,768)
+    rank 3: local [0,256) -> single [768,1024)
+    rank 4: local [0,256) -> single [0,256)
+    rank 5: local [0,256) -> single [256,512)
+    rank 6: local [0,256) -> single [512,768)
+    rank 7: local [0,256) -> single [768,1024)
+  Other dimensions: identity; matching extents checked.
+  Equation: D_r[i] = S[Phi_r(i)] for every valid local i and every rank.
+  rank 0 single-image intervals by dimension: (((0, 256),), ((0, 256),))
+  rank 1 single-image intervals by dimension: (((0, 256),), ((256, 512),))
+  rank 2 single-image intervals by dimension: (((0, 256),), ((512, 768),))
+  rank 3 single-image intervals by dimension: (((0, 256),), ((768, 1024),))
+  rank 4 single-image intervals by dimension: (((0, 256),), ((0, 256),))
+  rank 5 single-image intervals by dimension: (((0, 256),), ((256, 512),))
+  rank 6 single-image intervals by dimension: (((0, 256),), ((512, 768),))
+  rank 7 single-image intervals by dimension: (((0, 256),), ((768, 1024),))
+OUTPUT GOAL (never assumed)[0]: single.Z(4, 128, 1024)
+  rank0.Z0(2, 128, 256)
+  rank1.Z1(2, 128, 256)
+  rank2.Z2(2, 128, 256)
+  rank3.Z3(2, 128, 256)
+  rank4.Z4(2, 128, 256)
+  rank5.Z5(2, 128, 256)
+  rank6.Z6(2, 128, 256)
+  rank7.Z7(2, 128, 256)
+  family=dp, IndexPhi dim=0
+    rank 0: local [0,2) -> single [0,2)
+    rank 1: local [0,2) -> single [0,2)
+    rank 2: local [0,2) -> single [0,2)
+    rank 3: local [0,2) -> single [0,2)
+    rank 4: local [0,2) -> single [2,4)
+    rank 5: local [0,2) -> single [2,4)
+    rank 6: local [0,2) -> single [2,4)
+    rank 7: local [0,2) -> single [2,4)
+  family=tp, IndexPhi dim=2
+    rank 0: local [0,256) -> single [0,256)
+    rank 1: local [0,256) -> single [256,512)
+    rank 2: local [0,256) -> single [512,768)
+    rank 3: local [0,256) -> single [768,1024)
+    rank 4: local [0,256) -> single [0,256)
+    rank 5: local [0,256) -> single [256,512)
+    rank 6: local [0,256) -> single [512,768)
+    rank 7: local [0,256) -> single [768,1024)
+  Other dimensions: identity; matching extents checked.
+  Equation: D_r[i] = S[Phi_r(i)] for every valid local i and every rank.
+  rank 0 single-image intervals by dimension: (((0, 2),), ((0, 128),), ((0, 256),))
+  rank 1 single-image intervals by dimension: (((0, 2),), ((0, 128),), ((256, 512),))
+  rank 2 single-image intervals by dimension: (((0, 2),), ((0, 128),), ((512, 768),))
+  rank 3 single-image intervals by dimension: (((0, 2),), ((0, 128),), ((768, 1024),))
+  rank 4 single-image intervals by dimension: (((2, 4),), ((0, 128),), ((0, 256),))
+  rank 5 single-image intervals by dimension: (((2, 4),), ((0, 128),), ((256, 512),))
+  rank 6 single-image intervals by dimension: (((2, 4),), ((0, 128),), ((512, 768),))
+  rank 7 single-image intervals by dimension: (((2, 4),), ((0, 128),), ((768, 1024),))
+
+4. Shape/index-domain reduction and its justification
+=====================================================
+Method: SYMBOLIC_INDEX_DOMAIN
+Original tensor shapes and all map intervals remain unchanged.
+Replace enumeration of output elements by arbitrary integer coordinates i[d].
+Each query asserts 0 <= i[d] < original local extent[d]. No coordinate is fixed to a sample.
+For Partial, a representative member enumerates the common image; every group member contributes.
+MatMul contraction sums retain all original K terms. No reduced-K lifting assumption.
+SAT is an original-shape counterexample; UNSAT for all domains proves all original output elements.
+524288 output relation elements -> 8 symbolic-index domains.
+Physical shape reduction: NONE. No optimizer picks smaller dimensions; original shapes are retained.
+Reduction constraints are exact original index bounds, not sample-size constraints.
+  Domain 0: relation=0, group=(0,): 0 <= goal0_i0 < 2 AND 0 <= goal0_i1 < 128 AND 0 <= goal0_i2 < 256
+  Domain 1: relation=0, group=(1,): 0 <= goal1_i0 < 2 AND 0 <= goal1_i1 < 128 AND 0 <= goal1_i2 < 256
+  Domain 2: relation=0, group=(2,): 0 <= goal2_i0 < 2 AND 0 <= goal2_i1 < 128 AND 0 <= goal2_i2 < 256
+  Domain 3: relation=0, group=(3,): 0 <= goal3_i0 < 2 AND 0 <= goal3_i1 < 128 AND 0 <= goal3_i2 < 256
+  Domain 4: relation=0, group=(4,): 0 <= goal4_i0 < 2 AND 0 <= goal4_i1 < 128 AND 0 <= goal4_i2 < 256
+  Domain 5: relation=0, group=(5,): 0 <= goal5_i0 < 2 AND 0 <= goal5_i1 < 128 AND 0 <= goal5_i2 < 256
+  Domain 6: relation=0, group=(6,): 0 <= goal6_i0 < 2 AND 0 <= goal6_i1 < 128 AND 0 <= goal6_i2 < 256
+  Domain 7: relation=0, group=(7,): 0 <= goal7_i0 < 2 AND 0 <= goal7_i1 < 128 AND 0 <= goal7_i2 < 256
+
+5. Input equalities and exact elimination
+=========================================
+The following universal equalities define Rin before elimination:
+Rin[0] SMT-LIB:
+(forall ((rin0_r0_i0 Int) (rin0_r0_i1 Int) (rin0_r0_i2 Int))
+  (=> (and (>= rin0_r0_i0 0)
+           (< rin0_r0_i0 2)
+           (>= rin0_r0_i1 0)
+           (< rin0_r0_i1 128)
+           (>= rin0_r0_i2 0)
+           (< rin0_r0_i2 256))
+      (= (input_2 rin0_r0_i0 rin0_r0_i1 rin0_r0_i2)
+         (input_0 rin0_r0_i0 rin0_r0_i1 rin0_r0_i2))))
+Rin[1] SMT-LIB:
+(forall ((rin0_r1_i0 Int) (rin0_r1_i1 Int) (rin0_r1_i2 Int))
+  (=> (and (>= rin0_r1_i0 0)
+           (< rin0_r1_i0 2)
+           (>= rin0_r1_i1 0)
+           (< rin0_r1_i1 128)
+           (>= rin0_r1_i2 0)
+           (< rin0_r1_i2 256))
+      (= (input_4 rin0_r1_i0 rin0_r1_i1 rin0_r1_i2)
+         (input_0 rin0_r1_i0 rin0_r1_i1 rin0_r1_i2))))
+Rin[2] SMT-LIB:
+(forall ((rin0_r2_i0 Int) (rin0_r2_i1 Int) (rin0_r2_i2 Int))
+  (=> (and (>= rin0_r2_i0 0)
+           (< rin0_r2_i0 2)
+           (>= rin0_r2_i1 0)
+           (< rin0_r2_i1 128)
+           (>= rin0_r2_i2 0)
+           (< rin0_r2_i2 256))
+      (= (input_6 rin0_r2_i0 rin0_r2_i1 rin0_r2_i2)
+         (input_0 rin0_r2_i0 rin0_r2_i1 rin0_r2_i2))))
+Rin[3] SMT-LIB:
+(forall ((rin0_r3_i0 Int) (rin0_r3_i1 Int) (rin0_r3_i2 Int))
+  (=> (and (>= rin0_r3_i0 0)
+           (< rin0_r3_i0 2)
+           (>= rin0_r3_i1 0)
+           (< rin0_r3_i1 128)
+           (>= rin0_r3_i2 0)
+           (< rin0_r3_i2 256))
+      (= (input_8 rin0_r3_i0 rin0_r3_i1 rin0_r3_i2)
+         (input_0 rin0_r3_i0 rin0_r3_i1 rin0_r3_i2))))
+Rin[4] SMT-LIB:
+(forall ((rin0_r4_i0 Int) (rin0_r4_i1 Int) (rin0_r4_i2 Int))
+  (=> (and (>= rin0_r4_i0 0)
+           (< rin0_r4_i0 2)
+           (>= rin0_r4_i1 0)
+           (< rin0_r4_i1 128)
+           (>= rin0_r4_i2 0)
+           (< rin0_r4_i2 256))
+      (= (input_10 rin0_r4_i0 rin0_r4_i1 rin0_r4_i2)
+         (input_0 (+ 2 rin0_r4_i0) rin0_r4_i1 rin0_r4_i2))))
+Rin[5] SMT-LIB:
+(forall ((rin0_r5_i0 Int) (rin0_r5_i1 Int) (rin0_r5_i2 Int))
+  (=> (and (>= rin0_r5_i0 0)
+           (< rin0_r5_i0 2)
+           (>= rin0_r5_i1 0)
+           (< rin0_r5_i1 128)
+           (>= rin0_r5_i2 0)
+           (< rin0_r5_i2 256))
+      (= (input_12 rin0_r5_i0 rin0_r5_i1 rin0_r5_i2)
+         (input_0 (+ 2 rin0_r5_i0) rin0_r5_i1 rin0_r5_i2))))
+Rin[6] SMT-LIB:
+(forall ((rin0_r6_i0 Int) (rin0_r6_i1 Int) (rin0_r6_i2 Int))
+  (=> (and (>= rin0_r6_i0 0)
+           (< rin0_r6_i0 2)
+           (>= rin0_r6_i1 0)
+           (< rin0_r6_i1 128)
+           (>= rin0_r6_i2 0)
+           (< rin0_r6_i2 256))
+      (= (input_14 rin0_r6_i0 rin0_r6_i1 rin0_r6_i2)
+         (input_0 (+ 2 rin0_r6_i0) rin0_r6_i1 rin0_r6_i2))))
+Rin[7] SMT-LIB:
+(forall ((rin0_r7_i0 Int) (rin0_r7_i1 Int) (rin0_r7_i2 Int))
+  (=> (and (>= rin0_r7_i0 0)
+           (< rin0_r7_i0 2)
+           (>= rin0_r7_i1 0)
+           (< rin0_r7_i1 128)
+           (>= rin0_r7_i2 0)
+           (< rin0_r7_i2 256))
+      (= (input_16 rin0_r7_i0 rin0_r7_i1 rin0_r7_i2)
+         (input_0 (+ 2 rin0_r7_i0) rin0_r7_i1 rin0_r7_i2))))
+Rin[8] SMT-LIB:
+(forall ((rin1_r0_i0 Int) (rin1_r0_i1 Int))
+  (=> (and (>= rin1_r0_i0 0)
+           (< rin1_r0_i0 256)
+           (>= rin1_r0_i1 0)
+           (< rin1_r0_i1 256))
+      (= (input_3 rin1_r0_i0 rin1_r0_i1) (input_1 rin1_r0_i0 rin1_r0_i1))))
+Rin[9] SMT-LIB:
+(forall ((rin1_r1_i0 Int) (rin1_r1_i1 Int))
+  (=> (and (>= rin1_r1_i0 0)
+           (< rin1_r1_i0 256)
+           (>= rin1_r1_i1 0)
+           (< rin1_r1_i1 256))
+      (= (input_5 rin1_r1_i0 rin1_r1_i1)
+         (input_1 rin1_r1_i0 (+ 256 rin1_r1_i1)))))
+Rin[10] SMT-LIB:
+(forall ((rin1_r2_i0 Int) (rin1_r2_i1 Int))
+  (=> (and (>= rin1_r2_i0 0)
+           (< rin1_r2_i0 256)
+           (>= rin1_r2_i1 0)
+           (< rin1_r2_i1 256))
+      (= (input_7 rin1_r2_i0 rin1_r2_i1)
+         (input_1 rin1_r2_i0 (+ 512 rin1_r2_i1)))))
+Rin[11] SMT-LIB:
+(forall ((rin1_r3_i0 Int) (rin1_r3_i1 Int))
+  (=> (and (>= rin1_r3_i0 0)
+           (< rin1_r3_i0 256)
+           (>= rin1_r3_i1 0)
+           (< rin1_r3_i1 256))
+      (= (input_9 rin1_r3_i0 rin1_r3_i1)
+         (input_1 rin1_r3_i0 (+ 768 rin1_r3_i1)))))
+Rin[12] SMT-LIB:
+(forall ((rin1_r4_i0 Int) (rin1_r4_i1 Int))
+  (=> (and (>= rin1_r4_i0 0)
+           (< rin1_r4_i0 256)
+           (>= rin1_r4_i1 0)
+           (< rin1_r4_i1 256))
+      (= (input_11 rin1_r4_i0 rin1_r4_i1) (input_1 rin1_r4_i0 rin1_r4_i1))))
+Rin[13] SMT-LIB:
+(forall ((rin1_r5_i0 Int) (rin1_r5_i1 Int))
+  (=> (and (>= rin1_r5_i0 0)
+           (< rin1_r5_i0 256)
+           (>= rin1_r5_i1 0)
+           (< rin1_r5_i1 256))
+      (= (input_13 rin1_r5_i0 rin1_r5_i1)
+         (input_1 rin1_r5_i0 (+ 256 rin1_r5_i1)))))
+Rin[14] SMT-LIB:
+(forall ((rin1_r6_i0 Int) (rin1_r6_i1 Int))
+  (=> (and (>= rin1_r6_i0 0)
+           (< rin1_r6_i0 256)
+           (>= rin1_r6_i1 0)
+           (< rin1_r6_i1 256))
+      (= (input_15 rin1_r6_i0 rin1_r6_i1)
+         (input_1 rin1_r6_i0 (+ 512 rin1_r6_i1)))))
+Rin[15] SMT-LIB:
+(forall ((rin1_r7_i0 Int) (rin1_r7_i1 Int))
+  (=> (and (>= rin1_r7_i0 0)
+           (< rin1_r7_i0 256)
+           (>= rin1_r7_i1 0)
+           (< rin1_r7_i1 256))
+      (= (input_17 rin1_r7_i0 rin1_r7_i1)
+         (input_1 rin1_r7_i0 (+ 768 rin1_r7_i1)))))
+Free function symbols corresponding to original input tensors:
+  input_0: single.X
+  input_1: single.W1
+  input_2: rank0.X0
+  input_3: rank0.W1_0
+  input_4: rank1.X1
+  input_5: rank1.W1_1
+  input_6: rank2.X2
+  input_7: rank2.W1_2
+  input_8: rank3.X3
+  input_9: rank3.W1_3
+  input_10: rank4.X4
+  input_11: rank4.W1_4
+  input_12: rank5.X5
+  input_13: rank5.W1_5
+  input_14: rank6.X6
+  input_15: rank6.W1_6
+  input_16: rank7.X7
+  input_17: rank7.W1_7
+Substitutions applied to the local input environment:
+  rank0.X0[i] := single.X[Phi_0(i)]
+  rank1.X1[i] := single.X[Phi_1(i)]
+  rank2.X2[i] := single.X[Phi_2(i)]
+  rank3.X3[i] := single.X[Phi_3(i)]
+  rank4.X4[i] := single.X[Phi_4(i)]
+  rank5.X5[i] := single.X[Phi_5(i)]
+  rank6.X6[i] := single.X[Phi_6(i)]
+  rank7.X7[i] := single.X[Phi_7(i)]
+  rank0.W1_0[i] := single.W1[Phi_0(i)]
+  rank1.W1_1[i] := single.W1[Phi_1(i)]
+  rank2.W1_2[i] := single.W1[Phi_2(i)]
+  rank3.W1_3[i] := single.W1[Phi_3(i)]
+  rank4.W1_4[i] := single.W1[Phi_4(i)]
+  rank5.W1_5[i] := single.W1[Phi_5(i)]
+  rank6.W1_6[i] := single.W1[Phi_6(i)]
+  rank7.W1_7[i] := single.W1[Phi_7(i)]
+Justification: equality inputs are determined by S and Phi. For each Partial group,
+choose every non-pivot contribution freely and define the pivot as S minus their sum.
+Each original solution restricts to these free functions, and each such assignment reconstructs a solution.
+Unique local preimages and disjoint input bindings were checked. Functions outside valid domains are irrelevant.
+Thus Rin is enforced by exact parameterization, not dropped or replaced with sampled numeric inputs.
+No extra replica equalities are inserted. Unbound program inputs remain independent free functions.
+
+6. Symbolic execution and collective matching
+=============================================
+single op 0: matmul('X', 'W1') -> ('T',) shape=(4, 128, 1024) attrs={}
+single op 1: gelu('T',) -> ('Z',) shape=(4, 128, 1024) attrs={}
+rank0 op 0: matmul('X0', 'W1_0') -> ('T0',) shape=(2, 128, 256) attrs={}
+rank1 op 0: matmul('X1', 'W1_1') -> ('T1',) shape=(2, 128, 256) attrs={}
+rank2 op 0: matmul('X2', 'W1_2') -> ('T2',) shape=(2, 128, 256) attrs={}
+rank3 op 0: matmul('X3', 'W1_3') -> ('T3',) shape=(2, 128, 256) attrs={}
+rank4 op 0: matmul('X4', 'W1_4') -> ('T4',) shape=(2, 128, 256) attrs={}
+rank5 op 0: matmul('X5', 'W1_5') -> ('T5',) shape=(2, 128, 256) attrs={}
+rank6 op 0: matmul('X6', 'W1_6') -> ('T6',) shape=(2, 128, 256) attrs={}
+rank7 op 0: matmul('X7', 'W1_7') -> ('T7',) shape=(2, 128, 256) attrs={}
+rank0 op 1: gelu('T0',) -> ('Z0',) shape=(2, 128, 256) attrs={}
+rank1 op 1: gelu('T1',) -> ('Z1',) shape=(2, 128, 256) attrs={}
+rank2 op 1: gelu('T2',) -> ('Z2',) shape=(2, 128, 256) attrs={}
+rank3 op 1: gelu('T3',) -> ('Z3',) shape=(2, 128, 256) attrs={}
+rank4 op 1: gelu('T4',) -> ('Z4',) shape=(2, 128, 256) attrs={}
+rank5 op 1: gelu('T5',) -> ('Z5',) shape=(2, 128, 256) attrs={}
+rank6 op 1: gelu('T6',) -> ('Z6',) shape=(2, 128, 256) attrs={}
+rank7 op 1: gelu('T7',) -> ('Z7',) shape=(2, 128, 256) attrs={}
+Local outputs are lazy element expressions; no concrete tensor values are used.
+MatMul: Out[batch,i,j] = Sum_k Left[broadcast(batch),i,k]*Right[broadcast(batch),k,j], all original k.
+Add/Mul broadcast indices; Transpose permutes indices; Reshape uses row-major ravel/unravel; Expand broadcasts.
+GELU uses shared_gelu(x). AllGather concatenates in actual group order; AllReduce sums;
+ReduceScatter sums then assigns contiguous axis chunks in actual group order.
+
+7. Actual solver obligations after substitution
+===============================================
+Query 0: output[0] group=(0,); result=UNSAT
+Meaning: EXISTS valid original output index where single and distributed results disagree.
+Guard: (and (>= goal0_i0 0)
+     (< goal0_i0 2)
+     (>= goal0_i1 0)
+     (< goal0_i1 128)
+     (>= goal0_i2 0)
+     (< goal0_i2 256))
+Simplified disequality: false
+A false disequality means exact symbolic simplification made the two expressions identical.
+BEGIN SMT-LIB (complete query)
+; benchmark generated from python API
+(set-info :status unknown)
+(declare-fun goal0_i2 () Int)
+(declare-fun goal0_i1 () Int)
+(declare-fun goal0_i0 () Int)
+(assert
+ (let (($x156 (>= goal0_i2 0)))
+ (let (($x49 (>= goal0_i1 0)))
+ (let (($x45 (>= goal0_i0 0)))
+ (and $x45 (< goal0_i0 2) $x49 (< goal0_i1 128) $x156 (< goal0_i2 256))))))
+(assert
+ false)
+(check-sat)
+END SMT-LIB
+Query 1: output[0] group=(1,); result=UNSAT
+Meaning: EXISTS valid original output index where single and distributed results disagree.
+Guard: (and (>= goal1_i0 0)
+     (< goal1_i0 2)
+     (>= goal1_i1 0)
+     (< goal1_i1 128)
+     (>= goal1_i2 0)
+     (< goal1_i2 256))
+Simplified disequality: false
+A false disequality means exact symbolic simplification made the two expressions identical.
+BEGIN SMT-LIB (complete query)
+; benchmark generated from python API
+(set-info :status unknown)
+(declare-fun goal1_i2 () Int)
+(declare-fun goal1_i1 () Int)
+(declare-fun goal1_i0 () Int)
+(assert
+ (let (($x189 (>= goal1_i2 0)))
+ (let (($x66 (>= goal1_i1 0)))
+ (let (($x57 (>= goal1_i0 0)))
+ (and $x57 (< goal1_i0 2) $x66 (< goal1_i1 128) $x189 (< goal1_i2 256))))))
+(assert
+ false)
+(check-sat)
+END SMT-LIB
+Query 2: output[0] group=(2,); result=UNSAT
+Meaning: EXISTS valid original output index where single and distributed results disagree.
+Guard: (and (>= goal2_i0 0)
+     (< goal2_i0 2)
+     (>= goal2_i1 0)
+     (< goal2_i1 128)
+     (>= goal2_i2 0)
+     (< goal2_i2 256))
+Simplified disequality: false
+A false disequality means exact symbolic simplification made the two expressions identical.
+BEGIN SMT-LIB (complete query)
+; benchmark generated from python API
+(set-info :status unknown)
+(declare-fun goal2_i2 () Int)
+(declare-fun goal2_i1 () Int)
+(declare-fun goal2_i0 () Int)
+(assert
+ (let (($x373 (>= goal2_i2 0)))
+ (let (($x433 (>= goal2_i1 0)))
+ (let (($x553 (>= goal2_i0 0)))
+ (and $x553 (< goal2_i0 2) $x433 (< goal2_i1 128) $x373 (< goal2_i2 256))))))
+(assert
+ false)
+(check-sat)
+END SMT-LIB
+Query 3: output[0] group=(3,); result=UNSAT
+Meaning: EXISTS valid original output index where single and distributed results disagree.
+Guard: (and (>= goal3_i0 0)
+     (< goal3_i0 2)
+     (>= goal3_i1 0)
+     (< goal3_i1 128)
+     (>= goal3_i2 0)
+     (< goal3_i2 256))
+Simplified disequality: false
+A false disequality means exact symbolic simplification made the two expressions identical.
+BEGIN SMT-LIB (complete query)
+; benchmark generated from python API
+(set-info :status unknown)
+(declare-fun goal3_i2 () Int)
+(declare-fun goal3_i1 () Int)
+(declare-fun goal3_i0 () Int)
+(assert
+ (let (($x997 (>= goal3_i2 0)))
+ (let (($x1413 (>= goal3_i1 0)))
+ (let (($x1539 (>= goal3_i0 0)))
+ (and $x1539 (< goal3_i0 2) $x1413 (< goal3_i1 128) $x997 (< goal3_i2 256))))))
+(assert
+ false)
+(check-sat)
+END SMT-LIB
+Query 4: output[0] group=(4,); result=UNSAT
+Meaning: EXISTS valid original output index where single and distributed results disagree.
+Guard: (and (>= goal4_i0 0)
+     (< goal4_i0 2)
+     (>= goal4_i1 0)
+     (< goal4_i1 128)
+     (>= goal4_i2 0)
+     (< goal4_i2 256))
+Simplified disequality: false
+A false disequality means exact symbolic simplification made the two expressions identical.
+BEGIN SMT-LIB (complete query)
+; benchmark generated from python API
+(set-info :status unknown)
+(declare-fun goal4_i2 () Int)
+(declare-fun goal4_i1 () Int)
+(declare-fun goal4_i0 () Int)
+(assert
+ (let (($x1836 (>= goal4_i2 0)))
+ (let (($x2198 (>= goal4_i1 0)))
+ (let (($x2324 (>= goal4_i0 0)))
+ (and $x2324 (< goal4_i0 2) $x2198 (< goal4_i1 128) $x1836 (< goal4_i2 256))))))
+(assert
+ false)
+(check-sat)
+END SMT-LIB
+Query 5: output[0] group=(5,); result=UNSAT
+Meaning: EXISTS valid original output index where single and distributed results disagree.
+Guard: (and (>= goal5_i0 0)
+     (< goal5_i0 2)
+     (>= goal5_i1 0)
+     (< goal5_i1 128)
+     (>= goal5_i2 0)
+     (< goal5_i2 256))
+Simplified disequality: false
+A false disequality means exact symbolic simplification made the two expressions identical.
+BEGIN SMT-LIB (complete query)
+; benchmark generated from python API
+(set-info :status unknown)
+(declare-fun goal5_i2 () Int)
+(declare-fun goal5_i1 () Int)
+(declare-fun goal5_i0 () Int)
+(assert
+ (let (($x2594 (>= goal5_i2 0)))
+ (let (($x2351 (>= goal5_i1 0)))
+ (let (($x3006 (>= goal5_i0 0)))
+ (and $x3006 (< goal5_i0 2) $x2351 (< goal5_i1 128) $x2594 (< goal5_i2 256))))))
+(assert
+ false)
+(check-sat)
+END SMT-LIB
+Query 6: output[0] group=(6,); result=UNSAT
+Meaning: EXISTS valid original output index where single and distributed results disagree.
+Guard: (and (>= goal6_i0 0)
+     (< goal6_i0 2)
+     (>= goal6_i1 0)
+     (< goal6_i1 128)
+     (>= goal6_i2 0)
+     (< goal6_i2 256))
+Simplified disequality: false
+A false disequality means exact symbolic simplification made the two expressions identical.
+BEGIN SMT-LIB (complete query)
+; benchmark generated from python API
+(set-info :status unknown)
+(declare-fun goal6_i2 () Int)
+(declare-fun goal6_i1 () Int)
+(declare-fun goal6_i0 () Int)
+(assert
+ (let (($x3384 (>= goal6_i2 0)))
+ (let (($x3141 (>= goal6_i1 0)))
+ (let (($x3790 (>= goal6_i0 0)))
+ (and $x3790 (< goal6_i0 2) $x3141 (< goal6_i1 128) $x3384 (< goal6_i2 256))))))
+(assert
+ false)
+(check-sat)
+END SMT-LIB
+Query 7: output[0] group=(7,); result=UNSAT
+Meaning: EXISTS valid original output index where single and distributed results disagree.
+Guard: (and (>= goal7_i0 0)
+     (< goal7_i0 2)
+     (>= goal7_i1 0)
+     (< goal7_i1 128)
+     (>= goal7_i2 0)
+     (< goal7_i2 256))
+Simplified disequality: false
+A false disequality means exact symbolic simplification made the two expressions identical.
+BEGIN SMT-LIB (complete query)
+; benchmark generated from python API
+(set-info :status unknown)
+(declare-fun goal7_i2 () Int)
+(declare-fun goal7_i1 () Int)
+(declare-fun goal7_i0 () Int)
+(assert
+ (let (($x4168 (>= goal7_i2 0)))
+ (let (($x3925 (>= goal7_i1 0)))
+ (let (($x4644 (>= goal7_i0 0)))
+ (and $x4644 (< goal7_i0 2) $x3925 (< goal7_i1 128) $x4168 (< goal7_i2 256))))))
+(assert
+ false)
+(check-sat)
+END SMT-LIB
+
+Final result
+============
+Verification: PROVED
+Every output domain was UNSAT over original shapes, conditional on the stated input relations.

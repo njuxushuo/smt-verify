@@ -5,19 +5,18 @@
 This is the target contract for the JSON fixtures, all located in `input/`.
 It specifies one local equivalence obligation: single-device
 program, rank-local programs, assumed input relations, and candidate output
-relations. It is a design contract for the next backend iteration, not a claim
-that the current loader or solver supports it.
+relations. The refactored backend implements this contract for the supported
+operators below, using original-shape symbolic index-domain verification.
 
 There are 10 retained JSON files, including all five protected MLP stages.
 Six counterexample cases, two shape-invalid cases and sixteen positive-case
-variants were removed from the previous 34-file collection. The [cleanup inventory](../CLEANUP.md)
-records evidence and coverage decisions. Their relation representation is
+variants were removed from the previous 34-file collection. Their relation representation is
 aligned with this contract; section 8 records the collection audit.
-The existing `src/stage/loader.py`, verifier, legacy tests, and demo exporter still
-expect the previous placement format. All historical `demo.txt` reports have
-been removed; do not regenerate them with the old exporter. Names containing `proved` or `disproved`
-describe original test intent, not new solver results. Backend adaptation and
-AutoVerify relation-model adaptation are separate follow-up work.
+The entry point is `src/stage/codec.py`; legacy tests and scripts have been
+replaced. All ten JSON files have fresh demo.txt reports from the new verifier.
+Names do not control results. AutoVerify's producer model still needs adaptation.
+See [architecture](../../docs/architecture.md) for exact input elimination and
+the distinction between index-domain reduction and physical shape shrinking.
 
 ## 1. Fixed conventions
 
@@ -107,8 +106,6 @@ Ordinary operators cannot refer to tensors on another rank.
 | `gelu` | `{}` | Shared elementwise uninterpreted function in the current real-valued model. |
 | `transpose` | `dim0`, `dim1` | Swap two dimensions; legal negative axes are normalized against input rank. |
 | `reshape` | `shape` | Positive concrete target shape, equal to declared output shape; preserves row-major linear element order. |
-| `squeeze` | `dim` | Remove an extent-one dimension; output shape must agree. |
-| `unsqueeze` | `dim` | Insert an extent-one dimension. |
 | `expand` | `shape` | Broadcast to the declared positive target shape. |
 | `all_gather` | `group`, `axis` | Concatenate group inputs along `axis`, in group rank order; every member receives the concatenation. |
 | `all_reduce` | `group`, `reduce_op` | Elementwise group reduction; currently only `sum`. |
@@ -121,7 +118,9 @@ c10d signatures. Every member must execute matching collective calls: pair the
 n-th call on each concrete group in program order, with equal type/attrs and
 compatible shapes. Current examples contain at most one collective per group
 per stage. Uneven collectives, overlapping-group schedules and asynchronous
-handles need additional rules before use.
+handles need additional rules before use. Squeeze/unsqueeze, slice/concat
+operators and other operators not listed in the implemented registry currently
+return UNSUPPORTED. Multi-piece boundary maps are supported independently.
 
 ## 5. Tensor bindings and terms
 
@@ -335,7 +334,7 @@ To add a fixture:
    positive targets only; future negative regression cases should be maintained
    separately in test fixtures. Never silently repair a candidate during serialization.
 5. Check shape/dataflow legality, map completeness, group membership/order and
-   stage-to-stage boundaries. Then use an adapted verifier; valid JSON alone is
+   stage-to-stage boundaries. Then use the verifier; valid JSON alone is
    not a proof. Keep large-shape fixtures, but never arbitrarily shrink shapes
    without transforming index ranges and proving the reduction is sound.
 
@@ -357,20 +356,25 @@ not a claim that all distributed layouts obey it.
 Audit on 2026-10-09 after collection cleanup: 10 files contain 24 bindings and
 33 terms. None currently uses `terms: []`, but empty terms remain valid under
 this contract. No empty-map IndexPhi terms remain.
-The six removed false goals were checked with concrete integer counterexamples;
-two other files failed concrete shape validation. This is not a new SMT backend run.
+The ten retained inputs now pass the new backend with proof scope
+ORIGINAL_SHAPES_EXACT_REAL. The six removed false goals and two malformed files
+are historical cleanup facts; new negative cases live in tests.
 
 - Retained JSON contents were preserved during pruning. The protected five MLP
   JSON files were compared byte-for-byte. Documentation was updated separately.
 - Five MLP files use nonempty, dimension-specific maps and Partial only. Their
-  boundary relations are consistent; this is not a numerical or SMT proof.
+  boundary relations are consistent and their stage goals are SMT-proved under
+  the declared real/UF model. Stage input assumptions still need frontend justification.
 
-The existing backend expects legacy placements. Current AutoVerify RelationCodec
-v3 also differs: it stores dim per rank map, has identity defaults, independently
+The backend no longer accepts legacy placements. Current AutoVerify RelationCodec
+v3 differs: it stores dim per rank map, has identity defaults, independently
 validates each IndexPhi, and does not implement this term composition. The new
 contract additionally gives empty terms explicit equality semantics and permits
 logical SP/TP group sharing. Conversion must preserve actual family IDs, maps,
 and proof assumptions; format similarity is not a lossless-export guarantee.
-Producer/consumer adapters and semantics-preserving shape reduction remain to
-be implemented. Legacy tests also reference some removed fixtures and must be
-adapted separately. Historical reports must not be presented as new-format proofs.
+The producer adapter remains future work. Physical shape reduction is not used:
+all original contraction terms and index domains are retained. A symbolic output
+index represents every valid coordinate, so UNSAT does not rely on small-shape
+lifting. demo.txt records these bounds and the actual SMT queries. Default
+resource caps are K=8192, 10000 operator calls and lazy dependency depth 64;
+unsupported limits and solver UNKNOWN never become PROVED.

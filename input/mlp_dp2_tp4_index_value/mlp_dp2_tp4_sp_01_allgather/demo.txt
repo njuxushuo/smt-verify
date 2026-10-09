@@ -1,0 +1,645 @@
+Stage: mlp_dp2_tp4_sp_01_allgather
+Verification: PROVED
+Proof scope: ORIGINAL_SHAPES_EXACT_REAL
+Z3 version: 4.15.1
+Arithmetic: exact real; GELU: shared unary uninterpreted function.
+No claim of IEEE floating-point kernel equivalence or whole-program correctness.
+Canonical input SHA256: d25f5463ddfbb8102dffe0afba983118119db18f101e09342238b074fa089d62
+
+1. Parsed models / JSON parsing
+===============================
+StageSpec(name='mlp_dp2_tp4_sp_01_allgather', world_size=8)
+Group tp_0: ordered ranks=(0, 1, 2, 3)
+Group tp_1: ordered ranks=(4, 5, 6, 7)
+Group dp_0: ordered ranks=(0, 4)
+Group dp_1: ordered ranks=(1, 5)
+Group dp_2: ordered ranks=(2, 6)
+Group dp_3: ordered ranks=(3, 7)
+Family tp: groups=('tp_0', 'tp_1')
+Family dp: groups=('dp_0', 'dp_1', 'dp_2', 'dp_3')
+Family sp: groups=('tp_0', 'tp_1')
+Logical SP/TP families may alias actual groups; they are not extra rank axes.
+single: inputs=('X',), outputs=('X',)
+  TensorSpec X: original shape=(4, 128, 256), elements=131072
+  No operators: identity program using the declared input as output.
+rank0: inputs=('Xsp0',), outputs=('X0',)
+  TensorSpec Xsp0: original shape=(2, 32, 256), elements=16384
+  TensorSpec X0: original shape=(2, 128, 256), elements=65536
+  OpCall 0: all_gather inputs=('Xsp0',) outputs=('X0',) attrs={'group': 'tp_0', 'axis': 1}
+rank1: inputs=('Xsp1',), outputs=('X1',)
+  TensorSpec Xsp1: original shape=(2, 32, 256), elements=16384
+  TensorSpec X1: original shape=(2, 128, 256), elements=65536
+  OpCall 0: all_gather inputs=('Xsp1',) outputs=('X1',) attrs={'group': 'tp_0', 'axis': 1}
+rank2: inputs=('Xsp2',), outputs=('X2',)
+  TensorSpec Xsp2: original shape=(2, 32, 256), elements=16384
+  TensorSpec X2: original shape=(2, 128, 256), elements=65536
+  OpCall 0: all_gather inputs=('Xsp2',) outputs=('X2',) attrs={'group': 'tp_0', 'axis': 1}
+rank3: inputs=('Xsp3',), outputs=('X3',)
+  TensorSpec Xsp3: original shape=(2, 32, 256), elements=16384
+  TensorSpec X3: original shape=(2, 128, 256), elements=65536
+  OpCall 0: all_gather inputs=('Xsp3',) outputs=('X3',) attrs={'group': 'tp_0', 'axis': 1}
+rank4: inputs=('Xsp4',), outputs=('X4',)
+  TensorSpec Xsp4: original shape=(2, 32, 256), elements=16384
+  TensorSpec X4: original shape=(2, 128, 256), elements=65536
+  OpCall 0: all_gather inputs=('Xsp4',) outputs=('X4',) attrs={'group': 'tp_1', 'axis': 1}
+rank5: inputs=('Xsp5',), outputs=('X5',)
+  TensorSpec Xsp5: original shape=(2, 32, 256), elements=16384
+  TensorSpec X5: original shape=(2, 128, 256), elements=65536
+  OpCall 0: all_gather inputs=('Xsp5',) outputs=('X5',) attrs={'group': 'tp_1', 'axis': 1}
+rank6: inputs=('Xsp6',), outputs=('X6',)
+  TensorSpec Xsp6: original shape=(2, 32, 256), elements=16384
+  TensorSpec X6: original shape=(2, 128, 256), elements=65536
+  OpCall 0: all_gather inputs=('Xsp6',) outputs=('X6',) attrs={'group': 'tp_1', 'axis': 1}
+rank7: inputs=('Xsp7',), outputs=('X7',)
+  TensorSpec Xsp7: original shape=(2, 32, 256), elements=16384
+  TensorSpec X7: original shape=(2, 128, 256), elements=65536
+  OpCall 0: all_gather inputs=('Xsp7',) outputs=('X7',) attrs={'group': 'tp_1', 'axis': 1}
+
+2. Validation checks
+====================
+Topology: each family partitions world; group member order preserved.
+single: SSA, explicit boundaries and 0 operator shapes checked.
+rank0: SSA, explicit boundaries and 1 operator shapes checked.
+rank1: SSA, explicit boundaries and 1 operator shapes checked.
+rank2: SSA, explicit boundaries and 1 operator shapes checked.
+rank3: SSA, explicit boundaries and 1 operator shapes checked.
+rank4: SSA, explicit boundaries and 1 operator shapes checked.
+rank5: SSA, explicit boundaries and 1 operator shapes checked.
+rank6: SSA, explicit boundaries and 1 operator shapes checked.
+rank7: SSA, explicit boundaries and 1 operator shapes checked.
+input: 1 bindings; rank/extent/range/domain constraints checked.
+output: 1 bindings; rank/extent/range/domain constraints checked.
+Checks include unknown fields, duplicate JSON keys, boundary references, SSA order, operator attrs/shapes,
+full rank coverage, extents, local interval coverage, disjoint target pieces and Partial image compatibility.
+
+3. Normalized input assumptions and output goals
+================================================
+INPUT PREMISE[0]: single.X(4, 128, 256)
+  rank0.Xsp0(2, 32, 256)
+  rank1.Xsp1(2, 32, 256)
+  rank2.Xsp2(2, 32, 256)
+  rank3.Xsp3(2, 32, 256)
+  rank4.Xsp4(2, 32, 256)
+  rank5.Xsp5(2, 32, 256)
+  rank6.Xsp6(2, 32, 256)
+  rank7.Xsp7(2, 32, 256)
+  family=dp, IndexPhi dim=0
+    rank 0: local [0,2) -> single [0,2)
+    rank 1: local [0,2) -> single [0,2)
+    rank 2: local [0,2) -> single [0,2)
+    rank 3: local [0,2) -> single [0,2)
+    rank 4: local [0,2) -> single [2,4)
+    rank 5: local [0,2) -> single [2,4)
+    rank 6: local [0,2) -> single [2,4)
+    rank 7: local [0,2) -> single [2,4)
+  family=sp, IndexPhi dim=1
+    rank 0: local [0,32) -> single [0,32)
+    rank 1: local [0,32) -> single [32,64)
+    rank 2: local [0,32) -> single [64,96)
+    rank 3: local [0,32) -> single [96,128)
+    rank 4: local [0,32) -> single [0,32)
+    rank 5: local [0,32) -> single [32,64)
+    rank 6: local [0,32) -> single [64,96)
+    rank 7: local [0,32) -> single [96,128)
+  Other dimensions: identity; matching extents checked.
+  Equation: D_r[i] = S[Phi_r(i)] for every valid local i and every rank.
+  rank 0 single-image intervals by dimension: (((0, 2),), ((0, 32),), ((0, 256),))
+  rank 1 single-image intervals by dimension: (((0, 2),), ((32, 64),), ((0, 256),))
+  rank 2 single-image intervals by dimension: (((0, 2),), ((64, 96),), ((0, 256),))
+  rank 3 single-image intervals by dimension: (((0, 2),), ((96, 128),), ((0, 256),))
+  rank 4 single-image intervals by dimension: (((2, 4),), ((0, 32),), ((0, 256),))
+  rank 5 single-image intervals by dimension: (((2, 4),), ((32, 64),), ((0, 256),))
+  rank 6 single-image intervals by dimension: (((2, 4),), ((64, 96),), ((0, 256),))
+  rank 7 single-image intervals by dimension: (((2, 4),), ((96, 128),), ((0, 256),))
+OUTPUT GOAL (never assumed)[0]: single.X(4, 128, 256)
+  rank0.X0(2, 128, 256)
+  rank1.X1(2, 128, 256)
+  rank2.X2(2, 128, 256)
+  rank3.X3(2, 128, 256)
+  rank4.X4(2, 128, 256)
+  rank5.X5(2, 128, 256)
+  rank6.X6(2, 128, 256)
+  rank7.X7(2, 128, 256)
+  family=dp, IndexPhi dim=0
+    rank 0: local [0,2) -> single [0,2)
+    rank 1: local [0,2) -> single [0,2)
+    rank 2: local [0,2) -> single [0,2)
+    rank 3: local [0,2) -> single [0,2)
+    rank 4: local [0,2) -> single [2,4)
+    rank 5: local [0,2) -> single [2,4)
+    rank 6: local [0,2) -> single [2,4)
+    rank 7: local [0,2) -> single [2,4)
+  Other dimensions: identity; matching extents checked.
+  Equation: D_r[i] = S[Phi_r(i)] for every valid local i and every rank.
+  rank 0 single-image intervals by dimension: (((0, 2),), ((0, 128),), ((0, 256),))
+  rank 1 single-image intervals by dimension: (((0, 2),), ((0, 128),), ((0, 256),))
+  rank 2 single-image intervals by dimension: (((0, 2),), ((0, 128),), ((0, 256),))
+  rank 3 single-image intervals by dimension: (((0, 2),), ((0, 128),), ((0, 256),))
+  rank 4 single-image intervals by dimension: (((2, 4),), ((0, 128),), ((0, 256),))
+  rank 5 single-image intervals by dimension: (((2, 4),), ((0, 128),), ((0, 256),))
+  rank 6 single-image intervals by dimension: (((2, 4),), ((0, 128),), ((0, 256),))
+  rank 7 single-image intervals by dimension: (((2, 4),), ((0, 128),), ((0, 256),))
+
+4. Shape/index-domain reduction and its justification
+=====================================================
+Method: SYMBOLIC_INDEX_DOMAIN
+Original tensor shapes and all map intervals remain unchanged.
+Replace enumeration of output elements by arbitrary integer coordinates i[d].
+Each query asserts 0 <= i[d] < original local extent[d]. No coordinate is fixed to a sample.
+For Partial, a representative member enumerates the common image; every group member contributes.
+MatMul contraction sums retain all original K terms. No reduced-K lifting assumption.
+SAT is an original-shape counterexample; UNSAT for all domains proves all original output elements.
+524288 output relation elements -> 8 symbolic-index domains.
+Physical shape reduction: NONE. No optimizer picks smaller dimensions; original shapes are retained.
+Reduction constraints are exact original index bounds, not sample-size constraints.
+  Domain 0: relation=0, group=(0,): 0 <= goal0_i0 < 2 AND 0 <= goal0_i1 < 128 AND 0 <= goal0_i2 < 256
+  Domain 1: relation=0, group=(1,): 0 <= goal1_i0 < 2 AND 0 <= goal1_i1 < 128 AND 0 <= goal1_i2 < 256
+  Domain 2: relation=0, group=(2,): 0 <= goal2_i0 < 2 AND 0 <= goal2_i1 < 128 AND 0 <= goal2_i2 < 256
+  Domain 3: relation=0, group=(3,): 0 <= goal3_i0 < 2 AND 0 <= goal3_i1 < 128 AND 0 <= goal3_i2 < 256
+  Domain 4: relation=0, group=(4,): 0 <= goal4_i0 < 2 AND 0 <= goal4_i1 < 128 AND 0 <= goal4_i2 < 256
+  Domain 5: relation=0, group=(5,): 0 <= goal5_i0 < 2 AND 0 <= goal5_i1 < 128 AND 0 <= goal5_i2 < 256
+  Domain 6: relation=0, group=(6,): 0 <= goal6_i0 < 2 AND 0 <= goal6_i1 < 128 AND 0 <= goal6_i2 < 256
+  Domain 7: relation=0, group=(7,): 0 <= goal7_i0 < 2 AND 0 <= goal7_i1 < 128 AND 0 <= goal7_i2 < 256
+
+5. Input equalities and exact elimination
+=========================================
+The following universal equalities define Rin before elimination:
+Rin[0] SMT-LIB:
+(forall ((rin0_r0_i0 Int) (rin0_r0_i1 Int) (rin0_r0_i2 Int))
+  (=> (and (>= rin0_r0_i0 0)
+           (< rin0_r0_i0 2)
+           (>= rin0_r0_i1 0)
+           (< rin0_r0_i1 32)
+           (>= rin0_r0_i2 0)
+           (< rin0_r0_i2 256))
+      (= (input_1 rin0_r0_i0 rin0_r0_i1 rin0_r0_i2)
+         (input_0 rin0_r0_i0 rin0_r0_i1 rin0_r0_i2))))
+Rin[1] SMT-LIB:
+(forall ((rin0_r1_i0 Int) (rin0_r1_i1 Int) (rin0_r1_i2 Int))
+  (=> (and (>= rin0_r1_i0 0)
+           (< rin0_r1_i0 2)
+           (>= rin0_r1_i1 0)
+           (< rin0_r1_i1 32)
+           (>= rin0_r1_i2 0)
+           (< rin0_r1_i2 256))
+      (= (input_2 rin0_r1_i0 rin0_r1_i1 rin0_r1_i2)
+         (input_0 rin0_r1_i0 (+ 32 rin0_r1_i1) rin0_r1_i2))))
+Rin[2] SMT-LIB:
+(forall ((rin0_r2_i0 Int) (rin0_r2_i1 Int) (rin0_r2_i2 Int))
+  (=> (and (>= rin0_r2_i0 0)
+           (< rin0_r2_i0 2)
+           (>= rin0_r2_i1 0)
+           (< rin0_r2_i1 32)
+           (>= rin0_r2_i2 0)
+           (< rin0_r2_i2 256))
+      (= (input_3 rin0_r2_i0 rin0_r2_i1 rin0_r2_i2)
+         (input_0 rin0_r2_i0 (+ 64 rin0_r2_i1) rin0_r2_i2))))
+Rin[3] SMT-LIB:
+(forall ((rin0_r3_i0 Int) (rin0_r3_i1 Int) (rin0_r3_i2 Int))
+  (=> (and (>= rin0_r3_i0 0)
+           (< rin0_r3_i0 2)
+           (>= rin0_r3_i1 0)
+           (< rin0_r3_i1 32)
+           (>= rin0_r3_i2 0)
+           (< rin0_r3_i2 256))
+      (= (input_4 rin0_r3_i0 rin0_r3_i1 rin0_r3_i2)
+         (input_0 rin0_r3_i0 (+ 96 rin0_r3_i1) rin0_r3_i2))))
+Rin[4] SMT-LIB:
+(forall ((rin0_r4_i0 Int) (rin0_r4_i1 Int) (rin0_r4_i2 Int))
+  (=> (and (>= rin0_r4_i0 0)
+           (< rin0_r4_i0 2)
+           (>= rin0_r4_i1 0)
+           (< rin0_r4_i1 32)
+           (>= rin0_r4_i2 0)
+           (< rin0_r4_i2 256))
+      (= (input_5 rin0_r4_i0 rin0_r4_i1 rin0_r4_i2)
+         (input_0 (+ 2 rin0_r4_i0) rin0_r4_i1 rin0_r4_i2))))
+Rin[5] SMT-LIB:
+(forall ((rin0_r5_i0 Int) (rin0_r5_i1 Int) (rin0_r5_i2 Int))
+  (=> (and (>= rin0_r5_i0 0)
+           (< rin0_r5_i0 2)
+           (>= rin0_r5_i1 0)
+           (< rin0_r5_i1 32)
+           (>= rin0_r5_i2 0)
+           (< rin0_r5_i2 256))
+      (= (input_6 rin0_r5_i0 rin0_r5_i1 rin0_r5_i2)
+         (input_0 (+ 2 rin0_r5_i0) (+ 32 rin0_r5_i1) rin0_r5_i2))))
+Rin[6] SMT-LIB:
+(forall ((rin0_r6_i0 Int) (rin0_r6_i1 Int) (rin0_r6_i2 Int))
+  (=> (and (>= rin0_r6_i0 0)
+           (< rin0_r6_i0 2)
+           (>= rin0_r6_i1 0)
+           (< rin0_r6_i1 32)
+           (>= rin0_r6_i2 0)
+           (< rin0_r6_i2 256))
+      (= (input_7 rin0_r6_i0 rin0_r6_i1 rin0_r6_i2)
+         (input_0 (+ 2 rin0_r6_i0) (+ 64 rin0_r6_i1) rin0_r6_i2))))
+Rin[7] SMT-LIB:
+(forall ((rin0_r7_i0 Int) (rin0_r7_i1 Int) (rin0_r7_i2 Int))
+  (=> (and (>= rin0_r7_i0 0)
+           (< rin0_r7_i0 2)
+           (>= rin0_r7_i1 0)
+           (< rin0_r7_i1 32)
+           (>= rin0_r7_i2 0)
+           (< rin0_r7_i2 256))
+      (= (input_8 rin0_r7_i0 rin0_r7_i1 rin0_r7_i2)
+         (input_0 (+ 2 rin0_r7_i0) (+ 96 rin0_r7_i1) rin0_r7_i2))))
+Free function symbols corresponding to original input tensors:
+  input_0: single.X
+  input_1: rank0.Xsp0
+  input_2: rank1.Xsp1
+  input_3: rank2.Xsp2
+  input_4: rank3.Xsp3
+  input_5: rank4.Xsp4
+  input_6: rank5.Xsp5
+  input_7: rank6.Xsp6
+  input_8: rank7.Xsp7
+Substitutions applied to the local input environment:
+  rank0.Xsp0[i] := single.X[Phi_0(i)]
+  rank1.Xsp1[i] := single.X[Phi_1(i)]
+  rank2.Xsp2[i] := single.X[Phi_2(i)]
+  rank3.Xsp3[i] := single.X[Phi_3(i)]
+  rank4.Xsp4[i] := single.X[Phi_4(i)]
+  rank5.Xsp5[i] := single.X[Phi_5(i)]
+  rank6.Xsp6[i] := single.X[Phi_6(i)]
+  rank7.Xsp7[i] := single.X[Phi_7(i)]
+Justification: equality inputs are determined by S and Phi. For each Partial group,
+choose every non-pivot contribution freely and define the pivot as S minus their sum.
+Each original solution restricts to these free functions, and each such assignment reconstructs a solution.
+Unique local preimages and disjoint input bindings were checked. Functions outside valid domains are irrelevant.
+Thus Rin is enforced by exact parameterization, not dropped or replaced with sampled numeric inputs.
+No extra replica equalities are inserted. Unbound program inputs remain independent free functions.
+
+6. Symbolic execution and collective matching
+=============================================
+collective tp_0 #0: all_gather, members=(0, 1, 2, 3), attrs={'group': 'tp_0', 'axis': 1}, inputs=[(2, 32, 256), (2, 32, 256), (2, 32, 256), (2, 32, 256)], outputs=[(2, 128, 256), (2, 128, 256), (2, 128, 256), (2, 128, 256)]
+collective tp_1 #0: all_gather, members=(4, 5, 6, 7), attrs={'group': 'tp_1', 'axis': 1}, inputs=[(2, 32, 256), (2, 32, 256), (2, 32, 256), (2, 32, 256)], outputs=[(2, 128, 256), (2, 128, 256), (2, 128, 256), (2, 128, 256)]
+Local outputs are lazy element expressions; no concrete tensor values are used.
+MatMul: Out[batch,i,j] = Sum_k Left[broadcast(batch),i,k]*Right[broadcast(batch),k,j], all original k.
+Add/Mul broadcast indices; Transpose permutes indices; Reshape uses row-major ravel/unravel; Expand broadcasts.
+GELU uses shared_gelu(x). AllGather concatenates in actual group order; AllReduce sums;
+ReduceScatter sums then assigns contiguous axis chunks in actual group order.
+
+7. Actual solver obligations after substitution
+===============================================
+Query 0: output[0] group=(0,); result=UNSAT
+Meaning: EXISTS valid original output index where single and distributed results disagree.
+Guard: (and (>= goal0_i0 0)
+     (< goal0_i0 2)
+     (>= goal0_i1 0)
+     (< goal0_i1 128)
+     (>= goal0_i2 0)
+     (< goal0_i2 256))
+Simplified disequality: (let ((a!1 (ite (= (div goal0_i1 32) 2)
+                (input_0 goal0_i0 (+ 64 (mod goal0_i1 32)) goal0_i2)
+                (input_0 goal0_i0 (+ 96 (mod goal0_i1 32)) goal0_i2))))
+(let ((a!2 (ite (= (div goal0_i1 32) 1)
+                (input_0 goal0_i0 (+ 32 (mod goal0_i1 32)) goal0_i2)
+                a!1)))
+(let ((a!3 (= (input_0 goal0_i0 goal0_i1 goal0_i2)
+              (ite (= (div goal0_i1 32) 0)
+                   (input_0 goal0_i0 (mod goal0_i1 32) goal0_i2)
+                   a!2))))
+  (not a!3))))
+A false disequality means exact symbolic simplification made the two expressions identical.
+BEGIN SMT-LIB (complete query)
+; benchmark generated from python API
+(set-info :status unknown)
+(declare-fun goal0_i2 () Int)
+(declare-fun goal0_i1 () Int)
+(declare-fun goal0_i0 () Int)
+(declare-fun input_0 (Int Int Int) Real)
+(assert
+ (let (($x156 (>= goal0_i2 0)))
+ (let (($x49 (>= goal0_i1 0)))
+ (let (($x45 (>= goal0_i0 0)))
+ (and $x45 (< goal0_i0 2) $x49 (< goal0_i1 128) $x156 (< goal0_i2 256))))))
+(assert
+ (let ((?x1158 (input_0 goal0_i0 (+ 96 (mod goal0_i1 32)) goal0_i2)))
+(let ((?x150 (input_0 goal0_i0 (+ 64 (mod goal0_i1 32)) goal0_i2)))
+(let ((?x159 (input_0 goal0_i0 (+ 32 (mod goal0_i1 32)) goal0_i2)))
+(let ((?x1174 (ite (= (div goal0_i1 32) 1) ?x159 (ite (= (div goal0_i1 32) 2) ?x150 ?x1158))))
+(let ((?x151 (mod goal0_i1 32)))
+(let ((?x1159 (input_0 goal0_i0 ?x151 goal0_i2)))
+(let ((?x223 (ite (= (div goal0_i1 32) 0) ?x1159 ?x1174)))
+(let ((?x213 (input_0 goal0_i0 goal0_i1 goal0_i2)))
+(not (= ?x213 ?x223)))))))))))
+(check-sat)
+END SMT-LIB
+Query 1: output[0] group=(1,); result=UNSAT
+Meaning: EXISTS valid original output index where single and distributed results disagree.
+Guard: (and (>= goal1_i0 0)
+     (< goal1_i0 2)
+     (>= goal1_i1 0)
+     (< goal1_i1 128)
+     (>= goal1_i2 0)
+     (< goal1_i2 256))
+Simplified disequality: (let ((a!1 (ite (= (div goal1_i1 32) 2)
+                (input_0 goal1_i0 (+ 64 (mod goal1_i1 32)) goal1_i2)
+                (input_0 goal1_i0 (+ 96 (mod goal1_i1 32)) goal1_i2))))
+(let ((a!2 (ite (= (div goal1_i1 32) 1)
+                (input_0 goal1_i0 (+ 32 (mod goal1_i1 32)) goal1_i2)
+                a!1)))
+(let ((a!3 (= (input_0 goal1_i0 goal1_i1 goal1_i2)
+              (ite (= (div goal1_i1 32) 0)
+                   (input_0 goal1_i0 (mod goal1_i1 32) goal1_i2)
+                   a!2))))
+  (not a!3))))
+A false disequality means exact symbolic simplification made the two expressions identical.
+BEGIN SMT-LIB (complete query)
+; benchmark generated from python API
+(set-info :status unknown)
+(declare-fun goal1_i2 () Int)
+(declare-fun goal1_i1 () Int)
+(declare-fun goal1_i0 () Int)
+(declare-fun input_0 (Int Int Int) Real)
+(assert
+ (let (($x189 (>= goal1_i2 0)))
+ (let (($x66 (>= goal1_i1 0)))
+ (let (($x57 (>= goal1_i0 0)))
+ (and $x57 (< goal1_i0 2) $x66 (< goal1_i1 128) $x189 (< goal1_i2 256))))))
+(assert
+ (let ((?x251 (input_0 goal1_i0 (+ 96 (mod goal1_i1 32)) goal1_i2)))
+(let ((?x243 (input_0 goal1_i0 (+ 64 (mod goal1_i1 32)) goal1_i2)))
+(let ((?x247 (input_0 goal1_i0 (+ 32 (mod goal1_i1 32)) goal1_i2)))
+(let ((?x1175 (ite (= (div goal1_i1 32) 1) ?x247 (ite (= (div goal1_i1 32) 2) ?x243 ?x251))))
+(let ((?x239 (mod goal1_i1 32)))
+(let ((?x1179 (input_0 goal1_i0 ?x239 goal1_i2)))
+(let ((?x240 (ite (= (div goal1_i1 32) 0) ?x1179 ?x1175)))
+(let ((?x1937 (input_0 goal1_i0 goal1_i1 goal1_i2)))
+(not (= ?x1937 ?x240)))))))))))
+(check-sat)
+END SMT-LIB
+Query 2: output[0] group=(2,); result=UNSAT
+Meaning: EXISTS valid original output index where single and distributed results disagree.
+Guard: (and (>= goal2_i0 0)
+     (< goal2_i0 2)
+     (>= goal2_i1 0)
+     (< goal2_i1 128)
+     (>= goal2_i2 0)
+     (< goal2_i2 256))
+Simplified disequality: (let ((a!1 (ite (= (div goal2_i1 32) 2)
+                (input_0 goal2_i0 (+ 64 (mod goal2_i1 32)) goal2_i2)
+                (input_0 goal2_i0 (+ 96 (mod goal2_i1 32)) goal2_i2))))
+(let ((a!2 (ite (= (div goal2_i1 32) 1)
+                (input_0 goal2_i0 (+ 32 (mod goal2_i1 32)) goal2_i2)
+                a!1)))
+(let ((a!3 (= (input_0 goal2_i0 goal2_i1 goal2_i2)
+              (ite (= (div goal2_i1 32) 0)
+                   (input_0 goal2_i0 (mod goal2_i1 32) goal2_i2)
+                   a!2))))
+  (not a!3))))
+A false disequality means exact symbolic simplification made the two expressions identical.
+BEGIN SMT-LIB (complete query)
+; benchmark generated from python API
+(set-info :status unknown)
+(declare-fun goal2_i2 () Int)
+(declare-fun goal2_i1 () Int)
+(declare-fun goal2_i0 () Int)
+(declare-fun input_0 (Int Int Int) Real)
+(assert
+ (let (($x377 (>= goal2_i2 0)))
+ (let (($x1935 (>= goal2_i1 0)))
+ (let (($x345 (>= goal2_i0 0)))
+ (and $x345 (< goal2_i0 2) $x1935 (< goal2_i1 128) $x377 (< goal2_i2 256))))))
+(assert
+ (let ((?x263 (input_0 goal2_i0 (+ 96 (mod goal2_i1 32)) goal2_i2)))
+(let ((?x274 (input_0 goal2_i0 (+ 64 (mod goal2_i1 32)) goal2_i2)))
+(let ((?x272 (input_0 goal2_i0 (+ 32 (mod goal2_i1 32)) goal2_i2)))
+(let ((?x235 (ite (= (div goal2_i1 32) 1) ?x272 (ite (= (div goal2_i1 32) 2) ?x274 ?x263))))
+(let ((?x262 (mod goal2_i1 32)))
+(let ((?x264 (input_0 goal2_i0 ?x262 goal2_i2)))
+(let ((?x1184 (ite (= (div goal2_i1 32) 0) ?x264 ?x235)))
+(let ((?x1946 (input_0 goal2_i0 goal2_i1 goal2_i2)))
+(not (= ?x1946 ?x1184)))))))))))
+(check-sat)
+END SMT-LIB
+Query 3: output[0] group=(3,); result=UNSAT
+Meaning: EXISTS valid original output index where single and distributed results disagree.
+Guard: (and (>= goal3_i0 0)
+     (< goal3_i0 2)
+     (>= goal3_i1 0)
+     (< goal3_i1 128)
+     (>= goal3_i2 0)
+     (< goal3_i2 256))
+Simplified disequality: (let ((a!1 (ite (= (div goal3_i1 32) 2)
+                (input_0 goal3_i0 (+ 64 (mod goal3_i1 32)) goal3_i2)
+                (input_0 goal3_i0 (+ 96 (mod goal3_i1 32)) goal3_i2))))
+(let ((a!2 (ite (= (div goal3_i1 32) 1)
+                (input_0 goal3_i0 (+ 32 (mod goal3_i1 32)) goal3_i2)
+                a!1)))
+(let ((a!3 (= (input_0 goal3_i0 goal3_i1 goal3_i2)
+              (ite (= (div goal3_i1 32) 0)
+                   (input_0 goal3_i0 (mod goal3_i1 32) goal3_i2)
+                   a!2))))
+  (not a!3))))
+A false disequality means exact symbolic simplification made the two expressions identical.
+BEGIN SMT-LIB (complete query)
+; benchmark generated from python API
+(set-info :status unknown)
+(declare-fun goal3_i2 () Int)
+(declare-fun goal3_i1 () Int)
+(declare-fun goal3_i0 () Int)
+(declare-fun input_0 (Int Int Int) Real)
+(assert
+ (let (($x1953 (>= goal3_i2 0)))
+ (let (($x365 (>= goal3_i1 0)))
+ (let (($x437 (>= goal3_i0 0)))
+ (and $x437 (< goal3_i0 2) $x365 (< goal3_i1 128) $x1953 (< goal3_i2 256))))))
+(assert
+ (let ((?x286 (input_0 goal3_i0 (+ 96 (mod goal3_i1 32)) goal3_i2)))
+(let ((?x1188 (input_0 goal3_i0 (+ 64 (mod goal3_i1 32)) goal3_i2)))
+(let ((?x288 (input_0 goal3_i0 (+ 32 (mod goal3_i1 32)) goal3_i2)))
+(let ((?x255 (ite (= (div goal3_i1 32) 1) ?x288 (ite (= (div goal3_i1 32) 2) ?x1188 ?x286))))
+(let ((?x279 (mod goal3_i1 32)))
+(let ((?x1189 (input_0 goal3_i0 ?x279 goal3_i2)))
+(let ((?x231 (ite (= (div goal3_i1 32) 0) ?x1189 ?x255)))
+(let ((?x425 (input_0 goal3_i0 goal3_i1 goal3_i2)))
+(not (= ?x425 ?x231)))))))))))
+(check-sat)
+END SMT-LIB
+Query 4: output[0] group=(4,); result=UNSAT
+Meaning: EXISTS valid original output index where single and distributed results disagree.
+Guard: (and (>= goal4_i0 0)
+     (< goal4_i0 2)
+     (>= goal4_i1 0)
+     (< goal4_i1 128)
+     (>= goal4_i2 0)
+     (< goal4_i2 256))
+Simplified disequality: (let ((a!1 (ite (= (div goal4_i1 32) 2)
+                (input_0 (+ 2 goal4_i0) (+ 64 (mod goal4_i1 32)) goal4_i2)
+                (input_0 (+ 2 goal4_i0) (+ 96 (mod goal4_i1 32)) goal4_i2))))
+(let ((a!2 (ite (= (div goal4_i1 32) 1)
+                (input_0 (+ 2 goal4_i0) (+ 32 (mod goal4_i1 32)) goal4_i2)
+                a!1)))
+(let ((a!3 (= (input_0 (+ 2 goal4_i0) goal4_i1 goal4_i2)
+              (ite (= (div goal4_i1 32) 0)
+                   (input_0 (+ 2 goal4_i0) (mod goal4_i1 32) goal4_i2)
+                   a!2))))
+  (not a!3))))
+A false disequality means exact symbolic simplification made the two expressions identical.
+BEGIN SMT-LIB (complete query)
+; benchmark generated from python API
+(set-info :status unknown)
+(declare-fun goal4_i2 () Int)
+(declare-fun goal4_i1 () Int)
+(declare-fun goal4_i0 () Int)
+(declare-fun input_0 (Int Int Int) Real)
+(assert
+ (let (($x1958 (>= goal4_i2 0)))
+ (let (($x501 (>= goal4_i1 0)))
+ (let (($x1957 (>= goal4_i0 0)))
+ (and $x1957 (< goal4_i0 2) $x501 (< goal4_i1 128) $x1958 (< goal4_i2 256))))))
+(assert
+ (let ((?x533 (+ 2 goal4_i0)))
+(let ((?x1195 (input_0 ?x533 (+ 96 (mod goal4_i1 32)) goal4_i2)))
+(let ((?x303 (input_0 ?x533 (+ 64 (mod goal4_i1 32)) goal4_i2)))
+(let ((?x248 (input_0 ?x533 (+ 32 (mod goal4_i1 32)) goal4_i2)))
+(let ((?x232 (ite (= (div goal4_i1 32) 1) ?x248 (ite (= (div goal4_i1 32) 2) ?x303 ?x1195))))
+(let ((?x1193 (mod goal4_i1 32)))
+(let ((?x298 (input_0 ?x533 ?x1193 goal4_i2)))
+(let ((?x220 (ite (= (div goal4_i1 32) 0) ?x298 ?x232)))
+(let ((?x497 (input_0 ?x533 goal4_i1 goal4_i2)))
+(not (= ?x497 ?x220))))))))))))
+(check-sat)
+END SMT-LIB
+Query 5: output[0] group=(5,); result=UNSAT
+Meaning: EXISTS valid original output index where single and distributed results disagree.
+Guard: (and (>= goal5_i0 0)
+     (< goal5_i0 2)
+     (>= goal5_i1 0)
+     (< goal5_i1 128)
+     (>= goal5_i2 0)
+     (< goal5_i2 256))
+Simplified disequality: (let ((a!1 (ite (= (div goal5_i1 32) 2)
+                (input_0 (+ 2 goal5_i0) (+ 64 (mod goal5_i1 32)) goal5_i2)
+                (input_0 (+ 2 goal5_i0) (+ 96 (mod goal5_i1 32)) goal5_i2))))
+(let ((a!2 (ite (= (div goal5_i1 32) 1)
+                (input_0 (+ 2 goal5_i0) (+ 32 (mod goal5_i1 32)) goal5_i2)
+                a!1)))
+(let ((a!3 (= (input_0 (+ 2 goal5_i0) goal5_i1 goal5_i2)
+              (ite (= (div goal5_i1 32) 0)
+                   (input_0 (+ 2 goal5_i0) (mod goal5_i1 32) goal5_i2)
+                   a!2))))
+  (not a!3))))
+A false disequality means exact symbolic simplification made the two expressions identical.
+BEGIN SMT-LIB (complete query)
+; benchmark generated from python API
+(set-info :status unknown)
+(declare-fun goal5_i2 () Int)
+(declare-fun goal5_i1 () Int)
+(declare-fun goal5_i0 () Int)
+(declare-fun input_0 (Int Int Int) Real)
+(assert
+ (let (($x569 (>= goal5_i2 0)))
+ (let (($x581 (>= goal5_i1 0)))
+ (let (($x597 (>= goal5_i0 0)))
+ (and $x597 (< goal5_i0 2) $x581 (< goal5_i1 128) $x569 (< goal5_i2 256))))))
+(assert
+ (let ((?x1965 (+ 2 goal5_i0)))
+(let ((?x1198 (input_0 ?x1965 (+ 96 (mod goal5_i1 32)) goal5_i2)))
+(let ((?x322 (input_0 ?x1965 (+ 64 (mod goal5_i1 32)) goal5_i2)))
+(let ((?x319 (input_0 ?x1965 (+ 32 (mod goal5_i1 32)) goal5_i2)))
+(let ((?x324 (ite (= (div goal5_i1 32) 1) ?x319 (ite (= (div goal5_i1 32) 2) ?x322 ?x1198))))
+(let ((?x314 (mod goal5_i1 32)))
+(let ((?x316 (input_0 ?x1965 ?x314 goal5_i2)))
+(let ((?x271 (ite (= (div goal5_i1 32) 0) ?x316 ?x324)))
+(let ((?x609 (input_0 ?x1965 goal5_i1 goal5_i2)))
+(not (= ?x609 ?x271))))))))))))
+(check-sat)
+END SMT-LIB
+Query 6: output[0] group=(6,); result=UNSAT
+Meaning: EXISTS valid original output index where single and distributed results disagree.
+Guard: (and (>= goal6_i0 0)
+     (< goal6_i0 2)
+     (>= goal6_i1 0)
+     (< goal6_i1 128)
+     (>= goal6_i2 0)
+     (< goal6_i2 256))
+Simplified disequality: (let ((a!1 (ite (= (div goal6_i1 32) 2)
+                (input_0 (+ 2 goal6_i0) (+ 64 (mod goal6_i1 32)) goal6_i2)
+                (input_0 (+ 2 goal6_i0) (+ 96 (mod goal6_i1 32)) goal6_i2))))
+(let ((a!2 (ite (= (div goal6_i1 32) 1)
+                (input_0 (+ 2 goal6_i0) (+ 32 (mod goal6_i1 32)) goal6_i2)
+                a!1)))
+(let ((a!3 (= (input_0 (+ 2 goal6_i0) goal6_i1 goal6_i2)
+              (ite (= (div goal6_i1 32) 0)
+                   (input_0 (+ 2 goal6_i0) (mod goal6_i1 32) goal6_i2)
+                   a!2))))
+  (not a!3))))
+A false disequality means exact symbolic simplification made the two expressions identical.
+BEGIN SMT-LIB (complete query)
+; benchmark generated from python API
+(set-info :status unknown)
+(declare-fun goal6_i2 () Int)
+(declare-fun goal6_i1 () Int)
+(declare-fun goal6_i0 () Int)
+(declare-fun input_0 (Int Int Int) Real)
+(assert
+ (let (($x657 (>= goal6_i2 0)))
+ (let (($x1968 (>= goal6_i1 0)))
+ (let (($x1971 (>= goal6_i0 0)))
+ (and $x1971 (< goal6_i0 2) $x1968 (< goal6_i1 128) $x657 (< goal6_i2 256))))))
+(assert
+ (let ((?x701 (+ 2 goal6_i0)))
+(let ((?x1202 (input_0 ?x701 (+ 96 (mod goal6_i1 32)) goal6_i2)))
+(let ((?x1203 (input_0 ?x701 (+ 64 (mod goal6_i1 32)) goal6_i2)))
+(let ((?x338 (input_0 ?x701 (+ 32 (mod goal6_i1 32)) goal6_i2)))
+(let ((?x343 (ite (= (div goal6_i1 32) 1) ?x338 (ite (= (div goal6_i1 32) 2) ?x1203 ?x1202))))
+(let ((?x332 (mod goal6_i1 32)))
+(let ((?x331 (input_0 ?x701 ?x332 goal6_i2)))
+(let ((?x334 (ite (= (div goal6_i1 32) 0) ?x331 ?x343)))
+(let ((?x669 (input_0 ?x701 goal6_i1 goal6_i2)))
+(not (= ?x669 ?x334))))))))))))
+(check-sat)
+END SMT-LIB
+Query 7: output[0] group=(7,); result=UNSAT
+Meaning: EXISTS valid original output index where single and distributed results disagree.
+Guard: (and (>= goal7_i0 0)
+     (< goal7_i0 2)
+     (>= goal7_i1 0)
+     (< goal7_i1 128)
+     (>= goal7_i2 0)
+     (< goal7_i2 256))
+Simplified disequality: (let ((a!1 (ite (= (div goal7_i1 32) 2)
+                (input_0 (+ 2 goal7_i0) (+ 64 (mod goal7_i1 32)) goal7_i2)
+                (input_0 (+ 2 goal7_i0) (+ 96 (mod goal7_i1 32)) goal7_i2))))
+(let ((a!2 (ite (= (div goal7_i1 32) 1)
+                (input_0 (+ 2 goal7_i0) (+ 32 (mod goal7_i1 32)) goal7_i2)
+                a!1)))
+(let ((a!3 (= (input_0 (+ 2 goal7_i0) goal7_i1 goal7_i2)
+              (ite (= (div goal7_i1 32) 0)
+                   (input_0 (+ 2 goal7_i0) (mod goal7_i1 32) goal7_i2)
+                   a!2))))
+  (not a!3))))
+A false disequality means exact symbolic simplification made the two expressions identical.
+BEGIN SMT-LIB (complete query)
+; benchmark generated from python API
+(set-info :status unknown)
+(declare-fun goal7_i2 () Int)
+(declare-fun goal7_i1 () Int)
+(declare-fun goal7_i0 () Int)
+(declare-fun input_0 (Int Int Int) Real)
+(assert
+ (let (($x1977 (>= goal7_i2 0)))
+ (let (($x729 (>= goal7_i1 0)))
+ (let (($x1976 (>= goal7_i0 0)))
+ (and $x1976 (< goal7_i0 2) $x729 (< goal7_i1 128) $x1977 (< goal7_i2 256))))))
+(assert
+ (let ((?x761 (+ 2 goal7_i0)))
+(let ((?x359 (input_0 ?x761 (+ 96 (mod goal7_i1 32)) goal7_i2)))
+(let ((?x346 (input_0 ?x761 (+ 64 (mod goal7_i1 32)) goal7_i2)))
+(let ((?x358 (input_0 ?x761 (+ 32 (mod goal7_i1 32)) goal7_i2)))
+(let ((?x1209 (ite (= (div goal7_i1 32) 1) ?x358 (ite (= (div goal7_i1 32) 2) ?x346 ?x359))))
+(let ((?x347 (mod goal7_i1 32)))
+(let ((?x1206 (input_0 ?x761 ?x347 goal7_i2)))
+(let ((?x1204 (ite (= (div goal7_i1 32) 0) ?x1206 ?x1209)))
+(let ((?x725 (input_0 ?x761 goal7_i1 goal7_i2)))
+(not (= ?x725 ?x1204))))))))))))
+(check-sat)
+END SMT-LIB
+
+Final result
+============
+Verification: PROVED
+Every output domain was UNSAT over original shapes, conditional on the stated input relations.

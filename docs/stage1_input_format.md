@@ -2,7 +2,7 @@
 
 > 本文保留旧 placement 协议的历史说明。当前样例格式以
 > [中文输入规范](../input/docs/README.zh-CN.md) / [English input contract](../input/docs/README.md)
-> 为准；loader 的实现尚待同步升级。
+> 为准；新 loader 和验证器已实现该规范，下文只保留旧协议历史记录。
 
 阶段一规定 SMT verifier 原型的 Stage 输入契约。它只描述和校验局部 stage，不执行 operator，也不进行 SMT、shape reduction 或真实计算图解析。
 

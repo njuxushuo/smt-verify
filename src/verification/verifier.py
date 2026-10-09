@@ -1,142 +1,73 @@
-"""End-to-end local Stage verification over reduced symbolic shapes."""
-
-from __future__ import annotations
-
-from dataclasses import dataclass
-from enum import Enum
-
-import z3
-
-from ..shape.model import ReducedShapeResult
-from ..shape.reducer import reduce_shapes
-from ..stage.model import StageSpec
-from ..symbolic.executor import execute_stage
-from ..symbolic.tensor import SymbolicStageResult
-from .relation_encoder import EncodedRelations, encode_stage_relations
-
-
-class VerificationStatus(str, Enum):
-    """The three possible outcomes of the Stage proof query."""
-
-    PROVED = "PROVED"
-    DISPROVED = "DISPROVED"
-    UNKNOWN = "UNKNOWN"
-
-
-@dataclass(frozen=True)
-class Counterexample:
-    """A model restricted to free variables of true program inputs."""
-
-    single_inputs: dict[str, tuple[str, ...]]
-    distributed_inputs: dict[int, dict[str, tuple[str, ...]]]
-    failed_output_constraints: tuple[int, ...]
-
-
-@dataclass(frozen=True)
-class VerificationResult:
-    """The result of reducing, executing, encoding, and checking one Stage."""
-
-    stage_name: str
-    status: VerificationStatus
-    reduced_shapes: ReducedShapeResult
-    input_constraint_count: int
-    output_constraint_count: int
-    counterexample: Counterexample | None = None
-    reason_unknown: str | None = None
-
-
-class VerificationError(ValueError):
-    """Raised when the verifier cannot construct its fixed proof query."""
-
-
-def _validate_timeout(timeout_ms: int | None) -> None:
-    if timeout_ms is None:
-        return
-    if isinstance(timeout_ms, bool) or not isinstance(timeout_ms, int) or timeout_ms <= 0:
-        raise VerificationError("timeout_ms must be a positive integer or None")
-
-
-def _serialize_input_tensors(
-    symbolic: SymbolicStageResult,
-    model: z3.ModelRef,
-) -> tuple[dict[str, tuple[str, ...]], dict[int, dict[str, tuple[str, ...]]]]:
-    """Serialize exactly the free tensors identified as program inputs."""
-
-    single_inputs = {
-        name: tuple(
-            str(model.eval(value, model_completion=True))
-            for value in symbolic.single.tensors[name].values
-        )
-        for name in symbolic.single.input_names
-    }
-    distributed_inputs = {
-        rank: {
-            name: tuple(
-                str(model.eval(value, model_completion=True))
-                for value in program.tensors[name].values
-            )
-            for name in program.input_names
-        }
-        for rank, program in symbolic.distributed.items()
-    }
-    return single_inputs, distributed_inputs
-
-
-def _extract_counterexample(
-    symbolic: SymbolicStageResult,
-    encoded: EncodedRelations,
-    model: z3.ModelRef,
-) -> Counterexample:
-    single_inputs, distributed_inputs = _serialize_input_tensors(symbolic, model)
-    failed = tuple(
-        index
-        for index, constraint in enumerate(encoded.output_constraints)
-        if z3.is_false(model.eval(constraint, model_completion=True))
-    )
-    return Counterexample(
-        single_inputs=single_inputs,
-        distributed_inputs=distributed_inputs,
-        failed_output_constraints=failed,
-    )
+from ..core.errors import InvalidInput, Unsupported
+from ..relation.encoding import encode_inputs
+from ..reduction.reducer import reduce_domains
+from ..reduction.rules import check_budget
+from ..smt.context import SymbolicContext
+from ..smt.solver import check
+from ..stage.codec import load_stage
+from ..stage.validation import validate_stage
+from .counterexample import extract
+from .executor import execute_stage
+from .obligation import build_obligation
+from .result import Status, VerificationResult
 
 
 def verify_stage(
-    stage: StageSpec,
-    *,
-    timeout_ms: int | None = None,
-) -> VerificationResult:
-    """Check the fixed query ``Rin ∧ ¬And(Rout)`` for one reduced Stage."""
-
-    _validate_timeout(timeout_ms)
-    reduced = reduce_shapes(stage)
-    symbolic = execute_stage(stage, reduced)
-    encoded = encode_stage_relations(stage, symbolic)
-    if not encoded.output_constraints:
-        raise VerificationError("stage output relation produced no constraints")
-
-    solver = z3.Solver()
-    if timeout_ms is not None:
-        solver.set(timeout=timeout_ms)
-    solver.add(*encoded.input_constraints)
-    solver.add(z3.Not(z3.And(*encoded.output_constraints)))
-    outcome = solver.check()
-
-    common = {
-        "stage_name": stage.name,
-        "reduced_shapes": reduced,
-        "input_constraint_count": len(encoded.input_constraints),
-        "output_constraint_count": len(encoded.output_constraints),
-    }
-    if outcome == z3.unsat:
-        return VerificationResult(status=VerificationStatus.PROVED, **common)
-    if outcome == z3.sat:
-        return VerificationResult(
-            status=VerificationStatus.DISPROVED,
-            counterexample=_extract_counterexample(symbolic, encoded, solver.model()),
-            **common,
+    stage, registry, *, timeout_ms=30000, max_contraction=8192, max_symbolic_ops=10000
+):
+    if type(timeout_ms) is not int or timeout_ms < 1:
+        raise InvalidInput("timeout_ms must be a positive integer")
+    result = VerificationResult(stage.name, Status.UNKNOWN)
+    try:
+        result.validated = validate_stage(stage, registry)
+        check_budget(stage, max_contraction, max_symbolic_ops)
+        result.reduction = reduce_domains(result.validated.outputs)
+        context = SymbolicContext()
+        result.inputs = encode_inputs(
+            stage.single, stage.distributed, result.validated.inputs, context
         )
-    return VerificationResult(
-        status=VerificationStatus.UNKNOWN,
-        reason_unknown=solver.reason_unknown(),
-        **common,
-    )
+        result.execution = execute_stage(
+            stage, result.inputs.tensors, registry, context
+        )
+        unknown = []
+        for n, domain in enumerate(result.reduction.domains):
+            obligation = build_obligation(
+                n,
+                domain,
+                result.validated.outputs[domain.relation_index],
+                result.execution.tensors,
+            )
+            outcome = check((obligation.guard,), obligation.violation, timeout_ms)
+            result.queries.append((obligation, outcome))
+            if outcome.status == "SAT":
+                result.status = Status.DISPROVED
+                result.counterexample = extract(
+                    obligation, outcome.model, context, result.inputs
+                )
+                return result
+            if outcome.status == "UNKNOWN":
+                unknown.append(outcome.reason)
+        result.status = Status.UNKNOWN if unknown else Status.PROVED
+        result.reason = "; ".join(unknown) if unknown else None
+    except InvalidInput as e:
+        result.status = Status.INVALID_INPUT
+        result.reason = str(e)
+    except Unsupported as e:
+        result.status = Status.UNSUPPORTED
+        result.reason = str(e)
+    except RecursionError:
+        result.status = Status.UNSUPPORTED
+        result.reason = (
+            "symbolic dependency expansion exceeded the interpreter recursion budget"
+        )
+    return result
+
+
+def verify_file(path, registry, **options):
+    try:
+        stage = load_stage(path)
+    except InvalidInput as e:
+        return VerificationResult(str(path), Status.INVALID_INPUT, reason=str(e))
+    except Unsupported as e:
+        return VerificationResult(str(path), Status.UNSUPPORTED, reason=str(e))
+    return verify_stage(stage, registry, **options)
