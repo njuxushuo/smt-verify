@@ -1,0 +1,143 @@
+{
+  "name": "mlp_dp2_tp4_sp_01_allgather",
+  "topology": {
+    "world_size": 8,
+    "groups": {
+      "tp_0": {"ranks": [0, 1, 2, 3]},
+      "tp_1": {"ranks": [4, 5, 6, 7]},
+      "dp_0": {"ranks": [0, 4]},
+      "dp_1": {"ranks": [1, 5]},
+      "dp_2": {"ranks": [2, 6]},
+      "dp_3": {"ranks": [3, 7]}
+    },
+    "families": {
+      "tp": {"groups": ["tp_0", "tp_1"]},
+      "dp": {"groups": ["dp_0", "dp_1", "dp_2", "dp_3"]},
+      "sp": {"groups": ["tp_0", "tp_1"]}
+    }
+  },
+  "single": {"tensors": {"X": {"shape": [4, 128, 256]}}, "inputs": ["X"], "outputs": ["X"], "ops": []},
+  "distributed": {
+    "ranks": {
+      "0": {
+        "tensors": {"Xsp0": {"shape": [2, 32, 256]}, "X0": {"shape": [2, 128, 256]}},
+        "inputs": ["Xsp0"],
+        "outputs": ["X0"],
+        "ops": [{"type": "all_gather", "inputs": ["Xsp0"], "outputs": ["X0"], "attrs": {"group": "tp_0", "axis": 1}}]
+      },
+      "1": {
+        "tensors": {"Xsp1": {"shape": [2, 32, 256]}, "X1": {"shape": [2, 128, 256]}},
+        "inputs": ["Xsp1"],
+        "outputs": ["X1"],
+        "ops": [{"type": "all_gather", "inputs": ["Xsp1"], "outputs": ["X1"], "attrs": {"group": "tp_0", "axis": 1}}]
+      },
+      "2": {
+        "tensors": {"Xsp2": {"shape": [2, 32, 256]}, "X2": {"shape": [2, 128, 256]}},
+        "inputs": ["Xsp2"],
+        "outputs": ["X2"],
+        "ops": [{"type": "all_gather", "inputs": ["Xsp2"], "outputs": ["X2"], "attrs": {"group": "tp_0", "axis": 1}}]
+      },
+      "3": {
+        "tensors": {"Xsp3": {"shape": [2, 32, 256]}, "X3": {"shape": [2, 128, 256]}},
+        "inputs": ["Xsp3"],
+        "outputs": ["X3"],
+        "ops": [{"type": "all_gather", "inputs": ["Xsp3"], "outputs": ["X3"], "attrs": {"group": "tp_0", "axis": 1}}]
+      },
+      "4": {
+        "tensors": {"Xsp4": {"shape": [2, 32, 256]}, "X4": {"shape": [2, 128, 256]}},
+        "inputs": ["Xsp4"],
+        "outputs": ["X4"],
+        "ops": [{"type": "all_gather", "inputs": ["Xsp4"], "outputs": ["X4"], "attrs": {"group": "tp_1", "axis": 1}}]
+      },
+      "5": {
+        "tensors": {"Xsp5": {"shape": [2, 32, 256]}, "X5": {"shape": [2, 128, 256]}},
+        "inputs": ["Xsp5"],
+        "outputs": ["X5"],
+        "ops": [{"type": "all_gather", "inputs": ["Xsp5"], "outputs": ["X5"], "attrs": {"group": "tp_1", "axis": 1}}]
+      },
+      "6": {
+        "tensors": {"Xsp6": {"shape": [2, 32, 256]}, "X6": {"shape": [2, 128, 256]}},
+        "inputs": ["Xsp6"],
+        "outputs": ["X6"],
+        "ops": [{"type": "all_gather", "inputs": ["Xsp6"], "outputs": ["X6"], "attrs": {"group": "tp_1", "axis": 1}}]
+      },
+      "7": {
+        "tensors": {"Xsp7": {"shape": [2, 32, 256]}, "X7": {"shape": [2, 128, 256]}},
+        "inputs": ["Xsp7"],
+        "outputs": ["X7"],
+        "ops": [{"type": "all_gather", "inputs": ["Xsp7"], "outputs": ["X7"], "attrs": {"group": "tp_1", "axis": 1}}]
+      }
+    }
+  },
+  "input_relations": [
+    {
+      "single_tensor": "X",
+      "distributed_tensors": {"0": "Xsp0", "1": "Xsp1", "2": "Xsp2", "3": "Xsp3", "4": "Xsp4", "5": "Xsp5", "6": "Xsp6", "7": "Xsp7"},
+      "relation": {
+        "terms": [
+          {
+            "family": "dp",
+            "expr": {
+              "kind": "index_phi",
+              "dim": 0,
+              "maps": [
+                {"rank": 0, "local_extent": 2, "single_extent": 4, "pieces": [{"local": {"start": 0, "stop": 2}, "single": {"start": 0, "stop": 2}}]},
+                {"rank": 1, "local_extent": 2, "single_extent": 4, "pieces": [{"local": {"start": 0, "stop": 2}, "single": {"start": 0, "stop": 2}}]},
+                {"rank": 2, "local_extent": 2, "single_extent": 4, "pieces": [{"local": {"start": 0, "stop": 2}, "single": {"start": 0, "stop": 2}}]},
+                {"rank": 3, "local_extent": 2, "single_extent": 4, "pieces": [{"local": {"start": 0, "stop": 2}, "single": {"start": 0, "stop": 2}}]},
+                {"rank": 4, "local_extent": 2, "single_extent": 4, "pieces": [{"local": {"start": 0, "stop": 2}, "single": {"start": 2, "stop": 4}}]},
+                {"rank": 5, "local_extent": 2, "single_extent": 4, "pieces": [{"local": {"start": 0, "stop": 2}, "single": {"start": 2, "stop": 4}}]},
+                {"rank": 6, "local_extent": 2, "single_extent": 4, "pieces": [{"local": {"start": 0, "stop": 2}, "single": {"start": 2, "stop": 4}}]},
+                {"rank": 7, "local_extent": 2, "single_extent": 4, "pieces": [{"local": {"start": 0, "stop": 2}, "single": {"start": 2, "stop": 4}}]}
+              ]
+            }
+          },
+          {
+            "family": "sp",
+            "expr": {
+              "kind": "index_phi",
+              "dim": 1,
+              "maps": [
+                {"rank": 0, "local_extent": 32, "single_extent": 128, "pieces": [{"local": {"start": 0, "stop": 32}, "single": {"start": 0, "stop": 32}}]},
+                {"rank": 1, "local_extent": 32, "single_extent": 128, "pieces": [{"local": {"start": 0, "stop": 32}, "single": {"start": 32, "stop": 64}}]},
+                {"rank": 2, "local_extent": 32, "single_extent": 128, "pieces": [{"local": {"start": 0, "stop": 32}, "single": {"start": 64, "stop": 96}}]},
+                {"rank": 3, "local_extent": 32, "single_extent": 128, "pieces": [{"local": {"start": 0, "stop": 32}, "single": {"start": 96, "stop": 128}}]},
+                {"rank": 4, "local_extent": 32, "single_extent": 128, "pieces": [{"local": {"start": 0, "stop": 32}, "single": {"start": 0, "stop": 32}}]},
+                {"rank": 5, "local_extent": 32, "single_extent": 128, "pieces": [{"local": {"start": 0, "stop": 32}, "single": {"start": 32, "stop": 64}}]},
+                {"rank": 6, "local_extent": 32, "single_extent": 128, "pieces": [{"local": {"start": 0, "stop": 32}, "single": {"start": 64, "stop": 96}}]},
+                {"rank": 7, "local_extent": 32, "single_extent": 128, "pieces": [{"local": {"start": 0, "stop": 32}, "single": {"start": 96, "stop": 128}}]}
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "output_relations": [
+    {
+      "single_tensor": "X",
+      "distributed_tensors": {"0": "X0", "1": "X1", "2": "X2", "3": "X3", "4": "X4", "5": "X5", "6": "X6", "7": "X7"},
+      "relation": {
+        "terms": [
+          {
+            "family": "dp",
+            "expr": {
+              "kind": "index_phi",
+              "dim": 0,
+              "maps": [
+                {"rank": 0, "local_extent": 2, "single_extent": 4, "pieces": [{"local": {"start": 0, "stop": 2}, "single": {"start": 0, "stop": 2}}]},
+                {"rank": 1, "local_extent": 2, "single_extent": 4, "pieces": [{"local": {"start": 0, "stop": 2}, "single": {"start": 0, "stop": 2}}]},
+                {"rank": 2, "local_extent": 2, "single_extent": 4, "pieces": [{"local": {"start": 0, "stop": 2}, "single": {"start": 0, "stop": 2}}]},
+                {"rank": 3, "local_extent": 2, "single_extent": 4, "pieces": [{"local": {"start": 0, "stop": 2}, "single": {"start": 0, "stop": 2}}]},
+                {"rank": 4, "local_extent": 2, "single_extent": 4, "pieces": [{"local": {"start": 0, "stop": 2}, "single": {"start": 2, "stop": 4}}]},
+                {"rank": 5, "local_extent": 2, "single_extent": 4, "pieces": [{"local": {"start": 0, "stop": 2}, "single": {"start": 2, "stop": 4}}]},
+                {"rank": 6, "local_extent": 2, "single_extent": 4, "pieces": [{"local": {"start": 0, "stop": 2}, "single": {"start": 2, "stop": 4}}]},
+                {"rank": 7, "local_extent": 2, "single_extent": 4, "pieces": [{"local": {"start": 0, "stop": 2}, "single": {"start": 2, "stop": 4}}]}
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

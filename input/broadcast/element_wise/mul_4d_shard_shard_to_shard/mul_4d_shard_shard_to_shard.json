@@ -1,48 +1,91 @@
 {
   "name": "mul_4d_shard_shard_to_shard",
-  "world_size": 2,
+  "topology": {
+    "world_size": 2,
+    "groups": {"mesh_axis_0_group_0": {"ranks": [0, 1]}},
+    "families": {"mesh_axis_0": {"groups": ["mesh_axis_0_group_0"]}}
+  },
   "single": {
-    "tensors": {
-      "A": {"shape": [2, 3, 4, 8]},
-      "B": {"shape": [1, 3, 1, 8]},
-      "C": {"shape": [2, 3, 4, 8]}
-    },
-    "ops": [
-      {"type": "mul", "inputs": ["A", "B"], "outputs": ["C"]}
-    ]
+    "tensors": {"A": {"shape": [2, 3, 4, 8]}, "B": {"shape": [1, 3, 1, 8]}, "C": {"shape": [2, 3, 4, 8]}},
+    "inputs": ["A", "B"],
+    "outputs": ["C"],
+    "ops": [{"type": "mul", "inputs": ["A", "B"], "outputs": ["C"], "attrs": {}}]
   },
   "distributed": {
     "ranks": {
       "0": {
-        "tensors": {
-          "A0": {"shape": [2, 3, 4, 4]},
-          "B0": {"shape": [1, 3, 1, 4]},
-          "C0": {"shape": [2, 3, 4, 4]}
-        },
-        "ops": [
-          {"type": "mul", "inputs": ["A0", "B0"], "outputs": ["C0"]}
-        ]
+        "tensors": {"A0": {"shape": [2, 3, 4, 4]}, "B0": {"shape": [1, 3, 1, 4]}, "C0": {"shape": [2, 3, 4, 4]}},
+        "inputs": ["A0", "B0"],
+        "outputs": ["C0"],
+        "ops": [{"type": "mul", "inputs": ["A0", "B0"], "outputs": ["C0"], "attrs": {}}]
       },
       "1": {
-        "tensors": {
-          "A1": {"shape": [2, 3, 4, 4]},
-          "B1": {"shape": [1, 3, 1, 4]},
-          "C1": {"shape": [2, 3, 4, 4]}
-        },
-        "ops": [
-          {"type": "mul", "inputs": ["A1", "B1"], "outputs": ["C1"]}
-        ]
+        "tensors": {"A1": {"shape": [2, 3, 4, 4]}, "B1": {"shape": [1, 3, 1, 4]}, "C1": {"shape": [2, 3, 4, 4]}},
+        "inputs": ["A1", "B1"],
+        "outputs": ["C1"],
+        "ops": [{"type": "mul", "inputs": ["A1", "B1"], "outputs": ["C1"], "attrs": {}}]
       }
     }
   },
   "input_relations": [
-    {"single_tensor": "A", "distributed_tensors": ["A0", "A1"], "type": "shard", "dim": 3},
-    {"single_tensor": "B", "distributed_tensors": ["B0", "B1"], "type": "shard", "dim": 3}
+    {
+      "single_tensor": "A",
+      "distributed_tensors": {"0": "A0", "1": "A1"},
+      "relation": {
+        "terms": [
+          {
+            "family": "mesh_axis_0",
+            "expr": {
+              "kind": "index_phi",
+              "dim": 3,
+              "maps": [
+                {"rank": 0, "local_extent": 4, "single_extent": 8, "pieces": [{"local": {"start": 0, "stop": 4}, "single": {"start": 0, "stop": 4}}]},
+                {"rank": 1, "local_extent": 4, "single_extent": 8, "pieces": [{"local": {"start": 0, "stop": 4}, "single": {"start": 4, "stop": 8}}]}
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "single_tensor": "B",
+      "distributed_tensors": {"0": "B0", "1": "B1"},
+      "relation": {
+        "terms": [
+          {
+            "family": "mesh_axis_0",
+            "expr": {
+              "kind": "index_phi",
+              "dim": 3,
+              "maps": [
+                {"rank": 0, "local_extent": 4, "single_extent": 8, "pieces": [{"local": {"start": 0, "stop": 4}, "single": {"start": 0, "stop": 4}}]},
+                {"rank": 1, "local_extent": 4, "single_extent": 8, "pieces": [{"local": {"start": 0, "stop": 4}, "single": {"start": 4, "stop": 8}}]}
+              ]
+            }
+          }
+        ]
+      }
+    }
   ],
-  "output_relation": {
-    "single_tensor": "C",
-    "distributed_tensors": ["C0", "C1"],
-    "type": "shard",
-    "dim": 3
-  }
+  "output_relations": [
+    {
+      "single_tensor": "C",
+      "distributed_tensors": {"0": "C0", "1": "C1"},
+      "relation": {
+        "terms": [
+          {
+            "family": "mesh_axis_0",
+            "expr": {
+              "kind": "index_phi",
+              "dim": 3,
+              "maps": [
+                {"rank": 0, "local_extent": 4, "single_extent": 8, "pieces": [{"local": {"start": 0, "stop": 4}, "single": {"start": 0, "stop": 4}}]},
+                {"rank": 1, "local_extent": 4, "single_extent": 8, "pieces": [{"local": {"start": 0, "stop": 4}, "single": {"start": 4, "stop": 8}}]}
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
 }

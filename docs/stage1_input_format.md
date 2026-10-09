@@ -1,5 +1,9 @@
 # Stage 1 输入格式
 
+> 本文保留旧 placement 协议的历史说明。当前样例格式以
+> [中文输入规范](../input/docs/README.zh-CN.md) / [English input contract](../input/docs/README.md)
+> 为准；loader 的实现尚待同步升级。
+
 阶段一规定 SMT verifier 原型的 Stage 输入契约。它只描述和校验局部 stage，不执行 operator，也不进行 SMT、shape reduction 或真实计算图解析。
 
 ## 顶层结构
@@ -83,7 +87,9 @@ Relation 关联一个单机 tensor 与按 flat rank 顺序排列的 local tensor
 }
 ```
 
-上面的完整示例刻意保留 legacy 1-D relation 写法，用于验证 backward compatibility。多维格式的可运行样例见 [`../input/mesh/mesh_shard_shard_transpose_proved/mesh_shard_shard_transpose_proved.json`](../input/mesh/mesh_shard_shard_transpose_proved/mesh_shard_shard_transpose_proved.json)。
+上面的完整示例保留 legacy 1-D relation 写法作为历史记录。当前保留的多 family 样例见
+[Shard/Partial transpose](../input/mesh/mesh_shard_partial_transpose_proved/mesh_shard_partial_transpose_proved.json)，
+该文件已采用新输入协议，旧 loader 尚不能直接运行。
 每个输入 case 位于以 JSON stem 命名的独立目录中；同目录 `demo.txt` 记录其真实 shape reduction、symbolic execution、relation encoding 和验证结果。运行 `conda run -n smt python scripts/export_input_demos.py` 可批量重建全部报告。静态非法 case 的报告会记录 `REJECTED` 和具体 validation error，不会伪造未执行的后续阶段。
 
 ## 当前限制

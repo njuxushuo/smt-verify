@@ -1,0 +1,183 @@
+{
+  "name": "mlp_dp2_tp4_04_allreduce",
+  "topology": {
+    "world_size": 8,
+    "groups": {
+      "tp_0": {"ranks": [0, 1, 2, 3]},
+      "tp_1": {"ranks": [4, 5, 6, 7]},
+      "dp_0": {"ranks": [0, 4]},
+      "dp_1": {"ranks": [1, 5]},
+      "dp_2": {"ranks": [2, 6]},
+      "dp_3": {"ranks": [3, 7]}
+    },
+    "families": {
+      "tp": {"groups": ["tp_0", "tp_1"]},
+      "dp": {"groups": ["dp_0", "dp_1", "dp_2", "dp_3"]},
+      "sp": {"groups": ["tp_0", "tp_1"]}
+    }
+  },
+  "single": {"tensors": {"Y": {"shape": [4, 128, 256]}}, "inputs": ["Y"], "outputs": ["Y"], "ops": []},
+  "distributed": {
+    "ranks": {
+      "0": {
+        "tensors": {"P0": {"shape": [2, 128, 256]}, "Y0": {"shape": [2, 128, 256]}},
+        "inputs": ["P0"],
+        "outputs": ["Y0"],
+        "ops": [
+          {
+            "type": "all_reduce",
+            "inputs": ["P0"],
+            "outputs": ["Y0"],
+            "attrs": {"group": "tp_0", "reduce_op": "sum"}
+          }
+        ]
+      },
+      "1": {
+        "tensors": {"P1": {"shape": [2, 128, 256]}, "Y1": {"shape": [2, 128, 256]}},
+        "inputs": ["P1"],
+        "outputs": ["Y1"],
+        "ops": [
+          {
+            "type": "all_reduce",
+            "inputs": ["P1"],
+            "outputs": ["Y1"],
+            "attrs": {"group": "tp_0", "reduce_op": "sum"}
+          }
+        ]
+      },
+      "2": {
+        "tensors": {"P2": {"shape": [2, 128, 256]}, "Y2": {"shape": [2, 128, 256]}},
+        "inputs": ["P2"],
+        "outputs": ["Y2"],
+        "ops": [
+          {
+            "type": "all_reduce",
+            "inputs": ["P2"],
+            "outputs": ["Y2"],
+            "attrs": {"group": "tp_0", "reduce_op": "sum"}
+          }
+        ]
+      },
+      "3": {
+        "tensors": {"P3": {"shape": [2, 128, 256]}, "Y3": {"shape": [2, 128, 256]}},
+        "inputs": ["P3"],
+        "outputs": ["Y3"],
+        "ops": [
+          {
+            "type": "all_reduce",
+            "inputs": ["P3"],
+            "outputs": ["Y3"],
+            "attrs": {"group": "tp_0", "reduce_op": "sum"}
+          }
+        ]
+      },
+      "4": {
+        "tensors": {"P4": {"shape": [2, 128, 256]}, "Y4": {"shape": [2, 128, 256]}},
+        "inputs": ["P4"],
+        "outputs": ["Y4"],
+        "ops": [
+          {
+            "type": "all_reduce",
+            "inputs": ["P4"],
+            "outputs": ["Y4"],
+            "attrs": {"group": "tp_1", "reduce_op": "sum"}
+          }
+        ]
+      },
+      "5": {
+        "tensors": {"P5": {"shape": [2, 128, 256]}, "Y5": {"shape": [2, 128, 256]}},
+        "inputs": ["P5"],
+        "outputs": ["Y5"],
+        "ops": [
+          {
+            "type": "all_reduce",
+            "inputs": ["P5"],
+            "outputs": ["Y5"],
+            "attrs": {"group": "tp_1", "reduce_op": "sum"}
+          }
+        ]
+      },
+      "6": {
+        "tensors": {"P6": {"shape": [2, 128, 256]}, "Y6": {"shape": [2, 128, 256]}},
+        "inputs": ["P6"],
+        "outputs": ["Y6"],
+        "ops": [
+          {
+            "type": "all_reduce",
+            "inputs": ["P6"],
+            "outputs": ["Y6"],
+            "attrs": {"group": "tp_1", "reduce_op": "sum"}
+          }
+        ]
+      },
+      "7": {
+        "tensors": {"P7": {"shape": [2, 128, 256]}, "Y7": {"shape": [2, 128, 256]}},
+        "inputs": ["P7"],
+        "outputs": ["Y7"],
+        "ops": [
+          {
+            "type": "all_reduce",
+            "inputs": ["P7"],
+            "outputs": ["Y7"],
+            "attrs": {"group": "tp_1", "reduce_op": "sum"}
+          }
+        ]
+      }
+    }
+  },
+  "input_relations": [
+    {
+      "single_tensor": "Y",
+      "distributed_tensors": {"0": "P0", "1": "P1", "2": "P2", "3": "P3", "4": "P4", "5": "P5", "6": "P6", "7": "P7"},
+      "relation": {
+        "terms": [
+          {
+            "family": "dp",
+            "expr": {
+              "kind": "index_phi",
+              "dim": 0,
+              "maps": [
+                {"rank": 0, "local_extent": 2, "single_extent": 4, "pieces": [{"local": {"start": 0, "stop": 2}, "single": {"start": 0, "stop": 2}}]},
+                {"rank": 1, "local_extent": 2, "single_extent": 4, "pieces": [{"local": {"start": 0, "stop": 2}, "single": {"start": 0, "stop": 2}}]},
+                {"rank": 2, "local_extent": 2, "single_extent": 4, "pieces": [{"local": {"start": 0, "stop": 2}, "single": {"start": 0, "stop": 2}}]},
+                {"rank": 3, "local_extent": 2, "single_extent": 4, "pieces": [{"local": {"start": 0, "stop": 2}, "single": {"start": 0, "stop": 2}}]},
+                {"rank": 4, "local_extent": 2, "single_extent": 4, "pieces": [{"local": {"start": 0, "stop": 2}, "single": {"start": 2, "stop": 4}}]},
+                {"rank": 5, "local_extent": 2, "single_extent": 4, "pieces": [{"local": {"start": 0, "stop": 2}, "single": {"start": 2, "stop": 4}}]},
+                {"rank": 6, "local_extent": 2, "single_extent": 4, "pieces": [{"local": {"start": 0, "stop": 2}, "single": {"start": 2, "stop": 4}}]},
+                {"rank": 7, "local_extent": 2, "single_extent": 4, "pieces": [{"local": {"start": 0, "stop": 2}, "single": {"start": 2, "stop": 4}}]}
+              ]
+            }
+          },
+          {"family": "tp", "expr": {"kind": "partial", "op": "sum"}}
+        ]
+      }
+    }
+  ],
+  "output_relations": [
+    {
+      "single_tensor": "Y",
+      "distributed_tensors": {"0": "Y0", "1": "Y1", "2": "Y2", "3": "Y3", "4": "Y4", "5": "Y5", "6": "Y6", "7": "Y7"},
+      "relation": {
+        "terms": [
+          {
+            "family": "dp",
+            "expr": {
+              "kind": "index_phi",
+              "dim": 0,
+              "maps": [
+                {"rank": 0, "local_extent": 2, "single_extent": 4, "pieces": [{"local": {"start": 0, "stop": 2}, "single": {"start": 0, "stop": 2}}]},
+                {"rank": 1, "local_extent": 2, "single_extent": 4, "pieces": [{"local": {"start": 0, "stop": 2}, "single": {"start": 0, "stop": 2}}]},
+                {"rank": 2, "local_extent": 2, "single_extent": 4, "pieces": [{"local": {"start": 0, "stop": 2}, "single": {"start": 0, "stop": 2}}]},
+                {"rank": 3, "local_extent": 2, "single_extent": 4, "pieces": [{"local": {"start": 0, "stop": 2}, "single": {"start": 0, "stop": 2}}]},
+                {"rank": 4, "local_extent": 2, "single_extent": 4, "pieces": [{"local": {"start": 0, "stop": 2}, "single": {"start": 2, "stop": 4}}]},
+                {"rank": 5, "local_extent": 2, "single_extent": 4, "pieces": [{"local": {"start": 0, "stop": 2}, "single": {"start": 2, "stop": 4}}]},
+                {"rank": 6, "local_extent": 2, "single_extent": 4, "pieces": [{"local": {"start": 0, "stop": 2}, "single": {"start": 2, "stop": 4}}]},
+                {"rank": 7, "local_extent": 2, "single_extent": 4, "pieces": [{"local": {"start": 0, "stop": 2}, "single": {"start": 2, "stop": 4}}]}
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

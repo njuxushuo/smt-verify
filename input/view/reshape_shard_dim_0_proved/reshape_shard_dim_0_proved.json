@@ -1,26 +1,72 @@
 {
   "name": "reshape_shard_dim_0_proved",
-  "world_size": 2,
+  "topology": {
+    "world_size": 2,
+    "groups": {"mesh_axis_0_group_0": {"ranks": [0, 1]}},
+    "families": {"mesh_axis_0": {"groups": ["mesh_axis_0_group_0"]}}
+  },
   "single": {
     "tensors": {"X": {"shape": [4, 2, 3]}, "Y": {"shape": [4, 6]}},
+    "inputs": ["X"],
+    "outputs": ["Y"],
     "ops": [{"type": "reshape", "inputs": ["X"], "outputs": ["Y"], "attrs": {"shape": [4, 6]}}]
   },
   "distributed": {
     "ranks": {
       "0": {
         "tensors": {"X0": {"shape": [2, 2, 3]}, "Y0": {"shape": [2, 6]}},
+        "inputs": ["X0"],
+        "outputs": ["Y0"],
         "ops": [{"type": "reshape", "inputs": ["X0"], "outputs": ["Y0"], "attrs": {"shape": [2, 6]}}]
       },
       "1": {
         "tensors": {"X1": {"shape": [2, 2, 3]}, "Y1": {"shape": [2, 6]}},
+        "inputs": ["X1"],
+        "outputs": ["Y1"],
         "ops": [{"type": "reshape", "inputs": ["X1"], "outputs": ["Y1"], "attrs": {"shape": [2, 6]}}]
       }
     }
   },
   "input_relations": [
-    {"single_tensor": "X", "distributed_tensors": ["X0", "X1"], "type": "shard", "dim": 0}
+    {
+      "single_tensor": "X",
+      "distributed_tensors": {"0": "X0", "1": "X1"},
+      "relation": {
+        "terms": [
+          {
+            "family": "mesh_axis_0",
+            "expr": {
+              "kind": "index_phi",
+              "dim": 0,
+              "maps": [
+                {"rank": 0, "local_extent": 2, "single_extent": 4, "pieces": [{"local": {"start": 0, "stop": 2}, "single": {"start": 0, "stop": 2}}]},
+                {"rank": 1, "local_extent": 2, "single_extent": 4, "pieces": [{"local": {"start": 0, "stop": 2}, "single": {"start": 2, "stop": 4}}]}
+              ]
+            }
+          }
+        ]
+      }
+    }
   ],
-  "output_relation": {
-    "single_tensor": "Y", "distributed_tensors": ["Y0", "Y1"], "type": "shard", "dim": 0
-  }
+  "output_relations": [
+    {
+      "single_tensor": "Y",
+      "distributed_tensors": {"0": "Y0", "1": "Y1"},
+      "relation": {
+        "terms": [
+          {
+            "family": "mesh_axis_0",
+            "expr": {
+              "kind": "index_phi",
+              "dim": 0,
+              "maps": [
+                {"rank": 0, "local_extent": 2, "single_extent": 4, "pieces": [{"local": {"start": 0, "stop": 2}, "single": {"start": 0, "stop": 2}}]},
+                {"rank": 1, "local_extent": 2, "single_extent": 4, "pieces": [{"local": {"start": 0, "stop": 2}, "single": {"start": 2, "stop": 4}}]}
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
 }
