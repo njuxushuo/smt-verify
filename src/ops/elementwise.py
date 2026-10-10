@@ -1,10 +1,12 @@
 from ..smt.tensor import SymbolicTensor
 from .api import arity, attrs_exact
 from .broadcast import broadcast_index, broadcast_shape
+from .shape_rules import elementwise
 
 
 class Elementwise:
     collective = False
+    shape_constraints = staticmethod(elementwise)
 
     def __init__(self, kind):
         self.kind = kind

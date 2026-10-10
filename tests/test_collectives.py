@@ -6,6 +6,11 @@ from tests.test_proofs import prove
 
 
 class CollectiveTests(unittest.TestCase):
+    shape_reduce = False
+
+    def prove(self, raw):
+        return prove(raw, shape_reduce=self.shape_reduce)
+
     def test_cross_group_dependency_deadlock_is_rejected(self):
         raw = identity_stage((2,))
         raw["topology"]["groups"]["other"] = {"ranks": [0, 1]}
@@ -30,43 +35,43 @@ class CollectiveTests(unittest.TestCase):
             ]
             p["outputs"] = [f"B{rank}"]
             raw["output_relations"][0]["distributed_tensors"][rank] = f"B{rank}"
-        result = prove(raw)
+        result = self.prove(raw)
         self.assertEqual(result.status, Status.INVALID_INPUT)
         self.assertIn("cannot make progress", result.reason)
 
     def test_group_order_changes_allgather_values(self):
         raw = fixture("mlp_dp2_tp4_sp_01_allgather")
         raw["topology"]["groups"]["tp_0"]["ranks"].reverse()
-        self.assertEqual(prove(raw).status, Status.DISPROVED)
+        self.assertEqual(self.prove(raw).status, Status.DISPROVED)
 
     def test_group_order_changes_reduce_scatter_assignment(self):
         raw = fixture("mlp_dp2_tp4_sp_04_reduce_scatter")
         raw["topology"]["groups"]["tp_1"]["ranks"].reverse()
-        self.assertEqual(prove(raw).status, Status.DISPROVED)
+        self.assertEqual(self.prove(raw).status, Status.DISPROVED)
 
     def test_reordering_allreduce_members_does_not_change_sum(self):
         raw = fixture("mlp_dp2_tp4_04_allreduce")
         raw["topology"]["groups"]["tp_1"]["ranks"].reverse()
-        self.assertEqual(prove(raw).status, Status.PROVED)
+        self.assertEqual(self.prove(raw).status, Status.PROVED)
 
     def test_missing_collective_member_is_invalid(self):
         raw = fixture("mlp_dp2_tp4_04_allreduce")
         p = raw["distributed"]["ranks"]["3"]
         p["ops"] = []
         p["inputs"].append("Y3")
-        self.assertEqual(prove(raw).status, Status.INVALID_INPUT)
+        self.assertEqual(self.prove(raw).status, Status.INVALID_INPUT)
 
     def test_wrong_group_membership_is_invalid(self):
         raw = fixture("mlp_dp2_tp4_04_allreduce")
         raw["distributed"]["ranks"]["0"]["ops"][0]["attrs"]["group"] = "tp_1"
-        self.assertEqual(prove(raw).status, Status.INVALID_INPUT)
+        self.assertEqual(self.prove(raw).status, Status.INVALID_INPUT)
 
     def test_no_cross_dp_reduction(self):
         raw = fixture("mlp_dp2_tp4_04_allreduce")
         raw["topology"]["groups"]["world"] = {"ranks": list(range(8))}
         for p in raw["distributed"]["ranks"].values():
             p["ops"][0]["attrs"]["group"] = "world"
-        self.assertEqual(prove(raw).status, Status.DISPROVED)
+        self.assertEqual(self.prove(raw).status, Status.DISPROVED)
 
     def test_multiple_collectives_pair_by_occurrence(self):
         raw = fixture("mlp_dp2_tp4_04_allreduce")
@@ -83,4 +88,8 @@ class CollectiveTests(unittest.TestCase):
             p["outputs"] = ["Q" + rank]
             raw["output_relations"][0]["distributed_tensors"][rank] = "Q" + rank
         # Reducing a replicated sum a second time scales it by TP degree.
-        self.assertEqual(prove(raw).status, Status.DISPROVED)
+        self.assertEqual(self.prove(raw).status, Status.DISPROVED)
+
+
+class ShapeReducedCollectiveTests(CollectiveTests):
+    shape_reduce = True

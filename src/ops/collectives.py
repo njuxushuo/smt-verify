@@ -3,10 +3,14 @@ import z3
 from ..core.errors import InvalidInput, Unsupported
 from ..smt.tensor import SymbolicTensor
 from .api import arity, attrs_exact
+from .shape_rules import collective as collective_shape
 
 
 class Collective:
     collective = True
+
+    def shape_constraints(self, *args):
+        return collective_shape(self.kind, *args)
 
     def __init__(self, kind):
         self.kind = kind

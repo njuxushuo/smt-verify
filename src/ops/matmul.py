@@ -1,13 +1,14 @@
-import z3
-
 from ..core.errors import InvalidInput, Unsupported
 from ..smt.tensor import SymbolicTensor
 from .api import arity, attrs_exact, ExecutionLimits
 from .broadcast import broadcast_index, broadcast_shape
+from .shape_rules import matmul
 
 
 class MatMul:
     collective = False
+    shape_constraints = staticmethod(matmul)
+    contraction_axes = ((0, -1),)
 
     def __init__(self, limits=ExecutionLimits()):
         self.limits = limits
@@ -25,7 +26,7 @@ class MatMul:
     def evaluate(self, call, inputs, context):
         a, b = inputs
         shape = self.infer(call, (a.shape, b.shape))
-        if a.shape[-1] > self.limits.max_contraction:
+        if context.contraction_terms(a.shape[-1]) > self.limits.max_contraction:
             raise Unsupported(
                 "matmul contraction exceeds configured exact expansion limit"
             )
@@ -33,11 +34,9 @@ class MatMul:
         def element(index):
             left = broadcast_index(index[:-2], a.shape[:-2])
             right = broadcast_index(index[:-2], b.shape[:-2])
-            return z3.Sum(
-                [
-                    a.at(left + (index[-2], k)) * b.at(right + (k, index[-1]))
-                    for k in range(a.shape[-1])
-                ]
+            return context.contract(
+                a.shape[-1],
+                lambda k: a.at(left + (index[-2], k)) * b.at(right + (k, index[-1])),
             )
 
         return SymbolicTensor(shape, element)

@@ -10,17 +10,49 @@ from .counterexample import extract
 from .executor import execute_stage
 from .obligation import build_obligation
 from .result import Status, VerificationResult
+from .shape_mode import verify_reduced
 
 
 def verify_stage(
-    stage, registry, *, timeout_ms=30000, max_contraction=8192, max_symbolic_ops=10000
+    stage,
+    registry,
+    *,
+    timeout_ms=30000,
+    max_contraction=8192,
+    max_symbolic_ops=10000,
+    shape_reduce=False,
+    max_reduced_elements=50000,
 ):
     if type(timeout_ms) is not int or timeout_ms < 1:
         raise InvalidInput("timeout_ms must be a positive integer")
+    if (
+        type(shape_reduce) is not bool
+        or type(max_reduced_elements) is not int
+        or max_reduced_elements < 1
+    ):
+        raise InvalidInput("shape_reduce must be boolean and element budget positive")
     result = VerificationResult(stage.name, Status.UNKNOWN)
+    if shape_reduce:
+        result.mode = "SHAPE_REDUCTION_NOT_STARTED"
     try:
+        if shape_reduce:
+            return verify_reduced(
+                stage,
+                registry,
+                timeout_ms=timeout_ms,
+                max_elements=max_reduced_elements,
+                max_contraction=max_contraction,
+                max_symbolic_ops=max_symbolic_ops,
+                exact=lambda: verify_stage(
+                    stage,
+                    registry,
+                    timeout_ms=timeout_ms,
+                    max_contraction=max_contraction,
+                    max_symbolic_ops=max_symbolic_ops,
+                ),
+            )
         result.validated = validate_stage(stage, registry)
-        check_budget(stage, max_contraction, max_symbolic_ops)
+        check_budget(stage, max_contraction, max_symbolic_ops, registry=registry)
         result.reduction = reduce_domains(result.validated.outputs)
         context = SymbolicContext()
         result.inputs = encode_inputs(
@@ -66,8 +98,12 @@ def verify_stage(
 def verify_file(path, registry, **options):
     try:
         stage = load_stage(path)
-    except InvalidInput as e:
-        return VerificationResult(str(path), Status.INVALID_INPUT, reason=str(e))
-    except Unsupported as e:
-        return VerificationResult(str(path), Status.UNSUPPORTED, reason=str(e))
+    except (InvalidInput, Unsupported) as e:
+        status = (
+            Status.INVALID_INPUT if isinstance(e, InvalidInput) else Status.UNSUPPORTED
+        )
+        result = VerificationResult(str(path), status, reason=str(e))
+        if options.get("shape_reduce") is True:
+            result.mode = "SHAPE_REDUCTION_NOT_STARTED"
+        return result
     return verify_stage(stage, registry, **options)

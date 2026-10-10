@@ -89,11 +89,12 @@ def _relation(lines, rel, role, number):
         lines.append(f"  rank {r} single-image intervals by dimension: {rel.image(r)}")
 
 
-def render_report(result):
+def _render_standard(result):
     lines = [
         f"Stage: {result.name}",
         f"Verification: {result.status.value}",
         f"Proof scope: {result.scope}",
+        f"Actual mode: {result.mode}",
         f"Z3 version: {z3.get_version_string()}",
         "Arithmetic: exact real; GELU: shared unary uninterpreted function.",
         "No claim of IEEE floating-point kernel equivalence or whole-program correctness.",
@@ -154,12 +155,19 @@ def render_report(result):
         plan = result.reduction
         _section(lines, "4. Shape/index-domain reduction and its justification")
         lines.append("Method: " + plan.method)
-        lines.extend(plan.notes)
+        if result.mode == "SHAPE_REDUCED_ELEMENTWISE":
+            lines.append(
+                "Original-index certificate: matmul sums may be abstracted in fixed blocks; see block definitions above."
+            )
+        else:
+            lines.extend(plan.notes)
         lines.append(
             f"{plan.original_output_elements} output relation elements -> {len(plan.domains)} symbolic-index domains."
         )
         lines.append(
-            "Physical shape reduction: NONE. No optimizer picks smaller dimensions; original shapes are retained."
+            "Original certificate retains original dimensions; candidate shape reduction is documented above."
+            if result.mode == "SHAPE_REDUCED_ELEMENTWISE"
+            else "Physical shape reduction: NONE. No optimizer picks smaller dimensions; original shapes are retained."
         )
         lines.append(
             "Reduction constraints are exact original index bounds, not sample-size constraints."
@@ -215,7 +223,7 @@ def render_report(result):
             "Local outputs are lazy element expressions; no concrete tensor values are used."
         )
         lines.append(
-            "MatMul: Out[batch,i,j] = Sum_k Left[broadcast(batch),i,k]*Right[broadcast(batch),k,j], all original k."
+            "MatMul: exact finite sums; in certificate mode each declared opaque atom denotes one fixed block of original k."
         )
         lines.append(
             "Add/Mul broadcast indices; Transpose permutes indices; Reshape uses row-major ravel/unravel; Expand broadcasts."
@@ -267,10 +275,93 @@ def write_report(result, path):
     return path
 
 
-def demo_path(input_path):
+def demo_path(input_path, shape_reduce=False):
     """Keep existing inputs in place, with one unambiguous report per case."""
     path = Path(input_path)
     directory = (
         path.parent if path.parent.name == path.stem else path.parent / path.stem
     )
-    return directory / "demo.txt"
+    return directory / ("demo.shape-reduced.txt" if shape_reduce else "demo.txt")
+
+
+def render_report(result):
+    attempt = result.shape_attempt
+    if attempt is None:
+        return _render_standard(result)
+    lines = [
+        f"Stage: {result.name}",
+        "Requested mode: SHAPE_REDUCED_ELEMENTWISE",
+        f"Actual mode: {result.mode}",
+        f"Final original-shape status: {result.status.value}",
+        "Reduced UNSAT alone is never promoted to an original proof.",
+        "Original block-sum UNSAT certifies the result; abstract SAT/UNKNOWN requires exact fallback.",
+    ]
+    if attempt.fallback_reason:
+        lines.append("Fallback reason: " + attempt.fallback_reason)
+    plan = attempt.plan
+    if plan is not None:
+        _section(lines, "A. Joint shape optimization")
+        lines.append(
+            f"Declared tensor elements: {plan.original_elements} -> {plan.reduced_elements}"
+        )
+        lines.append(
+            "Objective: minimize sum of dimensions; each scale is an exact divisor, not rounded division."
+        )
+        for label, old, new in plan.changes:
+            lines.append(f"  {label}: {old} -> {new}")
+        for source, reason, expression in plan.constraints:
+            lines.append(f"  {source}: {reason}\n    {expression}")
+        _section(lines, "B. Reduced Stage JSON (original input is unchanged)")
+        lines.append(json.dumps(stage_to_dict(plan.stage), indent=2))
+    reduced = attempt.reduced
+    if reduced is not None:
+        _section(lines, "C. Finite element encoding: REDUCED SHAPES ONLY")
+        lines.append(f"Reduced status: {reduced.status.value}")
+        lines.append(
+            "Every input element has a Real symbol element_<tensor>_<coordinates>; bound inputs use exact substitution."
+        )
+        lines.append(
+            "Every mapped output element is enumerated; each query is the OR of its group's disequalities."
+        )
+        if reduced.validated:
+            for role, relations in (
+                ("INPUT", reduced.validated.inputs),
+                ("OUTPUT GOAL", reduced.validated.outputs),
+            ):
+                for n, rel in enumerate(relations):
+                    _relation(lines, rel, role, n)
+        if reduced.inputs:
+            lines.extend(reduced.inputs.substitutions)
+            lines.extend(
+                f"Rin[{n}]: {eq}" for n, eq in enumerate(reduced.inputs.equations)
+            )
+        if reduced.execution:
+            lines.extend(reduced.execution.trace)
+        _append_queries(lines, reduced)
+    _section(lines, "D. Original-shape certificate")
+    lines.append(
+        "Each opaque sum is the exact finite sum of its body over q=0..width-1. Other free symbols retain their current values."
+    )
+    lines.append(
+        "Equal simplified bodies share atoms; distinct atoms are unconstrained. Every original evaluation is an abstract assignment."
+    )
+    lines.append(
+        "Thus UNSAT is sound; a model of the abstraction is not necessarily an original counterexample. Nested opaque sums are rejected."
+    )
+    for atom, width, body in attempt.block_definitions:
+        lines.append(f"  {atom} = Sum(q=0..{width - 1}, body={body})")
+    if attempt.certificate is not None:
+        _append_queries(lines, attempt.certificate)
+    _section(lines, "E. Original-shape final verification details")
+    lines.append(_render_standard(result))
+    return "\n".join(lines) + "\n"
+
+
+def _append_queries(lines, result):
+    for obligation, outcome in result.queries:
+        lines.append(f"Query: {obligation.name}; result={outcome.status}")
+        lines.append("BEGIN SMT-LIB (complete query)")
+        lines.append(outcome.query.rstrip())
+        lines.append("END SMT-LIB")
+        if outcome.reason:
+            lines.append("Solver reason: " + outcome.reason)

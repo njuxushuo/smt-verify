@@ -12,7 +12,7 @@ class ArchitectureTests(unittest.TestCase):
             "ops": {"core", "smt", "ops"},
             "relation": {"core", "smt", "relation"},
             "stage": {"core", "relation", "stage"},
-            "reduction": {"core", "relation", "stage", "reduction"},
+            "reduction": {"core", "smt", "relation", "stage", "reduction"},
             "verification": {
                 "core",
                 "smt",

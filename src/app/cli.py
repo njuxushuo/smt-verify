@@ -29,6 +29,12 @@ def main(argv=None):
     batch.add_argument("--write-reports", action="store_true")
     for command in (single, batch):
         command.add_argument("--timeout-ms", type=positive, default=30000)
+        command.add_argument(
+            "--shape-reduce",
+            action="store_true",
+            help="Use reduced elementwise SMT plus an original-shape certificate; fall back explicitly if inconclusive.",
+        )
+        command.add_argument("--max-reduced-elements", type=positive, default=50000)
     args = parser.parse_args(argv)
     if args.command == "verify":
         paths = (args.input,)
@@ -39,7 +45,7 @@ def main(argv=None):
         if not paths:
             parser.error("no input JSON files found")
         if args.write_reports:
-            destinations = [demo_path(p) for p in paths]
+            destinations = [demo_path(p, args.shape_reduce) for p in paths]
             if len(set(destinations)) != len(destinations):
                 parser.error(
                     "multiple JSON files share a demo.txt destination; use verify --report for each"
@@ -47,14 +53,28 @@ def main(argv=None):
     registry = default_registry()
     failed = False
     for path in paths:
-        result = verify_file(path, registry, timeout_ms=args.timeout_ms)
-        print(f"{path}: {result.status.value} [{result.scope}]", flush=True)
+        result = verify_file(
+            path,
+            registry,
+            timeout_ms=args.timeout_ms,
+            shape_reduce=args.shape_reduce,
+            max_reduced_elements=args.max_reduced_elements,
+        )
+        print(
+            f"{path}: {result.status.value} [{result.scope}] mode={result.mode}",
+            flush=True,
+        )
+        if result.shape_attempt and result.shape_attempt.fallback_reason:
+            print(
+                "  Shape reduction fallback: " + result.shape_attempt.fallback_reason,
+                flush=True,
+            )
         if result.reason:
             print("  " + result.reason, flush=True)
         report = (
             args.report
             if args.command == "verify"
-            else demo_path(path)
+            else demo_path(path, args.shape_reduce)
             if args.write_reports
             else None
         )

@@ -5,10 +5,13 @@ from dataclasses import dataclass
 import z3
 
 from ..core.tensor import TensorRef
-from ..smt.tensor import SymbolicTensor, bounds
+from ..smt.tensor import SymbolicTensor
 
 
 def _coordinate(value, pieces, inverse=False):
+    if type(value) is int:
+        value = z3.IntVal(value)
+
     def endpoints(p):
         return (
             (p.single_start, p.single_stop, p.local_start)
@@ -60,14 +63,14 @@ def encode_inputs(single, distributed, relations, context):
             for rank, name in sorted(b.distributed_tensors.items()):
                 ref = TensorRef(rank, name)
                 raw = tensors[ref]
-                ids = tuple(
-                    z3.Int(f"rin{number}_r{rank}_i{d}") for d in range(len(raw.shape))
+                equations.extend(
+                    context.input_equations(
+                        raw.shape,
+                        f"rin{number}_r{rank}",
+                        lambda ids: raw.at(ids)
+                        == reference.at(forward(rel, rank, ids)),
+                    )
                 )
-                rhs = reference.at(forward(rel, rank, ids))
-                formula = z3.ForAll(
-                    ids, z3.Implies(bounds(ids, raw.shape), raw.at(ids) == rhs)
-                )
-                equations.append(formula.sexpr())
                 tensors[ref] = SymbolicTensor(
                     raw.shape,
                     lambda i, rel=rel, rank=rank, reference=reference: reference.at(
@@ -87,20 +90,19 @@ def encode_inputs(single, distributed, relations, context):
                     (rank, tensors[TensorRef(rank, b.distributed_tensors[rank])])
                     for rank in group[:-1]
                 )
-                ids = tuple(
-                    z3.Int(f"rin{number}_g{pivot}_i{d}") for d in range(len(raw.shape))
+
+                def equation(ids):
+                    target = forward(rel, pivot, ids)
+                    terms = [t.at(inverse(rel, r, target)) for r, t in others] + [
+                        raw.at(ids)
+                    ]
+                    return reference.at(target) == z3.Sum(terms)
+
+                equations.extend(
+                    context.input_equations(
+                        raw.shape, f"rin{number}_g{pivot}", equation
+                    )
                 )
-                target = forward(rel, pivot, ids)
-                terms = [t.at(inverse(rel, r, target)) for r, t in others] + [
-                    raw.at(ids)
-                ]
-                formula = z3.ForAll(
-                    ids,
-                    z3.Implies(
-                        bounds(ids, raw.shape), reference.at(target) == z3.Sum(terms)
-                    ),
-                )
-                equations.append(formula.sexpr())
 
                 def contribution(
                     i, rel=rel, pivot=pivot, reference=reference, others=others

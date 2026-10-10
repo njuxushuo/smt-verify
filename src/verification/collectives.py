@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from graphlib import CycleError, TopologicalSorter
 
 from ..core.errors import InvalidInput, Unsupported
 
@@ -45,3 +46,29 @@ def match_collectives(stage, registry):
             for r, i in calls.items():
                 lookup[(r, i)] = event
     return lookup, tuple(events)
+
+
+def validate_schedule(stage, registry):
+    """Check the original call dependencies without evaluating tensor values."""
+    lookup, events = match_collectives(stage, registry)
+    predecessors = {}
+    for rank, program in sorted(stage.distributed.items()):
+        previous = None
+        for index, _ in enumerate(program.ops):
+            event = lookup.get((rank, index))
+            node = (
+                ("collective", event.group, event.ordinal)
+                if event is not None
+                else ("local", rank, index)
+            )
+            parents = predecessors.setdefault(node, set())
+            if previous is not None:
+                parents.add(previous)
+            previous = node
+    try:
+        tuple(TopologicalSorter(predecessors).static_order())
+    except CycleError as exc:
+        raise InvalidInput(
+            "collective schedule cannot make progress: incompatible cross-group ordering"
+        ) from exc
+    return events

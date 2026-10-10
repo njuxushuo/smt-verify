@@ -1,0 +1,2420 @@
+Stage: mlp_dp2_tp4_sp_04_reduce_scatter
+Requested mode: SHAPE_REDUCED_ELEMENTWISE
+Actual mode: SHAPE_REDUCED_ELEMENTWISE
+Final original-shape status: PROVED
+Reduced UNSAT alone is never promoted to an original proof.
+Original block-sum UNSAT certifies the result; abstract SAT/UNKNOWN requires exact fallback.
+
+A. Joint shape optimization
+===========================
+Declared tensor elements: 786432 -> 384
+Objective: minimize sum of dimensions; each scale is an exact divisor, not rounded division.
+  single.Y: (4, 128, 256) -> (4, 8, 2)
+  rank0.P0: (2, 128, 256) -> (2, 8, 2)
+  rank0.Ysp0: (2, 32, 256) -> (2, 2, 2)
+  rank1.P1: (2, 128, 256) -> (2, 8, 2)
+  rank1.Ysp1: (2, 32, 256) -> (2, 2, 2)
+  rank2.P2: (2, 128, 256) -> (2, 8, 2)
+  rank2.Ysp2: (2, 32, 256) -> (2, 2, 2)
+  rank3.P3: (2, 128, 256) -> (2, 8, 2)
+  rank3.Ysp3: (2, 32, 256) -> (2, 2, 2)
+  rank4.P4: (2, 128, 256) -> (2, 8, 2)
+  rank4.Ysp4: (2, 32, 256) -> (2, 2, 2)
+  rank5.P5: (2, 128, 256) -> (2, 8, 2)
+  rank5.Ysp5: (2, 32, 256) -> (2, 2, 2)
+  rank6.P6: (2, 128, 256) -> (2, 8, 2)
+  rank6.Ysp6: (2, 32, 256) -> (2, 2, 2)
+  rank7.P7: (2, 128, 256) -> (2, 8, 2)
+  rank7.Ysp7: (2, 32, 256) -> (2, 2, 2)
+  single.Y.shape[0]: Exact integral block scaling; singleton fixed; other axes retain >=2.
+    (or (and (= scale_0 1) (= dimension_0 4)) (and (= scale_0 2) (= dimension_0 2)))
+  single.Y.shape[1]: Exact integral block scaling; singleton fixed; other axes retain >=2.
+    (or (and (= scale_1 1) (= dimension_1 128))
+    (and (= scale_1 2) (= dimension_1 64))
+    (and (= scale_1 4) (= dimension_1 32))
+    (and (= scale_1 8) (= dimension_1 16))
+    (and (= scale_1 16) (= dimension_1 8))
+    (and (= scale_1 32) (= dimension_1 4))
+    (and (= scale_1 64) (= dimension_1 2)))
+  single.Y.shape[2]: Exact integral block scaling; singleton fixed; other axes retain >=2.
+    (or (and (= scale_2 1) (= dimension_2 256))
+    (and (= scale_2 2) (= dimension_2 128))
+    (and (= scale_2 4) (= dimension_2 64))
+    (and (= scale_2 8) (= dimension_2 32))
+    (and (= scale_2 16) (= dimension_2 16))
+    (and (= scale_2 32) (= dimension_2 8))
+    (and (= scale_2 64) (= dimension_2 4))
+    (and (= scale_2 128) (= dimension_2 2)))
+  rank0.P0.shape[0]: Exact integral block scaling; singleton fixed; other axes retain >=2.
+    (and (= scale_3 1) (= dimension_3 2))
+  rank0.P0.shape[1]: Exact integral block scaling; singleton fixed; other axes retain >=2.
+    (or (and (= scale_4 1) (= dimension_4 128))
+    (and (= scale_4 2) (= dimension_4 64))
+    (and (= scale_4 4) (= dimension_4 32))
+    (and (= scale_4 8) (= dimension_4 16))
+    (and (= scale_4 16) (= dimension_4 8))
+    (and (= scale_4 32) (= dimension_4 4))
+    (and (= scale_4 64) (= dimension_4 2)))
+  rank0.P0.shape[2]: Exact integral block scaling; singleton fixed; other axes retain >=2.
+    (or (and (= scale_5 1) (= dimension_5 256))
+    (and (= scale_5 2) (= dimension_5 128))
+    (and (= scale_5 4) (= dimension_5 64))
+    (and (= scale_5 8) (= dimension_5 32))
+    (and (= scale_5 16) (= dimension_5 16))
+    (and (= scale_5 32) (= dimension_5 8))
+    (and (= scale_5 64) (= dimension_5 4))
+    (and (= scale_5 128) (= dimension_5 2)))
+  rank0.Ysp0.shape[0]: Exact integral block scaling; singleton fixed; other axes retain >=2.
+    (and (= scale_6 1) (= dimension_6 2))
+  rank0.Ysp0.shape[1]: Exact integral block scaling; singleton fixed; other axes retain >=2.
+    (or (and (= scale_7 1) (= dimension_7 32))
+    (and (= scale_7 2) (= dimension_7 16))
+    (and (= scale_7 4) (= dimension_7 8))
+    (and (= scale_7 8) (= dimension_7 4))
+    (and (= scale_7 16) (= dimension_7 2)))
+  rank0.Ysp0.shape[2]: Exact integral block scaling; singleton fixed; other axes retain >=2.
+    (or (and (= scale_8 1) (= dimension_8 256))
+    (and (= scale_8 2) (= dimension_8 128))
+    (and (= scale_8 4) (= dimension_8 64))
+    (and (= scale_8 8) (= dimension_8 32))
+    (and (= scale_8 16) (= dimension_8 16))
+    (and (= scale_8 32) (= dimension_8 8))
+    (and (= scale_8 64) (= dimension_8 4))
+    (and (= scale_8 128) (= dimension_8 2)))
+  rank1.P1.shape[0]: Exact integral block scaling; singleton fixed; other axes retain >=2.
+    (and (= scale_9 1) (= dimension_9 2))
+  rank1.P1.shape[1]: Exact integral block scaling; singleton fixed; other axes retain >=2.
+    (or (and (= scale_10 1) (= dimension_10 128))
+    (and (= scale_10 2) (= dimension_10 64))
+    (and (= scale_10 4) (= dimension_10 32))
+    (and (= scale_10 8) (= dimension_10 16))
+    (and (= scale_10 16) (= dimension_10 8))
+    (and (= scale_10 32) (= dimension_10 4))
+    (and (= scale_10 64) (= dimension_10 2)))
+  rank1.P1.shape[2]: Exact integral block scaling; singleton fixed; other axes retain >=2.
+    (or (and (= scale_11 1) (= dimension_11 256))
+    (and (= scale_11 2) (= dimension_11 128))
+    (and (= scale_11 4) (= dimension_11 64))
+    (and (= scale_11 8) (= dimension_11 32))
+    (and (= scale_11 16) (= dimension_11 16))
+    (and (= scale_11 32) (= dimension_11 8))
+    (and (= scale_11 64) (= dimension_11 4))
+    (and (= scale_11 128) (= dimension_11 2)))
+  rank1.Ysp1.shape[0]: Exact integral block scaling; singleton fixed; other axes retain >=2.
+    (and (= scale_12 1) (= dimension_12 2))
+  rank1.Ysp1.shape[1]: Exact integral block scaling; singleton fixed; other axes retain >=2.
+    (or (and (= scale_13 1) (= dimension_13 32))
+    (and (= scale_13 2) (= dimension_13 16))
+    (and (= scale_13 4) (= dimension_13 8))
+    (and (= scale_13 8) (= dimension_13 4))
+    (and (= scale_13 16) (= dimension_13 2)))
+  rank1.Ysp1.shape[2]: Exact integral block scaling; singleton fixed; other axes retain >=2.
+    (or (and (= scale_14 1) (= dimension_14 256))
+    (and (= scale_14 2) (= dimension_14 128))
+    (and (= scale_14 4) (= dimension_14 64))
+    (and (= scale_14 8) (= dimension_14 32))
+    (and (= scale_14 16) (= dimension_14 16))
+    (and (= scale_14 32) (= dimension_14 8))
+    (and (= scale_14 64) (= dimension_14 4))
+    (and (= scale_14 128) (= dimension_14 2)))
+  rank2.P2.shape[0]: Exact integral block scaling; singleton fixed; other axes retain >=2.
+    (and (= scale_15 1) (= dimension_15 2))
+  rank2.P2.shape[1]: Exact integral block scaling; singleton fixed; other axes retain >=2.
+    (or (and (= scale_16 1) (= dimension_16 128))
+    (and (= scale_16 2) (= dimension_16 64))
+    (and (= scale_16 4) (= dimension_16 32))
+    (and (= scale_16 8) (= dimension_16 16))
+    (and (= scale_16 16) (= dimension_16 8))
+    (and (= scale_16 32) (= dimension_16 4))
+    (and (= scale_16 64) (= dimension_16 2)))
+  rank2.P2.shape[2]: Exact integral block scaling; singleton fixed; other axes retain >=2.
+    (or (and (= scale_17 1) (= dimension_17 256))
+    (and (= scale_17 2) (= dimension_17 128))
+    (and (= scale_17 4) (= dimension_17 64))
+    (and (= scale_17 8) (= dimension_17 32))
+    (and (= scale_17 16) (= dimension_17 16))
+    (and (= scale_17 32) (= dimension_17 8))
+    (and (= scale_17 64) (= dimension_17 4))
+    (and (= scale_17 128) (= dimension_17 2)))
+  rank2.Ysp2.shape[0]: Exact integral block scaling; singleton fixed; other axes retain >=2.
+    (and (= scale_18 1) (= dimension_18 2))
+  rank2.Ysp2.shape[1]: Exact integral block scaling; singleton fixed; other axes retain >=2.
+    (or (and (= scale_19 1) (= dimension_19 32))
+    (and (= scale_19 2) (= dimension_19 16))
+    (and (= scale_19 4) (= dimension_19 8))
+    (and (= scale_19 8) (= dimension_19 4))
+    (and (= scale_19 16) (= dimension_19 2)))
+  rank2.Ysp2.shape[2]: Exact integral block scaling; singleton fixed; other axes retain >=2.
+    (or (and (= scale_20 1) (= dimension_20 256))
+    (and (= scale_20 2) (= dimension_20 128))
+    (and (= scale_20 4) (= dimension_20 64))
+    (and (= scale_20 8) (= dimension_20 32))
+    (and (= scale_20 16) (= dimension_20 16))
+    (and (= scale_20 32) (= dimension_20 8))
+    (and (= scale_20 64) (= dimension_20 4))
+    (and (= scale_20 128) (= dimension_20 2)))
+  rank3.P3.shape[0]: Exact integral block scaling; singleton fixed; other axes retain >=2.
+    (and (= scale_21 1) (= dimension_21 2))
+  rank3.P3.shape[1]: Exact integral block scaling; singleton fixed; other axes retain >=2.
+    (or (and (= scale_22 1) (= dimension_22 128))
+    (and (= scale_22 2) (= dimension_22 64))
+    (and (= scale_22 4) (= dimension_22 32))
+    (and (= scale_22 8) (= dimension_22 16))
+    (and (= scale_22 16) (= dimension_22 8))
+    (and (= scale_22 32) (= dimension_22 4))
+    (and (= scale_22 64) (= dimension_22 2)))
+  rank3.P3.shape[2]: Exact integral block scaling; singleton fixed; other axes retain >=2.
+    (or (and (= scale_23 1) (= dimension_23 256))
+    (and (= scale_23 2) (= dimension_23 128))
+    (and (= scale_23 4) (= dimension_23 64))
+    (and (= scale_23 8) (= dimension_23 32))
+    (and (= scale_23 16) (= dimension_23 16))
+    (and (= scale_23 32) (= dimension_23 8))
+    (and (= scale_23 64) (= dimension_23 4))
+    (and (= scale_23 128) (= dimension_23 2)))
+  rank3.Ysp3.shape[0]: Exact integral block scaling; singleton fixed; other axes retain >=2.
+    (and (= scale_24 1) (= dimension_24 2))
+  rank3.Ysp3.shape[1]: Exact integral block scaling; singleton fixed; other axes retain >=2.
+    (or (and (= scale_25 1) (= dimension_25 32))
+    (and (= scale_25 2) (= dimension_25 16))
+    (and (= scale_25 4) (= dimension_25 8))
+    (and (= scale_25 8) (= dimension_25 4))
+    (and (= scale_25 16) (= dimension_25 2)))
+  rank3.Ysp3.shape[2]: Exact integral block scaling; singleton fixed; other axes retain >=2.
+    (or (and (= scale_26 1) (= dimension_26 256))
+    (and (= scale_26 2) (= dimension_26 128))
+    (and (= scale_26 4) (= dimension_26 64))
+    (and (= scale_26 8) (= dimension_26 32))
+    (and (= scale_26 16) (= dimension_26 16))
+    (and (= scale_26 32) (= dimension_26 8))
+    (and (= scale_26 64) (= dimension_26 4))
+    (and (= scale_26 128) (= dimension_26 2)))
+  rank4.P4.shape[0]: Exact integral block scaling; singleton fixed; other axes retain >=2.
+    (and (= scale_27 1) (= dimension_27 2))
+  rank4.P4.shape[1]: Exact integral block scaling; singleton fixed; other axes retain >=2.
+    (or (and (= scale_28 1) (= dimension_28 128))
+    (and (= scale_28 2) (= dimension_28 64))
+    (and (= scale_28 4) (= dimension_28 32))
+    (and (= scale_28 8) (= dimension_28 16))
+    (and (= scale_28 16) (= dimension_28 8))
+    (and (= scale_28 32) (= dimension_28 4))
+    (and (= scale_28 64) (= dimension_28 2)))
+  rank4.P4.shape[2]: Exact integral block scaling; singleton fixed; other axes retain >=2.
+    (or (and (= scale_29 1) (= dimension_29 256))
+    (and (= scale_29 2) (= dimension_29 128))
+    (and (= scale_29 4) (= dimension_29 64))
+    (and (= scale_29 8) (= dimension_29 32))
+    (and (= scale_29 16) (= dimension_29 16))
+    (and (= scale_29 32) (= dimension_29 8))
+    (and (= scale_29 64) (= dimension_29 4))
+    (and (= scale_29 128) (= dimension_29 2)))
+  rank4.Ysp4.shape[0]: Exact integral block scaling; singleton fixed; other axes retain >=2.
+    (and (= scale_30 1) (= dimension_30 2))
+  rank4.Ysp4.shape[1]: Exact integral block scaling; singleton fixed; other axes retain >=2.
+    (or (and (= scale_31 1) (= dimension_31 32))
+    (and (= scale_31 2) (= dimension_31 16))
+    (and (= scale_31 4) (= dimension_31 8))
+    (and (= scale_31 8) (= dimension_31 4))
+    (and (= scale_31 16) (= dimension_31 2)))
+  rank4.Ysp4.shape[2]: Exact integral block scaling; singleton fixed; other axes retain >=2.
+    (or (and (= scale_32 1) (= dimension_32 256))
+    (and (= scale_32 2) (= dimension_32 128))
+    (and (= scale_32 4) (= dimension_32 64))
+    (and (= scale_32 8) (= dimension_32 32))
+    (and (= scale_32 16) (= dimension_32 16))
+    (and (= scale_32 32) (= dimension_32 8))
+    (and (= scale_32 64) (= dimension_32 4))
+    (and (= scale_32 128) (= dimension_32 2)))
+  rank5.P5.shape[0]: Exact integral block scaling; singleton fixed; other axes retain >=2.
+    (and (= scale_33 1) (= dimension_33 2))
+  rank5.P5.shape[1]: Exact integral block scaling; singleton fixed; other axes retain >=2.
+    (or (and (= scale_34 1) (= dimension_34 128))
+    (and (= scale_34 2) (= dimension_34 64))
+    (and (= scale_34 4) (= dimension_34 32))
+    (and (= scale_34 8) (= dimension_34 16))
+    (and (= scale_34 16) (= dimension_34 8))
+    (and (= scale_34 32) (= dimension_34 4))
+    (and (= scale_34 64) (= dimension_34 2)))
+  rank5.P5.shape[2]: Exact integral block scaling; singleton fixed; other axes retain >=2.
+    (or (and (= scale_35 1) (= dimension_35 256))
+    (and (= scale_35 2) (= dimension_35 128))
+    (and (= scale_35 4) (= dimension_35 64))
+    (and (= scale_35 8) (= dimension_35 32))
+    (and (= scale_35 16) (= dimension_35 16))
+    (and (= scale_35 32) (= dimension_35 8))
+    (and (= scale_35 64) (= dimension_35 4))
+    (and (= scale_35 128) (= dimension_35 2)))
+  rank5.Ysp5.shape[0]: Exact integral block scaling; singleton fixed; other axes retain >=2.
+    (and (= scale_36 1) (= dimension_36 2))
+  rank5.Ysp5.shape[1]: Exact integral block scaling; singleton fixed; other axes retain >=2.
+    (or (and (= scale_37 1) (= dimension_37 32))
+    (and (= scale_37 2) (= dimension_37 16))
+    (and (= scale_37 4) (= dimension_37 8))
+    (and (= scale_37 8) (= dimension_37 4))
+    (and (= scale_37 16) (= dimension_37 2)))
+  rank5.Ysp5.shape[2]: Exact integral block scaling; singleton fixed; other axes retain >=2.
+    (or (and (= scale_38 1) (= dimension_38 256))
+    (and (= scale_38 2) (= dimension_38 128))
+    (and (= scale_38 4) (= dimension_38 64))
+    (and (= scale_38 8) (= dimension_38 32))
+    (and (= scale_38 16) (= dimension_38 16))
+    (and (= scale_38 32) (= dimension_38 8))
+    (and (= scale_38 64) (= dimension_38 4))
+    (and (= scale_38 128) (= dimension_38 2)))
+  rank6.P6.shape[0]: Exact integral block scaling; singleton fixed; other axes retain >=2.
+    (and (= scale_39 1) (= dimension_39 2))
+  rank6.P6.shape[1]: Exact integral block scaling; singleton fixed; other axes retain >=2.
+    (or (and (= scale_40 1) (= dimension_40 128))
+    (and (= scale_40 2) (= dimension_40 64))
+    (and (= scale_40 4) (= dimension_40 32))
+    (and (= scale_40 8) (= dimension_40 16))
+    (and (= scale_40 16) (= dimension_40 8))
+    (and (= scale_40 32) (= dimension_40 4))
+    (and (= scale_40 64) (= dimension_40 2)))
+  rank6.P6.shape[2]: Exact integral block scaling; singleton fixed; other axes retain >=2.
+    (or (and (= scale_41 1) (= dimension_41 256))
+    (and (= scale_41 2) (= dimension_41 128))
+    (and (= scale_41 4) (= dimension_41 64))
+    (and (= scale_41 8) (= dimension_41 32))
+    (and (= scale_41 16) (= dimension_41 16))
+    (and (= scale_41 32) (= dimension_41 8))
+    (and (= scale_41 64) (= dimension_41 4))
+    (and (= scale_41 128) (= dimension_41 2)))
+  rank6.Ysp6.shape[0]: Exact integral block scaling; singleton fixed; other axes retain >=2.
+    (and (= scale_42 1) (= dimension_42 2))
+  rank6.Ysp6.shape[1]: Exact integral block scaling; singleton fixed; other axes retain >=2.
+    (or (and (= scale_43 1) (= dimension_43 32))
+    (and (= scale_43 2) (= dimension_43 16))
+    (and (= scale_43 4) (= dimension_43 8))
+    (and (= scale_43 8) (= dimension_43 4))
+    (and (= scale_43 16) (= dimension_43 2)))
+  rank6.Ysp6.shape[2]: Exact integral block scaling; singleton fixed; other axes retain >=2.
+    (or (and (= scale_44 1) (= dimension_44 256))
+    (and (= scale_44 2) (= dimension_44 128))
+    (and (= scale_44 4) (= dimension_44 64))
+    (and (= scale_44 8) (= dimension_44 32))
+    (and (= scale_44 16) (= dimension_44 16))
+    (and (= scale_44 32) (= dimension_44 8))
+    (and (= scale_44 64) (= dimension_44 4))
+    (and (= scale_44 128) (= dimension_44 2)))
+  rank7.P7.shape[0]: Exact integral block scaling; singleton fixed; other axes retain >=2.
+    (and (= scale_45 1) (= dimension_45 2))
+  rank7.P7.shape[1]: Exact integral block scaling; singleton fixed; other axes retain >=2.
+    (or (and (= scale_46 1) (= dimension_46 128))
+    (and (= scale_46 2) (= dimension_46 64))
+    (and (= scale_46 4) (= dimension_46 32))
+    (and (= scale_46 8) (= dimension_46 16))
+    (and (= scale_46 16) (= dimension_46 8))
+    (and (= scale_46 32) (= dimension_46 4))
+    (and (= scale_46 64) (= dimension_46 2)))
+  rank7.P7.shape[2]: Exact integral block scaling; singleton fixed; other axes retain >=2.
+    (or (and (= scale_47 1) (= dimension_47 256))
+    (and (= scale_47 2) (= dimension_47 128))
+    (and (= scale_47 4) (= dimension_47 64))
+    (and (= scale_47 8) (= dimension_47 32))
+    (and (= scale_47 16) (= dimension_47 16))
+    (and (= scale_47 32) (= dimension_47 8))
+    (and (= scale_47 64) (= dimension_47 4))
+    (and (= scale_47 128) (= dimension_47 2)))
+  rank7.Ysp7.shape[0]: Exact integral block scaling; singleton fixed; other axes retain >=2.
+    (and (= scale_48 1) (= dimension_48 2))
+  rank7.Ysp7.shape[1]: Exact integral block scaling; singleton fixed; other axes retain >=2.
+    (or (and (= scale_49 1) (= dimension_49 32))
+    (and (= scale_49 2) (= dimension_49 16))
+    (and (= scale_49 4) (= dimension_49 8))
+    (and (= scale_49 8) (= dimension_49 4))
+    (and (= scale_49 16) (= dimension_49 2)))
+  rank7.Ysp7.shape[2]: Exact integral block scaling; singleton fixed; other axes retain >=2.
+    (or (and (= scale_50 1) (= dimension_50 256))
+    (and (= scale_50 2) (= dimension_50 128))
+    (and (= scale_50 4) (= dimension_50 64))
+    (and (= scale_50 8) (= dimension_50 32))
+    (and (= scale_50 16) (= dimension_50 16))
+    (and (= scale_50 32) (= dimension_50 8))
+    (and (= scale_50 64) (= dimension_50 4))
+    (and (= scale_50 128) (= dimension_50 2)))
+  rank0.ops[0] reduce_scatter: Collective length and unchanged noncommunication axes.
+    (= dimension_6 dimension_3)
+  rank0.ops[0] reduce_scatter: Collective length and unchanged noncommunication axes.
+    (= dimension_4 (* 4 dimension_7))
+  rank0.ops[0] reduce_scatter: Collective length and unchanged noncommunication axes.
+    (= dimension_8 dimension_5)
+  rank1.ops[0] reduce_scatter: Collective length and unchanged noncommunication axes.
+    (= dimension_12 dimension_9)
+  rank1.ops[0] reduce_scatter: Collective length and unchanged noncommunication axes.
+    (= dimension_10 (* 4 dimension_13))
+  rank1.ops[0] reduce_scatter: Collective length and unchanged noncommunication axes.
+    (= dimension_14 dimension_11)
+  rank2.ops[0] reduce_scatter: Collective length and unchanged noncommunication axes.
+    (= dimension_18 dimension_15)
+  rank2.ops[0] reduce_scatter: Collective length and unchanged noncommunication axes.
+    (= dimension_16 (* 4 dimension_19))
+  rank2.ops[0] reduce_scatter: Collective length and unchanged noncommunication axes.
+    (= dimension_20 dimension_17)
+  rank3.ops[0] reduce_scatter: Collective length and unchanged noncommunication axes.
+    (= dimension_24 dimension_21)
+  rank3.ops[0] reduce_scatter: Collective length and unchanged noncommunication axes.
+    (= dimension_22 (* 4 dimension_25))
+  rank3.ops[0] reduce_scatter: Collective length and unchanged noncommunication axes.
+    (= dimension_26 dimension_23)
+  rank4.ops[0] reduce_scatter: Collective length and unchanged noncommunication axes.
+    (= dimension_30 dimension_27)
+  rank4.ops[0] reduce_scatter: Collective length and unchanged noncommunication axes.
+    (= dimension_28 (* 4 dimension_31))
+  rank4.ops[0] reduce_scatter: Collective length and unchanged noncommunication axes.
+    (= dimension_32 dimension_29)
+  rank5.ops[0] reduce_scatter: Collective length and unchanged noncommunication axes.
+    (= dimension_36 dimension_33)
+  rank5.ops[0] reduce_scatter: Collective length and unchanged noncommunication axes.
+    (= dimension_34 (* 4 dimension_37))
+  rank5.ops[0] reduce_scatter: Collective length and unchanged noncommunication axes.
+    (= dimension_38 dimension_35)
+  rank6.ops[0] reduce_scatter: Collective length and unchanged noncommunication axes.
+    (= dimension_42 dimension_39)
+  rank6.ops[0] reduce_scatter: Collective length and unchanged noncommunication axes.
+    (= dimension_40 (* 4 dimension_43))
+  rank6.ops[0] reduce_scatter: Collective length and unchanged noncommunication axes.
+    (= dimension_44 dimension_41)
+  rank7.ops[0] reduce_scatter: Collective length and unchanged noncommunication axes.
+    (= dimension_48 dimension_45)
+  rank7.ops[0] reduce_scatter: Collective length and unchanged noncommunication axes.
+    (= dimension_46 (* 4 dimension_49))
+  rank7.ops[0] reduce_scatter: Collective length and unchanged noncommunication axes.
+    (= dimension_50 dimension_47)
+  tp_0#0: Matched collective members have equal input shapes.
+    (= dimension_3 dimension_9)
+  tp_0#0: Matched collective members have equal input shapes.
+    (= dimension_4 dimension_10)
+  tp_0#0: Matched collective members have equal input shapes.
+    (= dimension_5 dimension_11)
+  tp_0#0: Matched collective members have equal input shapes.
+    (= dimension_3 dimension_15)
+  tp_0#0: Matched collective members have equal input shapes.
+    (= dimension_4 dimension_16)
+  tp_0#0: Matched collective members have equal input shapes.
+    (= dimension_5 dimension_17)
+  tp_0#0: Matched collective members have equal input shapes.
+    (= dimension_3 dimension_21)
+  tp_0#0: Matched collective members have equal input shapes.
+    (= dimension_4 dimension_22)
+  tp_0#0: Matched collective members have equal input shapes.
+    (= dimension_5 dimension_23)
+  tp_1#0: Matched collective members have equal input shapes.
+    (= dimension_27 dimension_33)
+  tp_1#0: Matched collective members have equal input shapes.
+    (= dimension_28 dimension_34)
+  tp_1#0: Matched collective members have equal input shapes.
+    (= dimension_29 dimension_35)
+  tp_1#0: Matched collective members have equal input shapes.
+    (= dimension_27 dimension_39)
+  tp_1#0: Matched collective members have equal input shapes.
+    (= dimension_28 dimension_40)
+  tp_1#0: Matched collective members have equal input shapes.
+    (= dimension_29 dimension_41)
+  tp_1#0: Matched collective members have equal input shapes.
+    (= dimension_27 dimension_45)
+  tp_1#0: Matched collective members have equal input shapes.
+    (= dimension_28 dimension_46)
+  tp_1#0: Matched collective members have equal input shapes.
+    (= dimension_29 dimension_47)
+  input_relations[0] (shape only): One scale in corresponding coordinate spaces, including implicit identity axes.
+    (= scale_0 scale_3)
+  input_relations[0] (shape only): One scale in corresponding coordinate spaces, including implicit identity axes.
+    (= scale_1 scale_4)
+  input_relations[0] (shape only): One scale in corresponding coordinate spaces, including implicit identity axes.
+    (= scale_2 scale_5)
+  input_relations[0] (shape only): One scale in corresponding coordinate spaces, including implicit identity axes.
+    (= scale_0 scale_9)
+  input_relations[0] (shape only): One scale in corresponding coordinate spaces, including implicit identity axes.
+    (= scale_1 scale_10)
+  input_relations[0] (shape only): One scale in corresponding coordinate spaces, including implicit identity axes.
+    (= scale_2 scale_11)
+  input_relations[0] (shape only): One scale in corresponding coordinate spaces, including implicit identity axes.
+    (= scale_0 scale_15)
+  input_relations[0] (shape only): One scale in corresponding coordinate spaces, including implicit identity axes.
+    (= scale_1 scale_16)
+  input_relations[0] (shape only): One scale in corresponding coordinate spaces, including implicit identity axes.
+    (= scale_2 scale_17)
+  input_relations[0] (shape only): One scale in corresponding coordinate spaces, including implicit identity axes.
+    (= scale_0 scale_21)
+  input_relations[0] (shape only): One scale in corresponding coordinate spaces, including implicit identity axes.
+    (= scale_1 scale_22)
+  input_relations[0] (shape only): One scale in corresponding coordinate spaces, including implicit identity axes.
+    (= scale_2 scale_23)
+  input_relations[0] (shape only): One scale in corresponding coordinate spaces, including implicit identity axes.
+    (= scale_0 scale_27)
+  input_relations[0] (shape only): One scale in corresponding coordinate spaces, including implicit identity axes.
+    (= scale_1 scale_28)
+  input_relations[0] (shape only): One scale in corresponding coordinate spaces, including implicit identity axes.
+    (= scale_2 scale_29)
+  input_relations[0] (shape only): One scale in corresponding coordinate spaces, including implicit identity axes.
+    (= scale_0 scale_33)
+  input_relations[0] (shape only): One scale in corresponding coordinate spaces, including implicit identity axes.
+    (= scale_1 scale_34)
+  input_relations[0] (shape only): One scale in corresponding coordinate spaces, including implicit identity axes.
+    (= scale_2 scale_35)
+  input_relations[0] (shape only): One scale in corresponding coordinate spaces, including implicit identity axes.
+    (= scale_0 scale_39)
+  input_relations[0] (shape only): One scale in corresponding coordinate spaces, including implicit identity axes.
+    (= scale_1 scale_40)
+  input_relations[0] (shape only): One scale in corresponding coordinate spaces, including implicit identity axes.
+    (= scale_2 scale_41)
+  input_relations[0] (shape only): One scale in corresponding coordinate spaces, including implicit identity axes.
+    (= scale_0 scale_45)
+  input_relations[0] (shape only): One scale in corresponding coordinate spaces, including implicit identity axes.
+    (= scale_1 scale_46)
+  input_relations[0] (shape only): One scale in corresponding coordinate spaces, including implicit identity axes.
+    (= scale_2 scale_47)
+  input_relations[0] (shape only): dp rank 0: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 2 scale_0) 0)
+  input_relations[0] (shape only): dp rank 0: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 4 scale_0) 0)
+  input_relations[0] (shape only): dp rank 0: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 0 scale_0) 0)
+  input_relations[0] (shape only): dp rank 0: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 2 scale_0) 0)
+  input_relations[0] (shape only): dp rank 0: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 0 scale_0) 0)
+  input_relations[0] (shape only): dp rank 0: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 2 scale_0) 0)
+  input_relations[0] (shape only): dp rank 1: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 2 scale_0) 0)
+  input_relations[0] (shape only): dp rank 1: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 4 scale_0) 0)
+  input_relations[0] (shape only): dp rank 1: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 0 scale_0) 0)
+  input_relations[0] (shape only): dp rank 1: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 2 scale_0) 0)
+  input_relations[0] (shape only): dp rank 1: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 0 scale_0) 0)
+  input_relations[0] (shape only): dp rank 1: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 2 scale_0) 0)
+  input_relations[0] (shape only): dp rank 2: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 2 scale_0) 0)
+  input_relations[0] (shape only): dp rank 2: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 4 scale_0) 0)
+  input_relations[0] (shape only): dp rank 2: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 0 scale_0) 0)
+  input_relations[0] (shape only): dp rank 2: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 2 scale_0) 0)
+  input_relations[0] (shape only): dp rank 2: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 0 scale_0) 0)
+  input_relations[0] (shape only): dp rank 2: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 2 scale_0) 0)
+  input_relations[0] (shape only): dp rank 3: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 2 scale_0) 0)
+  input_relations[0] (shape only): dp rank 3: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 4 scale_0) 0)
+  input_relations[0] (shape only): dp rank 3: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 0 scale_0) 0)
+  input_relations[0] (shape only): dp rank 3: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 2 scale_0) 0)
+  input_relations[0] (shape only): dp rank 3: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 0 scale_0) 0)
+  input_relations[0] (shape only): dp rank 3: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 2 scale_0) 0)
+  input_relations[0] (shape only): dp rank 4: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 2 scale_0) 0)
+  input_relations[0] (shape only): dp rank 4: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 4 scale_0) 0)
+  input_relations[0] (shape only): dp rank 4: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 0 scale_0) 0)
+  input_relations[0] (shape only): dp rank 4: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 2 scale_0) 0)
+  input_relations[0] (shape only): dp rank 4: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 2 scale_0) 0)
+  input_relations[0] (shape only): dp rank 4: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 4 scale_0) 0)
+  input_relations[0] (shape only): dp rank 5: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 2 scale_0) 0)
+  input_relations[0] (shape only): dp rank 5: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 4 scale_0) 0)
+  input_relations[0] (shape only): dp rank 5: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 0 scale_0) 0)
+  input_relations[0] (shape only): dp rank 5: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 2 scale_0) 0)
+  input_relations[0] (shape only): dp rank 5: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 2 scale_0) 0)
+  input_relations[0] (shape only): dp rank 5: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 4 scale_0) 0)
+  input_relations[0] (shape only): dp rank 6: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 2 scale_0) 0)
+  input_relations[0] (shape only): dp rank 6: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 4 scale_0) 0)
+  input_relations[0] (shape only): dp rank 6: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 0 scale_0) 0)
+  input_relations[0] (shape only): dp rank 6: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 2 scale_0) 0)
+  input_relations[0] (shape only): dp rank 6: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 2 scale_0) 0)
+  input_relations[0] (shape only): dp rank 6: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 4 scale_0) 0)
+  input_relations[0] (shape only): dp rank 7: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 2 scale_0) 0)
+  input_relations[0] (shape only): dp rank 7: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 4 scale_0) 0)
+  input_relations[0] (shape only): dp rank 7: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 0 scale_0) 0)
+  input_relations[0] (shape only): dp rank 7: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 2 scale_0) 0)
+  input_relations[0] (shape only): dp rank 7: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 2 scale_0) 0)
+  input_relations[0] (shape only): dp rank 7: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 4 scale_0) 0)
+  output_relations[0] (shape only): One scale in corresponding coordinate spaces, including implicit identity axes.
+    (= scale_0 scale_6)
+  output_relations[0] (shape only): One scale in corresponding coordinate spaces, including implicit identity axes.
+    (= scale_1 scale_7)
+  output_relations[0] (shape only): One scale in corresponding coordinate spaces, including implicit identity axes.
+    (= scale_2 scale_8)
+  output_relations[0] (shape only): One scale in corresponding coordinate spaces, including implicit identity axes.
+    (= scale_0 scale_12)
+  output_relations[0] (shape only): One scale in corresponding coordinate spaces, including implicit identity axes.
+    (= scale_1 scale_13)
+  output_relations[0] (shape only): One scale in corresponding coordinate spaces, including implicit identity axes.
+    (= scale_2 scale_14)
+  output_relations[0] (shape only): One scale in corresponding coordinate spaces, including implicit identity axes.
+    (= scale_0 scale_18)
+  output_relations[0] (shape only): One scale in corresponding coordinate spaces, including implicit identity axes.
+    (= scale_1 scale_19)
+  output_relations[0] (shape only): One scale in corresponding coordinate spaces, including implicit identity axes.
+    (= scale_2 scale_20)
+  output_relations[0] (shape only): One scale in corresponding coordinate spaces, including implicit identity axes.
+    (= scale_0 scale_24)
+  output_relations[0] (shape only): One scale in corresponding coordinate spaces, including implicit identity axes.
+    (= scale_1 scale_25)
+  output_relations[0] (shape only): One scale in corresponding coordinate spaces, including implicit identity axes.
+    (= scale_2 scale_26)
+  output_relations[0] (shape only): One scale in corresponding coordinate spaces, including implicit identity axes.
+    (= scale_0 scale_30)
+  output_relations[0] (shape only): One scale in corresponding coordinate spaces, including implicit identity axes.
+    (= scale_1 scale_31)
+  output_relations[0] (shape only): One scale in corresponding coordinate spaces, including implicit identity axes.
+    (= scale_2 scale_32)
+  output_relations[0] (shape only): One scale in corresponding coordinate spaces, including implicit identity axes.
+    (= scale_0 scale_36)
+  output_relations[0] (shape only): One scale in corresponding coordinate spaces, including implicit identity axes.
+    (= scale_1 scale_37)
+  output_relations[0] (shape only): One scale in corresponding coordinate spaces, including implicit identity axes.
+    (= scale_2 scale_38)
+  output_relations[0] (shape only): One scale in corresponding coordinate spaces, including implicit identity axes.
+    (= scale_0 scale_42)
+  output_relations[0] (shape only): One scale in corresponding coordinate spaces, including implicit identity axes.
+    (= scale_1 scale_43)
+  output_relations[0] (shape only): One scale in corresponding coordinate spaces, including implicit identity axes.
+    (= scale_2 scale_44)
+  output_relations[0] (shape only): One scale in corresponding coordinate spaces, including implicit identity axes.
+    (= scale_0 scale_48)
+  output_relations[0] (shape only): One scale in corresponding coordinate spaces, including implicit identity axes.
+    (= scale_1 scale_49)
+  output_relations[0] (shape only): One scale in corresponding coordinate spaces, including implicit identity axes.
+    (= scale_2 scale_50)
+  output_relations[0] (shape only): dp rank 0: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 2 scale_0) 0)
+  output_relations[0] (shape only): dp rank 0: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 4 scale_0) 0)
+  output_relations[0] (shape only): dp rank 0: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 0 scale_0) 0)
+  output_relations[0] (shape only): dp rank 0: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 2 scale_0) 0)
+  output_relations[0] (shape only): dp rank 0: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 0 scale_0) 0)
+  output_relations[0] (shape only): dp rank 0: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 2 scale_0) 0)
+  output_relations[0] (shape only): dp rank 1: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 2 scale_0) 0)
+  output_relations[0] (shape only): dp rank 1: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 4 scale_0) 0)
+  output_relations[0] (shape only): dp rank 1: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 0 scale_0) 0)
+  output_relations[0] (shape only): dp rank 1: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 2 scale_0) 0)
+  output_relations[0] (shape only): dp rank 1: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 0 scale_0) 0)
+  output_relations[0] (shape only): dp rank 1: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 2 scale_0) 0)
+  output_relations[0] (shape only): dp rank 2: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 2 scale_0) 0)
+  output_relations[0] (shape only): dp rank 2: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 4 scale_0) 0)
+  output_relations[0] (shape only): dp rank 2: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 0 scale_0) 0)
+  output_relations[0] (shape only): dp rank 2: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 2 scale_0) 0)
+  output_relations[0] (shape only): dp rank 2: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 0 scale_0) 0)
+  output_relations[0] (shape only): dp rank 2: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 2 scale_0) 0)
+  output_relations[0] (shape only): dp rank 3: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 2 scale_0) 0)
+  output_relations[0] (shape only): dp rank 3: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 4 scale_0) 0)
+  output_relations[0] (shape only): dp rank 3: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 0 scale_0) 0)
+  output_relations[0] (shape only): dp rank 3: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 2 scale_0) 0)
+  output_relations[0] (shape only): dp rank 3: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 0 scale_0) 0)
+  output_relations[0] (shape only): dp rank 3: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 2 scale_0) 0)
+  output_relations[0] (shape only): dp rank 4: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 2 scale_0) 0)
+  output_relations[0] (shape only): dp rank 4: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 4 scale_0) 0)
+  output_relations[0] (shape only): dp rank 4: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 0 scale_0) 0)
+  output_relations[0] (shape only): dp rank 4: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 2 scale_0) 0)
+  output_relations[0] (shape only): dp rank 4: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 2 scale_0) 0)
+  output_relations[0] (shape only): dp rank 4: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 4 scale_0) 0)
+  output_relations[0] (shape only): dp rank 5: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 2 scale_0) 0)
+  output_relations[0] (shape only): dp rank 5: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 4 scale_0) 0)
+  output_relations[0] (shape only): dp rank 5: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 0 scale_0) 0)
+  output_relations[0] (shape only): dp rank 5: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 2 scale_0) 0)
+  output_relations[0] (shape only): dp rank 5: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 2 scale_0) 0)
+  output_relations[0] (shape only): dp rank 5: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 4 scale_0) 0)
+  output_relations[0] (shape only): dp rank 6: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 2 scale_0) 0)
+  output_relations[0] (shape only): dp rank 6: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 4 scale_0) 0)
+  output_relations[0] (shape only): dp rank 6: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 0 scale_0) 0)
+  output_relations[0] (shape only): dp rank 6: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 2 scale_0) 0)
+  output_relations[0] (shape only): dp rank 6: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 2 scale_0) 0)
+  output_relations[0] (shape only): dp rank 6: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 4 scale_0) 0)
+  output_relations[0] (shape only): dp rank 7: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 2 scale_0) 0)
+  output_relations[0] (shape only): dp rank 7: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 4 scale_0) 0)
+  output_relations[0] (shape only): dp rank 7: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 0 scale_0) 0)
+  output_relations[0] (shape only): dp rank 7: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 2 scale_0) 0)
+  output_relations[0] (shape only): dp rank 7: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 2 scale_0) 0)
+  output_relations[0] (shape only): dp rank 7: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 4 scale_0) 0)
+  output_relations[0] (shape only): sp rank 0: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 32 scale_1) 0)
+  output_relations[0] (shape only): sp rank 0: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 128 scale_1) 0)
+  output_relations[0] (shape only): sp rank 0: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 0 scale_1) 0)
+  output_relations[0] (shape only): sp rank 0: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 32 scale_1) 0)
+  output_relations[0] (shape only): sp rank 0: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 0 scale_1) 0)
+  output_relations[0] (shape only): sp rank 0: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 32 scale_1) 0)
+  output_relations[0] (shape only): sp rank 1: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 32 scale_1) 0)
+  output_relations[0] (shape only): sp rank 1: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 128 scale_1) 0)
+  output_relations[0] (shape only): sp rank 1: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 0 scale_1) 0)
+  output_relations[0] (shape only): sp rank 1: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 32 scale_1) 0)
+  output_relations[0] (shape only): sp rank 1: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 32 scale_1) 0)
+  output_relations[0] (shape only): sp rank 1: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 64 scale_1) 0)
+  output_relations[0] (shape only): sp rank 2: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 32 scale_1) 0)
+  output_relations[0] (shape only): sp rank 2: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 128 scale_1) 0)
+  output_relations[0] (shape only): sp rank 2: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 0 scale_1) 0)
+  output_relations[0] (shape only): sp rank 2: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 32 scale_1) 0)
+  output_relations[0] (shape only): sp rank 2: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 64 scale_1) 0)
+  output_relations[0] (shape only): sp rank 2: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 96 scale_1) 0)
+  output_relations[0] (shape only): sp rank 3: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 32 scale_1) 0)
+  output_relations[0] (shape only): sp rank 3: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 128 scale_1) 0)
+  output_relations[0] (shape only): sp rank 3: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 0 scale_1) 0)
+  output_relations[0] (shape only): sp rank 3: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 32 scale_1) 0)
+  output_relations[0] (shape only): sp rank 3: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 96 scale_1) 0)
+  output_relations[0] (shape only): sp rank 3: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 128 scale_1) 0)
+  output_relations[0] (shape only): sp rank 4: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 32 scale_1) 0)
+  output_relations[0] (shape only): sp rank 4: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 128 scale_1) 0)
+  output_relations[0] (shape only): sp rank 4: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 0 scale_1) 0)
+  output_relations[0] (shape only): sp rank 4: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 32 scale_1) 0)
+  output_relations[0] (shape only): sp rank 4: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 0 scale_1) 0)
+  output_relations[0] (shape only): sp rank 4: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 32 scale_1) 0)
+  output_relations[0] (shape only): sp rank 5: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 32 scale_1) 0)
+  output_relations[0] (shape only): sp rank 5: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 128 scale_1) 0)
+  output_relations[0] (shape only): sp rank 5: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 0 scale_1) 0)
+  output_relations[0] (shape only): sp rank 5: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 32 scale_1) 0)
+  output_relations[0] (shape only): sp rank 5: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 32 scale_1) 0)
+  output_relations[0] (shape only): sp rank 5: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 64 scale_1) 0)
+  output_relations[0] (shape only): sp rank 6: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 32 scale_1) 0)
+  output_relations[0] (shape only): sp rank 6: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 128 scale_1) 0)
+  output_relations[0] (shape only): sp rank 6: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 0 scale_1) 0)
+  output_relations[0] (shape only): sp rank 6: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 32 scale_1) 0)
+  output_relations[0] (shape only): sp rank 6: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 64 scale_1) 0)
+  output_relations[0] (shape only): sp rank 6: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 96 scale_1) 0)
+  output_relations[0] (shape only): sp rank 7: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 32 scale_1) 0)
+  output_relations[0] (shape only): sp rank 7: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 128 scale_1) 0)
+  output_relations[0] (shape only): sp rank 7: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 0 scale_1) 0)
+  output_relations[0] (shape only): sp rank 7: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 32 scale_1) 0)
+  output_relations[0] (shape only): sp rank 7: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 96 scale_1) 0)
+  output_relations[0] (shape only): sp rank 7: exactly divisible extents and piece boundaries; no rounded offsets.
+    (= (mod 128 scale_1) 0)
+
+B. Reduced Stage JSON (original input is unchanged)
+===================================================
+{
+  "name": "mlp_dp2_tp4_sp_04_reduce_scatter",
+  "topology": {
+    "world_size": 8,
+    "groups": {
+      "tp_0": {
+        "ranks": [
+          0,
+          1,
+          2,
+          3
+        ]
+      },
+      "tp_1": {
+        "ranks": [
+          4,
+          5,
+          6,
+          7
+        ]
+      },
+      "dp_0": {
+        "ranks": [
+          0,
+          4
+        ]
+      },
+      "dp_1": {
+        "ranks": [
+          1,
+          5
+        ]
+      },
+      "dp_2": {
+        "ranks": [
+          2,
+          6
+        ]
+      },
+      "dp_3": {
+        "ranks": [
+          3,
+          7
+        ]
+      }
+    },
+    "families": {
+      "tp": {
+        "groups": [
+          "tp_0",
+          "tp_1"
+        ]
+      },
+      "dp": {
+        "groups": [
+          "dp_0",
+          "dp_1",
+          "dp_2",
+          "dp_3"
+        ]
+      },
+      "sp": {
+        "groups": [
+          "tp_0",
+          "tp_1"
+        ]
+      }
+    }
+  },
+  "single": {
+    "tensors": {
+      "Y": {
+        "shape": [
+          4,
+          8,
+          2
+        ]
+      }
+    },
+    "inputs": [
+      "Y"
+    ],
+    "outputs": [
+      "Y"
+    ],
+    "ops": []
+  },
+  "distributed": {
+    "ranks": {
+      "0": {
+        "tensors": {
+          "P0": {
+            "shape": [
+              2,
+              8,
+              2
+            ]
+          },
+          "Ysp0": {
+            "shape": [
+              2,
+              2,
+              2
+            ]
+          }
+        },
+        "inputs": [
+          "P0"
+        ],
+        "outputs": [
+          "Ysp0"
+        ],
+        "ops": [
+          {
+            "type": "reduce_scatter",
+            "inputs": [
+              "P0"
+            ],
+            "outputs": [
+              "Ysp0"
+            ],
+            "attrs": {
+              "group": "tp_0",
+              "axis": 1,
+              "reduce_op": "sum"
+            }
+          }
+        ]
+      },
+      "1": {
+        "tensors": {
+          "P1": {
+            "shape": [
+              2,
+              8,
+              2
+            ]
+          },
+          "Ysp1": {
+            "shape": [
+              2,
+              2,
+              2
+            ]
+          }
+        },
+        "inputs": [
+          "P1"
+        ],
+        "outputs": [
+          "Ysp1"
+        ],
+        "ops": [
+          {
+            "type": "reduce_scatter",
+            "inputs": [
+              "P1"
+            ],
+            "outputs": [
+              "Ysp1"
+            ],
+            "attrs": {
+              "group": "tp_0",
+              "axis": 1,
+              "reduce_op": "sum"
+            }
+          }
+        ]
+      },
+      "2": {
+        "tensors": {
+          "P2": {
+            "shape": [
+              2,
+              8,
+              2
+            ]
+          },
+          "Ysp2": {
+            "shape": [
+              2,
+              2,
+              2
+            ]
+          }
+        },
+        "inputs": [
+          "P2"
+        ],
+        "outputs": [
+          "Ysp2"
+        ],
+        "ops": [
+          {
+            "type": "reduce_scatter",
+            "inputs": [
+              "P2"
+            ],
+            "outputs": [
+              "Ysp2"
+            ],
+            "attrs": {
+              "group": "tp_0",
+              "axis": 1,
+              "reduce_op": "sum"
+            }
+          }
+        ]
+      },
+      "3": {
+        "tensors": {
+          "P3": {
+            "shape": [
+              2,
+              8,
+              2
+            ]
+          },
+          "Ysp3": {
+            "shape": [
+              2,
+              2,
+              2
+            ]
+          }
+        },
+        "inputs": [
+          "P3"
+        ],
+        "outputs": [
+          "Ysp3"
+        ],
+        "ops": [
+          {
+            "type": "reduce_scatter",
+            "inputs": [
+              "P3"
+            ],
+            "outputs": [
+              "Ysp3"
+            ],
+            "attrs": {
+              "group": "tp_0",
+              "axis": 1,
+              "reduce_op": "sum"
+            }
+          }
+        ]
+      },
+      "4": {
+        "tensors": {
+          "P4": {
+            "shape": [
+              2,
+              8,
+              2
+            ]
+          },
+          "Ysp4": {
+            "shape": [
+              2,
+              2,
+              2
+            ]
+          }
+        },
+        "inputs": [
+          "P4"
+        ],
+        "outputs": [
+          "Ysp4"
+        ],
+        "ops": [
+          {
+            "type": "reduce_scatter",
+            "inputs": [
+              "P4"
+            ],
+            "outputs": [
+              "Ysp4"
+            ],
+            "attrs": {
+              "group": "tp_1",
+              "axis": 1,
+              "reduce_op": "sum"
+            }
+          }
+        ]
+      },
+      "5": {
+        "tensors": {
+          "P5": {
+            "shape": [
+              2,
+              8,
+              2
+            ]
+          },
+          "Ysp5": {
+            "shape": [
+              2,
+              2,
+              2
+            ]
+          }
+        },
+        "inputs": [
+          "P5"
+        ],
+        "outputs": [
+          "Ysp5"
+        ],
+        "ops": [
+          {
+            "type": "reduce_scatter",
+            "inputs": [
+              "P5"
+            ],
+            "outputs": [
+              "Ysp5"
+            ],
+            "attrs": {
+              "group": "tp_1",
+              "axis": 1,
+              "reduce_op": "sum"
+            }
+          }
+        ]
+      },
+      "6": {
+        "tensors": {
+          "P6": {
+            "shape": [
+              2,
+              8,
+              2
+            ]
+          },
+          "Ysp6": {
+            "shape": [
+              2,
+              2,
+              2
+            ]
+          }
+        },
+        "inputs": [
+          "P6"
+        ],
+        "outputs": [
+          "Ysp6"
+        ],
+        "ops": [
+          {
+            "type": "reduce_scatter",
+            "inputs": [
+              "P6"
+            ],
+            "outputs": [
+              "Ysp6"
+            ],
+            "attrs": {
+              "group": "tp_1",
+              "axis": 1,
+              "reduce_op": "sum"
+            }
+          }
+        ]
+      },
+      "7": {
+        "tensors": {
+          "P7": {
+            "shape": [
+              2,
+              8,
+              2
+            ]
+          },
+          "Ysp7": {
+            "shape": [
+              2,
+              2,
+              2
+            ]
+          }
+        },
+        "inputs": [
+          "P7"
+        ],
+        "outputs": [
+          "Ysp7"
+        ],
+        "ops": [
+          {
+            "type": "reduce_scatter",
+            "inputs": [
+              "P7"
+            ],
+            "outputs": [
+              "Ysp7"
+            ],
+            "attrs": {
+              "group": "tp_1",
+              "axis": 1,
+              "reduce_op": "sum"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "input_relations": [
+    {
+      "single_tensor": "Y",
+      "distributed_tensors": {
+        "0": "P0",
+        "1": "P1",
+        "2": "P2",
+        "3": "P3",
+        "4": "P4",
+        "5": "P5",
+        "6": "P6",
+        "7": "P7"
+      },
+      "relation": {
+        "terms": [
+          {
+            "family": "dp",
+            "expr": {
+              "kind": "index_phi",
+              "dim": 0,
+              "maps": [
+                {
+                  "rank": 0,
+                  "local_extent": 2,
+                  "single_extent": 4,
+                  "pieces": [
+                    {
+                      "local": {
+                        "start": 0,
+                        "stop": 2
+                      },
+                      "single": {
+                        "start": 0,
+                        "stop": 2
+                      }
+                    }
+                  ]
+                },
+                {
+                  "rank": 1,
+                  "local_extent": 2,
+                  "single_extent": 4,
+                  "pieces": [
+                    {
+                      "local": {
+                        "start": 0,
+                        "stop": 2
+                      },
+                      "single": {
+                        "start": 0,
+                        "stop": 2
+                      }
+                    }
+                  ]
+                },
+                {
+                  "rank": 2,
+                  "local_extent": 2,
+                  "single_extent": 4,
+                  "pieces": [
+                    {
+                      "local": {
+                        "start": 0,
+                        "stop": 2
+                      },
+                      "single": {
+                        "start": 0,
+                        "stop": 2
+                      }
+                    }
+                  ]
+                },
+                {
+                  "rank": 3,
+                  "local_extent": 2,
+                  "single_extent": 4,
+                  "pieces": [
+                    {
+                      "local": {
+                        "start": 0,
+                        "stop": 2
+                      },
+                      "single": {
+                        "start": 0,
+                        "stop": 2
+                      }
+                    }
+                  ]
+                },
+                {
+                  "rank": 4,
+                  "local_extent": 2,
+                  "single_extent": 4,
+                  "pieces": [
+                    {
+                      "local": {
+                        "start": 0,
+                        "stop": 2
+                      },
+                      "single": {
+                        "start": 2,
+                        "stop": 4
+                      }
+                    }
+                  ]
+                },
+                {
+                  "rank": 5,
+                  "local_extent": 2,
+                  "single_extent": 4,
+                  "pieces": [
+                    {
+                      "local": {
+                        "start": 0,
+                        "stop": 2
+                      },
+                      "single": {
+                        "start": 2,
+                        "stop": 4
+                      }
+                    }
+                  ]
+                },
+                {
+                  "rank": 6,
+                  "local_extent": 2,
+                  "single_extent": 4,
+                  "pieces": [
+                    {
+                      "local": {
+                        "start": 0,
+                        "stop": 2
+                      },
+                      "single": {
+                        "start": 2,
+                        "stop": 4
+                      }
+                    }
+                  ]
+                },
+                {
+                  "rank": 7,
+                  "local_extent": 2,
+                  "single_extent": 4,
+                  "pieces": [
+                    {
+                      "local": {
+                        "start": 0,
+                        "stop": 2
+                      },
+                      "single": {
+                        "start": 2,
+                        "stop": 4
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "family": "tp",
+            "expr": {
+              "kind": "partial",
+              "op": "sum"
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "output_relations": [
+    {
+      "single_tensor": "Y",
+      "distributed_tensors": {
+        "0": "Ysp0",
+        "1": "Ysp1",
+        "2": "Ysp2",
+        "3": "Ysp3",
+        "4": "Ysp4",
+        "5": "Ysp5",
+        "6": "Ysp6",
+        "7": "Ysp7"
+      },
+      "relation": {
+        "terms": [
+          {
+            "family": "dp",
+            "expr": {
+              "kind": "index_phi",
+              "dim": 0,
+              "maps": [
+                {
+                  "rank": 0,
+                  "local_extent": 2,
+                  "single_extent": 4,
+                  "pieces": [
+                    {
+                      "local": {
+                        "start": 0,
+                        "stop": 2
+                      },
+                      "single": {
+                        "start": 0,
+                        "stop": 2
+                      }
+                    }
+                  ]
+                },
+                {
+                  "rank": 1,
+                  "local_extent": 2,
+                  "single_extent": 4,
+                  "pieces": [
+                    {
+                      "local": {
+                        "start": 0,
+                        "stop": 2
+                      },
+                      "single": {
+                        "start": 0,
+                        "stop": 2
+                      }
+                    }
+                  ]
+                },
+                {
+                  "rank": 2,
+                  "local_extent": 2,
+                  "single_extent": 4,
+                  "pieces": [
+                    {
+                      "local": {
+                        "start": 0,
+                        "stop": 2
+                      },
+                      "single": {
+                        "start": 0,
+                        "stop": 2
+                      }
+                    }
+                  ]
+                },
+                {
+                  "rank": 3,
+                  "local_extent": 2,
+                  "single_extent": 4,
+                  "pieces": [
+                    {
+                      "local": {
+                        "start": 0,
+                        "stop": 2
+                      },
+                      "single": {
+                        "start": 0,
+                        "stop": 2
+                      }
+                    }
+                  ]
+                },
+                {
+                  "rank": 4,
+                  "local_extent": 2,
+                  "single_extent": 4,
+                  "pieces": [
+                    {
+                      "local": {
+                        "start": 0,
+                        "stop": 2
+                      },
+                      "single": {
+                        "start": 2,
+                        "stop": 4
+                      }
+                    }
+                  ]
+                },
+                {
+                  "rank": 5,
+                  "local_extent": 2,
+                  "single_extent": 4,
+                  "pieces": [
+                    {
+                      "local": {
+                        "start": 0,
+                        "stop": 2
+                      },
+                      "single": {
+                        "start": 2,
+                        "stop": 4
+                      }
+                    }
+                  ]
+                },
+                {
+                  "rank": 6,
+                  "local_extent": 2,
+                  "single_extent": 4,
+                  "pieces": [
+                    {
+                      "local": {
+                        "start": 0,
+                        "stop": 2
+                      },
+                      "single": {
+                        "start": 2,
+                        "stop": 4
+                      }
+                    }
+                  ]
+                },
+                {
+                  "rank": 7,
+                  "local_extent": 2,
+                  "single_extent": 4,
+                  "pieces": [
+                    {
+                      "local": {
+                        "start": 0,
+                        "stop": 2
+                      },
+                      "single": {
+                        "start": 2,
+                        "stop": 4
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "family": "sp",
+            "expr": {
+              "kind": "index_phi",
+              "dim": 1,
+              "maps": [
+                {
+                  "rank": 0,
+                  "local_extent": 2,
+                  "single_extent": 8,
+                  "pieces": [
+                    {
+                      "local": {
+                        "start": 0,
+                        "stop": 2
+                      },
+                      "single": {
+                        "start": 0,
+                        "stop": 2
+                      }
+                    }
+                  ]
+                },
+                {
+                  "rank": 1,
+                  "local_extent": 2,
+                  "single_extent": 8,
+                  "pieces": [
+                    {
+                      "local": {
+                        "start": 0,
+                        "stop": 2
+                      },
+                      "single": {
+                        "start": 2,
+                        "stop": 4
+                      }
+                    }
+                  ]
+                },
+                {
+                  "rank": 2,
+                  "local_extent": 2,
+                  "single_extent": 8,
+                  "pieces": [
+                    {
+                      "local": {
+                        "start": 0,
+                        "stop": 2
+                      },
+                      "single": {
+                        "start": 4,
+                        "stop": 6
+                      }
+                    }
+                  ]
+                },
+                {
+                  "rank": 3,
+                  "local_extent": 2,
+                  "single_extent": 8,
+                  "pieces": [
+                    {
+                      "local": {
+                        "start": 0,
+                        "stop": 2
+                      },
+                      "single": {
+                        "start": 6,
+                        "stop": 8
+                      }
+                    }
+                  ]
+                },
+                {
+                  "rank": 4,
+                  "local_extent": 2,
+                  "single_extent": 8,
+                  "pieces": [
+                    {
+                      "local": {
+                        "start": 0,
+                        "stop": 2
+                      },
+                      "single": {
+                        "start": 0,
+                        "stop": 2
+                      }
+                    }
+                  ]
+                },
+                {
+                  "rank": 5,
+                  "local_extent": 2,
+                  "single_extent": 8,
+                  "pieces": [
+                    {
+                      "local": {
+                        "start": 0,
+                        "stop": 2
+                      },
+                      "single": {
+                        "start": 2,
+                        "stop": 4
+                      }
+                    }
+                  ]
+                },
+                {
+                  "rank": 6,
+                  "local_extent": 2,
+                  "single_extent": 8,
+                  "pieces": [
+                    {
+                      "local": {
+                        "start": 0,
+                        "stop": 2
+                      },
+                      "single": {
+                        "start": 4,
+                        "stop": 6
+                      }
+                    }
+                  ]
+                },
+                {
+                  "rank": 7,
+                  "local_extent": 2,
+                  "single_extent": 8,
+                  "pieces": [
+                    {
+                      "local": {
+                        "start": 0,
+                        "stop": 2
+                      },
+                      "single": {
+                        "start": 6,
+                        "stop": 8
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
+
+C. Finite element encoding: REDUCED SHAPES ONLY
+===============================================
+Reduced status: PROVED
+Every input element has a Real symbol element_<tensor>_<coordinates>; bound inputs use exact substitution.
+Every mapped output element is enumerated; each query is the OR of its group's disequalities.
+INPUT[0]: single.Y(4, 8, 2)
+  rank0.P0(2, 8, 2)
+  rank1.P1(2, 8, 2)
+  rank2.P2(2, 8, 2)
+  rank3.P3(2, 8, 2)
+  rank4.P4(2, 8, 2)
+  rank5.P5(2, 8, 2)
+  rank6.P6(2, 8, 2)
+  rank7.P7(2, 8, 2)
+  family=dp, IndexPhi dim=0
+    rank 0: local [0,2) -> single [0,2)
+    rank 1: local [0,2) -> single [0,2)
+    rank 2: local [0,2) -> single [0,2)
+    rank 3: local [0,2) -> single [0,2)
+    rank 4: local [0,2) -> single [2,4)
+    rank 5: local [0,2) -> single [2,4)
+    rank 6: local [0,2) -> single [2,4)
+    rank 7: local [0,2) -> single [2,4)
+  family=tp, Partial(sum), groups=((0, 1, 2, 3), (4, 5, 6, 7))
+  Other dimensions: identity; matching extents checked.
+  Equation: S[g] = sum(D_r[Phi_r^-1(g)] for r in G), separately for each G.
+  Partial alone DOES NOT assert D_r = S or replica contribution equality.
+  rank 0 single-image intervals by dimension: (((0, 2),), ((0, 8),), ((0, 2),))
+  rank 1 single-image intervals by dimension: (((0, 2),), ((0, 8),), ((0, 2),))
+  rank 2 single-image intervals by dimension: (((0, 2),), ((0, 8),), ((0, 2),))
+  rank 3 single-image intervals by dimension: (((0, 2),), ((0, 8),), ((0, 2),))
+  rank 4 single-image intervals by dimension: (((2, 4),), ((0, 8),), ((0, 2),))
+  rank 5 single-image intervals by dimension: (((2, 4),), ((0, 8),), ((0, 2),))
+  rank 6 single-image intervals by dimension: (((2, 4),), ((0, 8),), ((0, 2),))
+  rank 7 single-image intervals by dimension: (((2, 4),), ((0, 8),), ((0, 2),))
+OUTPUT GOAL[0]: single.Y(4, 8, 2)
+  rank0.Ysp0(2, 2, 2)
+  rank1.Ysp1(2, 2, 2)
+  rank2.Ysp2(2, 2, 2)
+  rank3.Ysp3(2, 2, 2)
+  rank4.Ysp4(2, 2, 2)
+  rank5.Ysp5(2, 2, 2)
+  rank6.Ysp6(2, 2, 2)
+  rank7.Ysp7(2, 2, 2)
+  family=dp, IndexPhi dim=0
+    rank 0: local [0,2) -> single [0,2)
+    rank 1: local [0,2) -> single [0,2)
+    rank 2: local [0,2) -> single [0,2)
+    rank 3: local [0,2) -> single [0,2)
+    rank 4: local [0,2) -> single [2,4)
+    rank 5: local [0,2) -> single [2,4)
+    rank 6: local [0,2) -> single [2,4)
+    rank 7: local [0,2) -> single [2,4)
+  family=sp, IndexPhi dim=1
+    rank 0: local [0,2) -> single [0,2)
+    rank 1: local [0,2) -> single [2,4)
+    rank 2: local [0,2) -> single [4,6)
+    rank 3: local [0,2) -> single [6,8)
+    rank 4: local [0,2) -> single [0,2)
+    rank 5: local [0,2) -> single [2,4)
+    rank 6: local [0,2) -> single [4,6)
+    rank 7: local [0,2) -> single [6,8)
+  Other dimensions: identity; matching extents checked.
+  Equation: D_r[i] = S[Phi_r(i)] for every valid local i and every rank.
+  rank 0 single-image intervals by dimension: (((0, 2),), ((0, 2),), ((0, 2),))
+  rank 1 single-image intervals by dimension: (((0, 2),), ((2, 4),), ((0, 2),))
+  rank 2 single-image intervals by dimension: (((0, 2),), ((4, 6),), ((0, 2),))
+  rank 3 single-image intervals by dimension: (((0, 2),), ((6, 8),), ((0, 2),))
+  rank 4 single-image intervals by dimension: (((2, 4),), ((0, 2),), ((0, 2),))
+  rank 5 single-image intervals by dimension: (((2, 4),), ((2, 4),), ((0, 2),))
+  rank 6 single-image intervals by dimension: (((2, 4),), ((4, 6),), ((0, 2),))
+  rank 7 single-image intervals by dimension: (((2, 4),), ((6, 8),), ((0, 2),))
+rank3.P3[i] := single.Y[Phi_3(i)] - sum(other independent contributions in group (0, 1, 2, 3)); no extra replica equalities
+rank7.P7[i] := single.Y[Phi_7(i)] - sum(other independent contributions in group (4, 5, 6, 7)); no extra replica equalities
+Rin[0]: (= element_0_0_0_0
+   (+ element_1_0_0_0 element_2_0_0_0 element_3_0_0_0 element_4_0_0_0))
+Rin[1]: (= element_0_0_0_1
+   (+ element_1_0_0_1 element_2_0_0_1 element_3_0_0_1 element_4_0_0_1))
+Rin[2]: (= element_0_0_1_0
+   (+ element_1_0_1_0 element_2_0_1_0 element_3_0_1_0 element_4_0_1_0))
+Rin[3]: (= element_0_0_1_1
+   (+ element_1_0_1_1 element_2_0_1_1 element_3_0_1_1 element_4_0_1_1))
+Rin[4]: (= element_0_0_2_0
+   (+ element_1_0_2_0 element_2_0_2_0 element_3_0_2_0 element_4_0_2_0))
+Rin[5]: (= element_0_0_2_1
+   (+ element_1_0_2_1 element_2_0_2_1 element_3_0_2_1 element_4_0_2_1))
+Rin[6]: (= element_0_0_3_0
+   (+ element_1_0_3_0 element_2_0_3_0 element_3_0_3_0 element_4_0_3_0))
+Rin[7]: (= element_0_0_3_1
+   (+ element_1_0_3_1 element_2_0_3_1 element_3_0_3_1 element_4_0_3_1))
+Rin[8]: (= element_0_0_4_0
+   (+ element_1_0_4_0 element_2_0_4_0 element_3_0_4_0 element_4_0_4_0))
+Rin[9]: (= element_0_0_4_1
+   (+ element_1_0_4_1 element_2_0_4_1 element_3_0_4_1 element_4_0_4_1))
+Rin[10]: (= element_0_0_5_0
+   (+ element_1_0_5_0 element_2_0_5_0 element_3_0_5_0 element_4_0_5_0))
+Rin[11]: (= element_0_0_5_1
+   (+ element_1_0_5_1 element_2_0_5_1 element_3_0_5_1 element_4_0_5_1))
+Rin[12]: (= element_0_0_6_0
+   (+ element_1_0_6_0 element_2_0_6_0 element_3_0_6_0 element_4_0_6_0))
+Rin[13]: (= element_0_0_6_1
+   (+ element_1_0_6_1 element_2_0_6_1 element_3_0_6_1 element_4_0_6_1))
+Rin[14]: (= element_0_0_7_0
+   (+ element_1_0_7_0 element_2_0_7_0 element_3_0_7_0 element_4_0_7_0))
+Rin[15]: (= element_0_0_7_1
+   (+ element_1_0_7_1 element_2_0_7_1 element_3_0_7_1 element_4_0_7_1))
+Rin[16]: (= element_0_1_0_0
+   (+ element_1_1_0_0 element_2_1_0_0 element_3_1_0_0 element_4_1_0_0))
+Rin[17]: (= element_0_1_0_1
+   (+ element_1_1_0_1 element_2_1_0_1 element_3_1_0_1 element_4_1_0_1))
+Rin[18]: (= element_0_1_1_0
+   (+ element_1_1_1_0 element_2_1_1_0 element_3_1_1_0 element_4_1_1_0))
+Rin[19]: (= element_0_1_1_1
+   (+ element_1_1_1_1 element_2_1_1_1 element_3_1_1_1 element_4_1_1_1))
+Rin[20]: (= element_0_1_2_0
+   (+ element_1_1_2_0 element_2_1_2_0 element_3_1_2_0 element_4_1_2_0))
+Rin[21]: (= element_0_1_2_1
+   (+ element_1_1_2_1 element_2_1_2_1 element_3_1_2_1 element_4_1_2_1))
+Rin[22]: (= element_0_1_3_0
+   (+ element_1_1_3_0 element_2_1_3_0 element_3_1_3_0 element_4_1_3_0))
+Rin[23]: (= element_0_1_3_1
+   (+ element_1_1_3_1 element_2_1_3_1 element_3_1_3_1 element_4_1_3_1))
+Rin[24]: (= element_0_1_4_0
+   (+ element_1_1_4_0 element_2_1_4_0 element_3_1_4_0 element_4_1_4_0))
+Rin[25]: (= element_0_1_4_1
+   (+ element_1_1_4_1 element_2_1_4_1 element_3_1_4_1 element_4_1_4_1))
+Rin[26]: (= element_0_1_5_0
+   (+ element_1_1_5_0 element_2_1_5_0 element_3_1_5_0 element_4_1_5_0))
+Rin[27]: (= element_0_1_5_1
+   (+ element_1_1_5_1 element_2_1_5_1 element_3_1_5_1 element_4_1_5_1))
+Rin[28]: (= element_0_1_6_0
+   (+ element_1_1_6_0 element_2_1_6_0 element_3_1_6_0 element_4_1_6_0))
+Rin[29]: (= element_0_1_6_1
+   (+ element_1_1_6_1 element_2_1_6_1 element_3_1_6_1 element_4_1_6_1))
+Rin[30]: (= element_0_1_7_0
+   (+ element_1_1_7_0 element_2_1_7_0 element_3_1_7_0 element_4_1_7_0))
+Rin[31]: (= element_0_1_7_1
+   (+ element_1_1_7_1 element_2_1_7_1 element_3_1_7_1 element_4_1_7_1))
+Rin[32]: (= element_0_2_0_0
+   (+ element_5_0_0_0 element_6_0_0_0 element_7_0_0_0 element_8_0_0_0))
+Rin[33]: (= element_0_2_0_1
+   (+ element_5_0_0_1 element_6_0_0_1 element_7_0_0_1 element_8_0_0_1))
+Rin[34]: (= element_0_2_1_0
+   (+ element_5_0_1_0 element_6_0_1_0 element_7_0_1_0 element_8_0_1_0))
+Rin[35]: (= element_0_2_1_1
+   (+ element_5_0_1_1 element_6_0_1_1 element_7_0_1_1 element_8_0_1_1))
+Rin[36]: (= element_0_2_2_0
+   (+ element_5_0_2_0 element_6_0_2_0 element_7_0_2_0 element_8_0_2_0))
+Rin[37]: (= element_0_2_2_1
+   (+ element_5_0_2_1 element_6_0_2_1 element_7_0_2_1 element_8_0_2_1))
+Rin[38]: (= element_0_2_3_0
+   (+ element_5_0_3_0 element_6_0_3_0 element_7_0_3_0 element_8_0_3_0))
+Rin[39]: (= element_0_2_3_1
+   (+ element_5_0_3_1 element_6_0_3_1 element_7_0_3_1 element_8_0_3_1))
+Rin[40]: (= element_0_2_4_0
+   (+ element_5_0_4_0 element_6_0_4_0 element_7_0_4_0 element_8_0_4_0))
+Rin[41]: (= element_0_2_4_1
+   (+ element_5_0_4_1 element_6_0_4_1 element_7_0_4_1 element_8_0_4_1))
+Rin[42]: (= element_0_2_5_0
+   (+ element_5_0_5_0 element_6_0_5_0 element_7_0_5_0 element_8_0_5_0))
+Rin[43]: (= element_0_2_5_1
+   (+ element_5_0_5_1 element_6_0_5_1 element_7_0_5_1 element_8_0_5_1))
+Rin[44]: (= element_0_2_6_0
+   (+ element_5_0_6_0 element_6_0_6_0 element_7_0_6_0 element_8_0_6_0))
+Rin[45]: (= element_0_2_6_1
+   (+ element_5_0_6_1 element_6_0_6_1 element_7_0_6_1 element_8_0_6_1))
+Rin[46]: (= element_0_2_7_0
+   (+ element_5_0_7_0 element_6_0_7_0 element_7_0_7_0 element_8_0_7_0))
+Rin[47]: (= element_0_2_7_1
+   (+ element_5_0_7_1 element_6_0_7_1 element_7_0_7_1 element_8_0_7_1))
+Rin[48]: (= element_0_3_0_0
+   (+ element_5_1_0_0 element_6_1_0_0 element_7_1_0_0 element_8_1_0_0))
+Rin[49]: (= element_0_3_0_1
+   (+ element_5_1_0_1 element_6_1_0_1 element_7_1_0_1 element_8_1_0_1))
+Rin[50]: (= element_0_3_1_0
+   (+ element_5_1_1_0 element_6_1_1_0 element_7_1_1_0 element_8_1_1_0))
+Rin[51]: (= element_0_3_1_1
+   (+ element_5_1_1_1 element_6_1_1_1 element_7_1_1_1 element_8_1_1_1))
+Rin[52]: (= element_0_3_2_0
+   (+ element_5_1_2_0 element_6_1_2_0 element_7_1_2_0 element_8_1_2_0))
+Rin[53]: (= element_0_3_2_1
+   (+ element_5_1_2_1 element_6_1_2_1 element_7_1_2_1 element_8_1_2_1))
+Rin[54]: (= element_0_3_3_0
+   (+ element_5_1_3_0 element_6_1_3_0 element_7_1_3_0 element_8_1_3_0))
+Rin[55]: (= element_0_3_3_1
+   (+ element_5_1_3_1 element_6_1_3_1 element_7_1_3_1 element_8_1_3_1))
+Rin[56]: (= element_0_3_4_0
+   (+ element_5_1_4_0 element_6_1_4_0 element_7_1_4_0 element_8_1_4_0))
+Rin[57]: (= element_0_3_4_1
+   (+ element_5_1_4_1 element_6_1_4_1 element_7_1_4_1 element_8_1_4_1))
+Rin[58]: (= element_0_3_5_0
+   (+ element_5_1_5_0 element_6_1_5_0 element_7_1_5_0 element_8_1_5_0))
+Rin[59]: (= element_0_3_5_1
+   (+ element_5_1_5_1 element_6_1_5_1 element_7_1_5_1 element_8_1_5_1))
+Rin[60]: (= element_0_3_6_0
+   (+ element_5_1_6_0 element_6_1_6_0 element_7_1_6_0 element_8_1_6_0))
+Rin[61]: (= element_0_3_6_1
+   (+ element_5_1_6_1 element_6_1_6_1 element_7_1_6_1 element_8_1_6_1))
+Rin[62]: (= element_0_3_7_0
+   (+ element_5_1_7_0 element_6_1_7_0 element_7_1_7_0 element_8_1_7_0))
+Rin[63]: (= element_0_3_7_1
+   (+ element_5_1_7_1 element_6_1_7_1 element_7_1_7_1 element_8_1_7_1))
+collective tp_0 #0: reduce_scatter, members=(0, 1, 2, 3), attrs={'group': 'tp_0', 'axis': 1, 'reduce_op': 'sum'}, inputs=[(2, 8, 2), (2, 8, 2), (2, 8, 2), (2, 8, 2)], outputs=[(2, 2, 2), (2, 2, 2), (2, 2, 2), (2, 2, 2)]
+collective tp_1 #0: reduce_scatter, members=(4, 5, 6, 7), attrs={'group': 'tp_1', 'axis': 1, 'reduce_op': 'sum'}, inputs=[(2, 8, 2), (2, 8, 2), (2, 8, 2), (2, 8, 2)], outputs=[(2, 2, 2), (2, 2, 2), (2, 2, 2), (2, 2, 2)]
+Query: finite output[0] group=(0,); result=UNSAT
+BEGIN SMT-LIB (complete query)
+; benchmark generated from python API
+(set-info :status unknown)
+(assert
+ false)
+(check-sat)
+END SMT-LIB
+Query: finite output[0] group=(1,); result=UNSAT
+BEGIN SMT-LIB (complete query)
+; benchmark generated from python API
+(set-info :status unknown)
+(assert
+ false)
+(check-sat)
+END SMT-LIB
+Query: finite output[0] group=(2,); result=UNSAT
+BEGIN SMT-LIB (complete query)
+; benchmark generated from python API
+(set-info :status unknown)
+(assert
+ false)
+(check-sat)
+END SMT-LIB
+Query: finite output[0] group=(3,); result=UNSAT
+BEGIN SMT-LIB (complete query)
+; benchmark generated from python API
+(set-info :status unknown)
+(assert
+ false)
+(check-sat)
+END SMT-LIB
+Query: finite output[0] group=(4,); result=UNSAT
+BEGIN SMT-LIB (complete query)
+; benchmark generated from python API
+(set-info :status unknown)
+(assert
+ false)
+(check-sat)
+END SMT-LIB
+Query: finite output[0] group=(5,); result=UNSAT
+BEGIN SMT-LIB (complete query)
+; benchmark generated from python API
+(set-info :status unknown)
+(assert
+ false)
+(check-sat)
+END SMT-LIB
+Query: finite output[0] group=(6,); result=UNSAT
+BEGIN SMT-LIB (complete query)
+; benchmark generated from python API
+(set-info :status unknown)
+(assert
+ false)
+(check-sat)
+END SMT-LIB
+Query: finite output[0] group=(7,); result=UNSAT
+BEGIN SMT-LIB (complete query)
+; benchmark generated from python API
+(set-info :status unknown)
+(assert
+ false)
+(check-sat)
+END SMT-LIB
+
+D. Original-shape certificate
+=============================
+Each opaque sum is the exact finite sum of its body over q=0..width-1. Other free symbols retain their current values.
+Equal simplified bodies share atoms; distinct atoms are unconstrained. Every original evaluation is an abstract assignment.
+Thus UNSAT is sound; a model of the abstraction is not necessarily an original counterexample. Nested opaque sums are rejected.
+
+E. Original-shape final verification details
+============================================
+Stage: mlp_dp2_tp4_sp_04_reduce_scatter
+Verification: PROVED
+Proof scope: ORIGINAL_SHAPES_EXACT_REAL
+Actual mode: SHAPE_REDUCED_ELEMENTWISE
+Z3 version: 4.15.1
+Arithmetic: exact real; GELU: shared unary uninterpreted function.
+No claim of IEEE floating-point kernel equivalence or whole-program correctness.
+Canonical input SHA256: c21505be5f934861f3ccc1287eb538adf5c4615315b6e84cbec4e71411d0a88a
+
+1. Parsed models / JSON parsing
+===============================
+StageSpec(name='mlp_dp2_tp4_sp_04_reduce_scatter', world_size=8)
+Group tp_0: ordered ranks=(0, 1, 2, 3)
+Group tp_1: ordered ranks=(4, 5, 6, 7)
+Group dp_0: ordered ranks=(0, 4)
+Group dp_1: ordered ranks=(1, 5)
+Group dp_2: ordered ranks=(2, 6)
+Group dp_3: ordered ranks=(3, 7)
+Family tp: groups=('tp_0', 'tp_1')
+Family dp: groups=('dp_0', 'dp_1', 'dp_2', 'dp_3')
+Family sp: groups=('tp_0', 'tp_1')
+Logical SP/TP families may alias actual groups; they are not extra rank axes.
+single: inputs=('Y',), outputs=('Y',)
+  TensorSpec Y: original shape=(4, 128, 256), elements=131072
+  No operators: identity program using the declared input as output.
+rank0: inputs=('P0',), outputs=('Ysp0',)
+  TensorSpec P0: original shape=(2, 128, 256), elements=65536
+  TensorSpec Ysp0: original shape=(2, 32, 256), elements=16384
+  OpCall 0: reduce_scatter inputs=('P0',) outputs=('Ysp0',) attrs={'group': 'tp_0', 'axis': 1, 'reduce_op': 'sum'}
+rank1: inputs=('P1',), outputs=('Ysp1',)
+  TensorSpec P1: original shape=(2, 128, 256), elements=65536
+  TensorSpec Ysp1: original shape=(2, 32, 256), elements=16384
+  OpCall 0: reduce_scatter inputs=('P1',) outputs=('Ysp1',) attrs={'group': 'tp_0', 'axis': 1, 'reduce_op': 'sum'}
+rank2: inputs=('P2',), outputs=('Ysp2',)
+  TensorSpec P2: original shape=(2, 128, 256), elements=65536
+  TensorSpec Ysp2: original shape=(2, 32, 256), elements=16384
+  OpCall 0: reduce_scatter inputs=('P2',) outputs=('Ysp2',) attrs={'group': 'tp_0', 'axis': 1, 'reduce_op': 'sum'}
+rank3: inputs=('P3',), outputs=('Ysp3',)
+  TensorSpec P3: original shape=(2, 128, 256), elements=65536
+  TensorSpec Ysp3: original shape=(2, 32, 256), elements=16384
+  OpCall 0: reduce_scatter inputs=('P3',) outputs=('Ysp3',) attrs={'group': 'tp_0', 'axis': 1, 'reduce_op': 'sum'}
+rank4: inputs=('P4',), outputs=('Ysp4',)
+  TensorSpec P4: original shape=(2, 128, 256), elements=65536
+  TensorSpec Ysp4: original shape=(2, 32, 256), elements=16384
+  OpCall 0: reduce_scatter inputs=('P4',) outputs=('Ysp4',) attrs={'group': 'tp_1', 'axis': 1, 'reduce_op': 'sum'}
+rank5: inputs=('P5',), outputs=('Ysp5',)
+  TensorSpec P5: original shape=(2, 128, 256), elements=65536
+  TensorSpec Ysp5: original shape=(2, 32, 256), elements=16384
+  OpCall 0: reduce_scatter inputs=('P5',) outputs=('Ysp5',) attrs={'group': 'tp_1', 'axis': 1, 'reduce_op': 'sum'}
+rank6: inputs=('P6',), outputs=('Ysp6',)
+  TensorSpec P6: original shape=(2, 128, 256), elements=65536
+  TensorSpec Ysp6: original shape=(2, 32, 256), elements=16384
+  OpCall 0: reduce_scatter inputs=('P6',) outputs=('Ysp6',) attrs={'group': 'tp_1', 'axis': 1, 'reduce_op': 'sum'}
+rank7: inputs=('P7',), outputs=('Ysp7',)
+  TensorSpec P7: original shape=(2, 128, 256), elements=65536
+  TensorSpec Ysp7: original shape=(2, 32, 256), elements=16384
+  OpCall 0: reduce_scatter inputs=('P7',) outputs=('Ysp7',) attrs={'group': 'tp_1', 'axis': 1, 'reduce_op': 'sum'}
+
+2. Validation checks
+====================
+Topology: each family partitions world; group member order preserved.
+single: SSA, explicit boundaries and 0 operator shapes checked.
+rank0: SSA, explicit boundaries and 1 operator shapes checked.
+rank1: SSA, explicit boundaries and 1 operator shapes checked.
+rank2: SSA, explicit boundaries and 1 operator shapes checked.
+rank3: SSA, explicit boundaries and 1 operator shapes checked.
+rank4: SSA, explicit boundaries and 1 operator shapes checked.
+rank5: SSA, explicit boundaries and 1 operator shapes checked.
+rank6: SSA, explicit boundaries and 1 operator shapes checked.
+rank7: SSA, explicit boundaries and 1 operator shapes checked.
+input: 1 bindings; rank/extent/range/domain constraints checked.
+output: 1 bindings; rank/extent/range/domain constraints checked.
+Checks include unknown fields, duplicate JSON keys, boundary references, SSA order, operator attrs/shapes,
+full rank coverage, extents, local interval coverage, disjoint target pieces and Partial image compatibility.
+
+3. Normalized input assumptions and output goals
+================================================
+INPUT PREMISE[0]: single.Y(4, 128, 256)
+  rank0.P0(2, 128, 256)
+  rank1.P1(2, 128, 256)
+  rank2.P2(2, 128, 256)
+  rank3.P3(2, 128, 256)
+  rank4.P4(2, 128, 256)
+  rank5.P5(2, 128, 256)
+  rank6.P6(2, 128, 256)
+  rank7.P7(2, 128, 256)
+  family=dp, IndexPhi dim=0
+    rank 0: local [0,2) -> single [0,2)
+    rank 1: local [0,2) -> single [0,2)
+    rank 2: local [0,2) -> single [0,2)
+    rank 3: local [0,2) -> single [0,2)
+    rank 4: local [0,2) -> single [2,4)
+    rank 5: local [0,2) -> single [2,4)
+    rank 6: local [0,2) -> single [2,4)
+    rank 7: local [0,2) -> single [2,4)
+  family=tp, Partial(sum), groups=((0, 1, 2, 3), (4, 5, 6, 7))
+  Other dimensions: identity; matching extents checked.
+  Equation: S[g] = sum(D_r[Phi_r^-1(g)] for r in G), separately for each G.
+  Partial alone DOES NOT assert D_r = S or replica contribution equality.
+  rank 0 single-image intervals by dimension: (((0, 2),), ((0, 128),), ((0, 256),))
+  rank 1 single-image intervals by dimension: (((0, 2),), ((0, 128),), ((0, 256),))
+  rank 2 single-image intervals by dimension: (((0, 2),), ((0, 128),), ((0, 256),))
+  rank 3 single-image intervals by dimension: (((0, 2),), ((0, 128),), ((0, 256),))
+  rank 4 single-image intervals by dimension: (((2, 4),), ((0, 128),), ((0, 256),))
+  rank 5 single-image intervals by dimension: (((2, 4),), ((0, 128),), ((0, 256),))
+  rank 6 single-image intervals by dimension: (((2, 4),), ((0, 128),), ((0, 256),))
+  rank 7 single-image intervals by dimension: (((2, 4),), ((0, 128),), ((0, 256),))
+OUTPUT GOAL (never assumed)[0]: single.Y(4, 128, 256)
+  rank0.Ysp0(2, 32, 256)
+  rank1.Ysp1(2, 32, 256)
+  rank2.Ysp2(2, 32, 256)
+  rank3.Ysp3(2, 32, 256)
+  rank4.Ysp4(2, 32, 256)
+  rank5.Ysp5(2, 32, 256)
+  rank6.Ysp6(2, 32, 256)
+  rank7.Ysp7(2, 32, 256)
+  family=dp, IndexPhi dim=0
+    rank 0: local [0,2) -> single [0,2)
+    rank 1: local [0,2) -> single [0,2)
+    rank 2: local [0,2) -> single [0,2)
+    rank 3: local [0,2) -> single [0,2)
+    rank 4: local [0,2) -> single [2,4)
+    rank 5: local [0,2) -> single [2,4)
+    rank 6: local [0,2) -> single [2,4)
+    rank 7: local [0,2) -> single [2,4)
+  family=sp, IndexPhi dim=1
+    rank 0: local [0,32) -> single [0,32)
+    rank 1: local [0,32) -> single [32,64)
+    rank 2: local [0,32) -> single [64,96)
+    rank 3: local [0,32) -> single [96,128)
+    rank 4: local [0,32) -> single [0,32)
+    rank 5: local [0,32) -> single [32,64)
+    rank 6: local [0,32) -> single [64,96)
+    rank 7: local [0,32) -> single [96,128)
+  Other dimensions: identity; matching extents checked.
+  Equation: D_r[i] = S[Phi_r(i)] for every valid local i and every rank.
+  rank 0 single-image intervals by dimension: (((0, 2),), ((0, 32),), ((0, 256),))
+  rank 1 single-image intervals by dimension: (((0, 2),), ((32, 64),), ((0, 256),))
+  rank 2 single-image intervals by dimension: (((0, 2),), ((64, 96),), ((0, 256),))
+  rank 3 single-image intervals by dimension: (((0, 2),), ((96, 128),), ((0, 256),))
+  rank 4 single-image intervals by dimension: (((2, 4),), ((0, 32),), ((0, 256),))
+  rank 5 single-image intervals by dimension: (((2, 4),), ((32, 64),), ((0, 256),))
+  rank 6 single-image intervals by dimension: (((2, 4),), ((64, 96),), ((0, 256),))
+  rank 7 single-image intervals by dimension: (((2, 4),), ((96, 128),), ((0, 256),))
+
+4. Shape/index-domain reduction and its justification
+=====================================================
+Method: SYMBOLIC_INDEX_DOMAIN
+Original-index certificate: matmul sums may be abstracted in fixed blocks; see block definitions above.
+131072 output relation elements -> 8 symbolic-index domains.
+Original certificate retains original dimensions; candidate shape reduction is documented above.
+Reduction constraints are exact original index bounds, not sample-size constraints.
+  Domain 0: relation=0, group=(0,): 0 <= goal0_i0 < 2 AND 0 <= goal0_i1 < 32 AND 0 <= goal0_i2 < 256
+  Domain 1: relation=0, group=(1,): 0 <= goal1_i0 < 2 AND 0 <= goal1_i1 < 32 AND 0 <= goal1_i2 < 256
+  Domain 2: relation=0, group=(2,): 0 <= goal2_i0 < 2 AND 0 <= goal2_i1 < 32 AND 0 <= goal2_i2 < 256
+  Domain 3: relation=0, group=(3,): 0 <= goal3_i0 < 2 AND 0 <= goal3_i1 < 32 AND 0 <= goal3_i2 < 256
+  Domain 4: relation=0, group=(4,): 0 <= goal4_i0 < 2 AND 0 <= goal4_i1 < 32 AND 0 <= goal4_i2 < 256
+  Domain 5: relation=0, group=(5,): 0 <= goal5_i0 < 2 AND 0 <= goal5_i1 < 32 AND 0 <= goal5_i2 < 256
+  Domain 6: relation=0, group=(6,): 0 <= goal6_i0 < 2 AND 0 <= goal6_i1 < 32 AND 0 <= goal6_i2 < 256
+  Domain 7: relation=0, group=(7,): 0 <= goal7_i0 < 2 AND 0 <= goal7_i1 < 32 AND 0 <= goal7_i2 < 256
+
+5. Input equalities and exact elimination
+=========================================
+The following universal equalities define Rin before elimination:
+Rin[0] SMT-LIB:
+(forall ((rin0_g3_i0 Int) (rin0_g3_i1 Int) (rin0_g3_i2 Int))
+  (=> (and (>= rin0_g3_i0 0)
+           (< rin0_g3_i0 2)
+           (>= rin0_g3_i1 0)
+           (< rin0_g3_i1 128)
+           (>= rin0_g3_i2 0)
+           (< rin0_g3_i2 256))
+      (= (input_0 rin0_g3_i0 rin0_g3_i1 rin0_g3_i2)
+         (+ (input_1 rin0_g3_i0 rin0_g3_i1 rin0_g3_i2)
+            (input_2 rin0_g3_i0 rin0_g3_i1 rin0_g3_i2)
+            (input_3 rin0_g3_i0 rin0_g3_i1 rin0_g3_i2)
+            (input_4 rin0_g3_i0 rin0_g3_i1 rin0_g3_i2)))))
+Rin[1] SMT-LIB:
+(forall ((rin0_g7_i0 Int) (rin0_g7_i1 Int) (rin0_g7_i2 Int))
+  (=> (and (>= rin0_g7_i0 0)
+           (< rin0_g7_i0 2)
+           (>= rin0_g7_i1 0)
+           (< rin0_g7_i1 128)
+           (>= rin0_g7_i2 0)
+           (< rin0_g7_i2 256))
+      (= (input_0 (+ 2 rin0_g7_i0) rin0_g7_i1 rin0_g7_i2)
+         (+ (input_5 rin0_g7_i0 rin0_g7_i1 rin0_g7_i2)
+            (input_6 rin0_g7_i0 rin0_g7_i1 rin0_g7_i2)
+            (input_7 rin0_g7_i0 rin0_g7_i1 rin0_g7_i2)
+            (input_8 rin0_g7_i0 rin0_g7_i1 rin0_g7_i2)))))
+Free function symbols corresponding to original input tensors:
+  input_0: single.Y
+  input_1: rank0.P0
+  input_2: rank1.P1
+  input_3: rank2.P2
+  input_4: rank3.P3
+  input_5: rank4.P4
+  input_6: rank5.P5
+  input_7: rank6.P6
+  input_8: rank7.P7
+Substitutions applied to the local input environment:
+  rank3.P3[i] := single.Y[Phi_3(i)] - sum(other independent contributions in group (0, 1, 2, 3)); no extra replica equalities
+  rank7.P7[i] := single.Y[Phi_7(i)] - sum(other independent contributions in group (4, 5, 6, 7)); no extra replica equalities
+Justification: equality inputs are determined by S and Phi. For each Partial group,
+choose every non-pivot contribution freely and define the pivot as S minus their sum.
+Each original solution restricts to these free functions, and each such assignment reconstructs a solution.
+Unique local preimages and disjoint input bindings were checked. Functions outside valid domains are irrelevant.
+Thus Rin is enforced by exact parameterization, not dropped or replaced with sampled numeric inputs.
+No extra replica equalities are inserted. Unbound program inputs remain independent free functions.
+
+6. Symbolic execution and collective matching
+=============================================
+collective tp_0 #0: reduce_scatter, members=(0, 1, 2, 3), attrs={'group': 'tp_0', 'axis': 1, 'reduce_op': 'sum'}, inputs=[(2, 128, 256), (2, 128, 256), (2, 128, 256), (2, 128, 256)], outputs=[(2, 32, 256), (2, 32, 256), (2, 32, 256), (2, 32, 256)]
+collective tp_1 #0: reduce_scatter, members=(4, 5, 6, 7), attrs={'group': 'tp_1', 'axis': 1, 'reduce_op': 'sum'}, inputs=[(2, 128, 256), (2, 128, 256), (2, 128, 256), (2, 128, 256)], outputs=[(2, 32, 256), (2, 32, 256), (2, 32, 256), (2, 32, 256)]
+Local outputs are lazy element expressions; no concrete tensor values are used.
+MatMul: exact finite sums; in certificate mode each declared opaque atom denotes one fixed block of original k.
+Add/Mul broadcast indices; Transpose permutes indices; Reshape uses row-major ravel/unravel; Expand broadcasts.
+GELU uses shared_gelu(x). AllGather concatenates in actual group order; AllReduce sums;
+ReduceScatter sums then assigns contiguous axis chunks in actual group order.
+
+7. Actual solver obligations after substitution
+===============================================
+Query 0: output[0] group=(0,); result=UNSAT
+Meaning: EXISTS valid original output index where single and distributed results disagree.
+Guard: (and (>= goal0_i0 0)
+     (< goal0_i0 2)
+     (>= goal0_i1 0)
+     (< goal0_i1 32)
+     (>= goal0_i2 0)
+     (< goal0_i2 256))
+Simplified disequality: false
+A false disequality means exact symbolic simplification made the two expressions identical.
+BEGIN SMT-LIB (complete query)
+; benchmark generated from python API
+(set-info :status unknown)
+(declare-fun goal0_i2 () Int)
+(declare-fun goal0_i1 () Int)
+(declare-fun goal0_i0 () Int)
+(assert
+ (let (($x167 (< goal0_i2 256)))
+ (let (($x215 (>= goal0_i2 0)))
+ (let (($x89 (>= goal0_i1 0)))
+ (let (($x200 (< goal0_i0 2)))
+ (let (($x117 (>= goal0_i0 0)))
+ (and $x117 $x200 $x89 (< goal0_i1 32) $x215 $x167)))))))
+(assert
+ false)
+(check-sat)
+END SMT-LIB
+Query 1: output[0] group=(1,); result=UNSAT
+Meaning: EXISTS valid original output index where single and distributed results disagree.
+Guard: (and (>= goal1_i0 0)
+     (< goal1_i0 2)
+     (>= goal1_i1 0)
+     (< goal1_i1 32)
+     (>= goal1_i2 0)
+     (< goal1_i2 256))
+Simplified disequality: false
+A false disequality means exact symbolic simplification made the two expressions identical.
+BEGIN SMT-LIB (complete query)
+; benchmark generated from python API
+(set-info :status unknown)
+(declare-fun goal1_i2 () Int)
+(declare-fun goal1_i1 () Int)
+(declare-fun goal1_i0 () Int)
+(assert
+ (let (($x317 (< goal1_i2 256)))
+ (let (($x341 (>= goal1_i2 0)))
+ (let (($x147 (>= goal1_i1 0)))
+ (let (($x334 (< goal1_i0 2)))
+ (let (($x136 (>= goal1_i0 0)))
+ (and $x136 $x334 $x147 (< goal1_i1 32) $x341 $x317)))))))
+(assert
+ false)
+(check-sat)
+END SMT-LIB
+Query 2: output[0] group=(2,); result=UNSAT
+Meaning: EXISTS valid original output index where single and distributed results disagree.
+Guard: (and (>= goal2_i0 0)
+     (< goal2_i0 2)
+     (>= goal2_i1 0)
+     (< goal2_i1 32)
+     (>= goal2_i2 0)
+     (< goal2_i2 256))
+Simplified disequality: false
+A false disequality means exact symbolic simplification made the two expressions identical.
+BEGIN SMT-LIB (complete query)
+; benchmark generated from python API
+(set-info :status unknown)
+(declare-fun goal2_i2 () Int)
+(declare-fun goal2_i1 () Int)
+(declare-fun goal2_i0 () Int)
+(assert
+ (let (($x629 (< goal2_i2 256)))
+ (let (($x564 (>= goal2_i2 0)))
+ (let (($x639 (>= goal2_i1 0)))
+ (let (($x641 (< goal2_i0 2)))
+ (let (($x646 (>= goal2_i0 0)))
+ (and $x646 $x641 $x639 (< goal2_i1 32) $x564 $x629)))))))
+(assert
+ false)
+(check-sat)
+END SMT-LIB
+Query 3: output[0] group=(3,); result=UNSAT
+Meaning: EXISTS valid original output index where single and distributed results disagree.
+Guard: (and (>= goal3_i0 0)
+     (< goal3_i0 2)
+     (>= goal3_i1 0)
+     (< goal3_i1 32)
+     (>= goal3_i2 0)
+     (< goal3_i2 256))
+Simplified disequality: false
+A false disequality means exact symbolic simplification made the two expressions identical.
+BEGIN SMT-LIB (complete query)
+; benchmark generated from python API
+(set-info :status unknown)
+(declare-fun goal3_i2 () Int)
+(declare-fun goal3_i1 () Int)
+(declare-fun goal3_i0 () Int)
+(assert
+ (let (($x473 (< goal3_i2 256)))
+ (let (($x377 (>= goal3_i2 0)))
+ (let (($x403 (>= goal3_i1 0)))
+ (let (($x466 (< goal3_i0 2)))
+ (let (($x685 (>= goal3_i0 0)))
+ (and $x685 $x466 $x403 (< goal3_i1 32) $x377 $x473)))))))
+(assert
+ false)
+(check-sat)
+END SMT-LIB
+Query 4: output[0] group=(4,); result=UNSAT
+Meaning: EXISTS valid original output index where single and distributed results disagree.
+Guard: (and (>= goal4_i0 0)
+     (< goal4_i0 2)
+     (>= goal4_i1 0)
+     (< goal4_i1 32)
+     (>= goal4_i2 0)
+     (< goal4_i2 256))
+Simplified disequality: false
+A false disequality means exact symbolic simplification made the two expressions identical.
+BEGIN SMT-LIB (complete query)
+; benchmark generated from python API
+(set-info :status unknown)
+(declare-fun goal4_i2 () Int)
+(declare-fun goal4_i1 () Int)
+(declare-fun goal4_i0 () Int)
+(assert
+ (let (($x782 (< goal4_i2 256)))
+ (let (($x520 (>= goal4_i2 0)))
+ (let (($x424 (>= goal4_i1 0)))
+ (let (($x373 (< goal4_i0 2)))
+ (let (($x393 (>= goal4_i0 0)))
+ (and $x393 $x373 $x424 (< goal4_i1 32) $x520 $x782)))))))
+(assert
+ false)
+(check-sat)
+END SMT-LIB
+Query 5: output[0] group=(5,); result=UNSAT
+Meaning: EXISTS valid original output index where single and distributed results disagree.
+Guard: (and (>= goal5_i0 0)
+     (< goal5_i0 2)
+     (>= goal5_i1 0)
+     (< goal5_i1 32)
+     (>= goal5_i2 0)
+     (< goal5_i2 256))
+Simplified disequality: false
+A false disequality means exact symbolic simplification made the two expressions identical.
+BEGIN SMT-LIB (complete query)
+; benchmark generated from python API
+(set-info :status unknown)
+(declare-fun goal5_i2 () Int)
+(declare-fun goal5_i1 () Int)
+(declare-fun goal5_i0 () Int)
+(assert
+ (let (($x417 (< goal5_i2 256)))
+ (let (($x430 (>= goal5_i2 0)))
+ (let (($x429 (>= goal5_i1 0)))
+ (let (($x522 (< goal5_i0 2)))
+ (let (($x518 (>= goal5_i0 0)))
+ (and $x518 $x522 $x429 (< goal5_i1 32) $x430 $x417)))))))
+(assert
+ false)
+(check-sat)
+END SMT-LIB
+Query 6: output[0] group=(6,); result=UNSAT
+Meaning: EXISTS valid original output index where single and distributed results disagree.
+Guard: (and (>= goal6_i0 0)
+     (< goal6_i0 2)
+     (>= goal6_i1 0)
+     (< goal6_i1 32)
+     (>= goal6_i2 0)
+     (< goal6_i2 256))
+Simplified disequality: false
+A false disequality means exact symbolic simplification made the two expressions identical.
+BEGIN SMT-LIB (complete query)
+; benchmark generated from python API
+(set-info :status unknown)
+(declare-fun goal6_i2 () Int)
+(declare-fun goal6_i1 () Int)
+(declare-fun goal6_i0 () Int)
+(assert
+ (let (($x45 (< goal6_i2 256)))
+ (let (($x35 (>= goal6_i2 0)))
+ (let (($x33 (>= goal6_i1 0)))
+ (let (($x116 (< goal6_i0 2)))
+ (let (($x46 (>= goal6_i0 0)))
+ (and $x46 $x116 $x33 (< goal6_i1 32) $x35 $x45)))))))
+(assert
+ false)
+(check-sat)
+END SMT-LIB
+Query 7: output[0] group=(7,); result=UNSAT
+Meaning: EXISTS valid original output index where single and distributed results disagree.
+Guard: (and (>= goal7_i0 0)
+     (< goal7_i0 2)
+     (>= goal7_i1 0)
+     (< goal7_i1 32)
+     (>= goal7_i2 0)
+     (< goal7_i2 256))
+Simplified disequality: false
+A false disequality means exact symbolic simplification made the two expressions identical.
+BEGIN SMT-LIB (complete query)
+; benchmark generated from python API
+(set-info :status unknown)
+(declare-fun goal7_i2 () Int)
+(declare-fun goal7_i1 () Int)
+(declare-fun goal7_i0 () Int)
+(assert
+ (let (($x26 (< goal7_i2 256)))
+ (let (($x609 (>= goal7_i2 0)))
+ (let (($x100 (>= goal7_i1 0)))
+ (let (($x405 (< goal7_i0 2)))
+ (let (($x47 (>= goal7_i0 0)))
+ (and $x47 $x405 $x100 (< goal7_i1 32) $x609 $x26)))))))
+(assert
+ false)
+(check-sat)
+END SMT-LIB
+
+Final result
+============
+Verification: PROVED
+Every output domain was UNSAT over original shapes, conditional on the stated input relations.
+

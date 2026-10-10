@@ -4,10 +4,20 @@ from ..core.errors import InvalidInput
 from ..smt.tensor import SymbolicTensor
 from .api import arity, attrs_exact, axis
 from .broadcast import broadcast_index, broadcast_shape
+from .shape_rules import view
 
 
 class View:
     collective = False
+
+    def shape_constraints(self, *args):
+        return view(self.kind, *args)
+
+    def reduced_attrs(self, call, output_shape):
+        attrs = dict(call.attrs)
+        if self.kind in ("reshape", "expand"):
+            attrs["shape"] = list(output_shape)
+        return attrs
 
     def __init__(self, kind):
         self.kind = kind

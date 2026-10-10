@@ -22,3 +22,5 @@ class VerificationResult:
     execution: object = None
     queries: list = field(default_factory=list)
     counterexample: dict | None = None
+    mode: str = "SYMBOLIC_INDEX_DOMAIN"
+    shape_attempt: object = None

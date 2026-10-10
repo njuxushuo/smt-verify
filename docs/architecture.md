@@ -14,7 +14,7 @@ changed to make the new verifier succeed.
 | relation | Own models/codecs, structural validation, map normalization, value encoding | core, smt, relation |
 | ops | Local and collective operator math, shape/attribute checking, explicit registry | core, smt, ops |
 | stage | Task model/codec, SSA and boundary validation; delegates to passed registry | core, relation, stage |
-| reduction | Exact original-domain index reduction and budget checks | core, relation, stage, reduction |
+| reduction | Original index domains, optional joint shape candidates, budgets | core, smt, relation, stage, reduction |
 | verification | Collective scheduling, execution, proof obligations, result/counterexample | lower layers, verification |
 | app | Registry composition, CLI and report I/O | application and lower layers |
 
@@ -74,7 +74,7 @@ and codec output for audit. Reports show intermediate extents, level order and
 the final maps separately. Old single-level relations keep their semantics.
 Repeated family IDs and multiple Partial terms remain outside the supported subset.
 
-## What reduction means here
+## Default index-domain reduction
 
 The original backend minimized physical dimensions and relied on a restricted
 lifting argument. This implementation deliberately does not generalize a proof
@@ -96,6 +96,16 @@ normalization checks and actual SMT-LIB queries appear in every report.
 This is called `SYMBOLIC_INDEX_DOMAIN`, with proof scope
 `ORIGINAL_SHAPES_EXACT_REAL`. Physical shape reduction is explicitly reported as
 NONE. No smaller activation tensor is substituted into the original problem.
+
+## Optional physical shape reduction
+
+`--shape-reduce` selects a second route: joint operator/relation constraints,
+finite-element verification of a reduced StageSpec, then an original-shape
+block-sum certificate. A small-shape proof alone is never promoted. Inconclusive
+reduction/certification falls back explicitly to the default exact route.
+See [shape_reduction.md](shape_reduction.md) for the constraints, module ownership,
+soundness argument, limitations and report format. Both routes share relation
+elimination and operator value semantics; operators expose `shape_constraints`.
 
 ## Arithmetic, resources and outcomes
 

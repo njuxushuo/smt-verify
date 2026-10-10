@@ -10,11 +10,12 @@
 - 精确实数语义；GELU 使用两侧共享的一元未解释函数，不表示 GPU 浮点内核等价。
 - 输入关系通过完整索引映射和 Partial 消元精确参数化；不根据文件名选择结论。
 - 同一维度的多个 IndexPhi 按 terms 顺序组合，支持 SP→CP 等中间索引域及分段跨边界处理。
-- 保留原始 shape 和完整 matmul 求和范围，用任意受界符号索引替代输出元素枚举。
+- 默认保留原始 shape 和完整 matmul 求和范围，用任意受界符号索引替代输出元素枚举。
+- 可选 `--shape-reduce`：联合缩减 stage、逐元素 SMT，再用原尺寸分块求和证明核验；不确定时显式回退。
 - PROVED / DISPROVED / UNKNOWN / INVALID_INPUT / UNSUPPORTED，以及原始索引反例和可审计报告。
 
 现有 11 个 JSON 已全部在原始 shape 上得到 PROVED，含 DP2/CP2/SP2 Zigzag AllGather；这仍是给定输入假设和实数/共享函数模型下的条件性结论。
-所有输入文件保持不变。没有执行物理 shape 缩小，也不依赖小 shape 到大 shape 的未经证明推广。
+所有输入文件保持不变。默认模式不缩小 shape；可选模式不依赖小 shape 到大 shape 的未经证明推广。
 集成测试之外还包含错误目标、缺失前提、QKV 多段映射、通信顺序、API 校验和依赖方向回归。
 
 ## 安装和运行
@@ -26,6 +27,7 @@ python -m pip install -e .
 python -m unittest discover -s tests -v
 python -m src.app.cli verify input/mlp_dp2_tp4_index_value/mlp_dp2_tp4_03_fc2_partial.json
 python -m src.app.cli batch input --write-reports
+python -m src.app.cli batch input --shape-reduce --write-reports
 ```
 
 也可使用 `make check`、`make demos`，或安装后的 `smt-verify verify ...`。
@@ -41,6 +43,9 @@ python -m src.app.cli batch input --write-reports
 
 每个 JSON 对应一份 `demo.txt`：独立用例目录直接保存于 JSON 旁；MLP 的五个 JSON 共用目录，
 因此报告保存于 `input/mlp_dp2_tp4_index_value/<json-stem>/demo.txt`，不移动或覆盖 JSON。
+开启 shape reduction 后，批量报告写入同目录的 `demo.shape-reduced.txt`，保留默认模式报告。
+新报告区分小尺寸逐元素证明与原尺寸核验，记录约束来源、缩减后的 JSON、分块求和定义和回退原因。
+Python API 支持 `verify_stage(..., shape_reduce=True)`；`--max-reduced-elements` 默认限制候选 stage 总元素数为 50000。
 
 报告包含解析模型、原始 shape、所有索引映射、校验项、输入逻辑等式、精确替换过程、
 符号执行轨迹、约简索引边界、完整可重放 SMT-LIB 查询和最终结论。报告不等于独立检查的形式化证明证书。
@@ -49,6 +54,7 @@ python -m src.app.cli batch input --write-reports
 
 - [roadmap：项目目的和模块方案](roadmap.md)
 - [当前架构与证明方法](docs/architecture.md)
+- [可选 Shape Reduction：规则、逐元素编码与原尺寸核验](docs/shape_reduction.md)
 - [输入规范：中文](input/docs/README.zh-CN.md) / [English](input/docs/README.md)
 - [MLP 样例与报告](input/mlp_dp2_tp4_index_value/README.md)
 
