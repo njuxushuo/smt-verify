@@ -12,6 +12,8 @@ class RangeMap:
 
 @dataclass(frozen=True)
 class RankMap:
+    """One level: local_extent is its source size, single_extent its target size."""
+
     rank: int
     local_extent: int
     single_extent: int
@@ -37,6 +39,8 @@ class RelationTerm:
 
 @dataclass(frozen=True)
 class TensorRelation:
+    """Index terms on the same dimension compose in tuple order, local to global."""
+
     terms: tuple[RelationTerm, ...]
 
 

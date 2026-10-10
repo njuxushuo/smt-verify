@@ -8,12 +8,13 @@ program, rank-local programs, assumed input relations, and candidate output
 relations. The refactored backend implements this contract for the supported
 operators below, using original-shape symbolic index-domain verification.
 
-There are 10 retained JSON files, including all five protected MLP stages.
+There are 11 JSON files, including all five protected MLP stages and the new
+DP2/CP2/SP2 Zigzag AllGather case.
 Six counterexample cases, two shape-invalid cases and sixteen positive-case
 variants were removed from the previous 34-file collection. Their relation representation is
 aligned with this contract; section 8 records the collection audit.
 The entry point is `src/stage/codec.py`; legacy tests and scripts have been
-replaced. All ten JSON files have fresh demo.txt reports from the new verifier.
+replaced. All eleven JSON files have fresh demo.txt reports from the new verifier.
 Names do not control results. AutoVerify's producer model still needs adaptation.
 See [architecture](../../docs/architecture.md) for exact input elimination and
 the distinction between index-domain reduction and physical shape shrinking.
@@ -149,10 +150,12 @@ Input bindings refer only to declared program inputs; output bindings refer to
 declared stage outputs. Every exported tensor must have an output goal. A
 boundary input without a relation remains unconstrained across programs: names
 alone never imply equality. Each single tensor is bound at most once per list;
-use `terms` for multiple family components. In the initial supported subset, a
-family occurs at most once within a binding, and each index dimension has at
-most one term. Term order has no mathematical significance. These are support
-limits, not claims that more general layouts never occur.
+use `terms` for multiple family components. A family still occurs at most once
+within a binding. Multiple distinct families may map the same tensor dimension:
+their IndexPhi terms form an ordered chain. Filter by `dim` while preserving
+the original `terms` order; never sort by family name or infer order from extents.
+Different dimensions compose independently. Partial terms do not participate
+in index composition and apply only to the final mapped values.
 
 An explicit `"relation": {"terms": []}` means full elementwise equality:
 every local tensor has the same shape and values as the single tensor.
@@ -206,24 +209,55 @@ world rank exactly once. It is not a complete multi-rank relation on its own.
 | `expr.dim` | Required nonnegative tensor dimension. It is not a mesh axis. |
 | `expr.maps` | Nonempty array containing exactly one entry for every rank. |
 | `maps[].rank` | World rank to which this map applies. |
-| `maps[].local_extent` | Local tensor size at `expr.dim`; must match the tensor declaration. |
-| `maps[].single_extent` | Single tensor size at `expr.dim`; must match its declaration. |
-| `maps[].pieces` | Pieces covering the entire local dimension. |
-| `pieces[].local.start/stop` | Half-open source interval `[start, stop)` in local indices. |
-| `pieces[].single.start/stop` | Half-open target interval in single-tensor indices. |
+| `maps[].local_extent` | This level's source-domain length; the first level matches actual local shape. |
+| `maps[].single_extent` | This level's target-domain length; only the final level must match single shape. |
+| `maps[].pieces` | Pieces covering the entire source domain of this level. |
+| `pieces[].local.start/stop` | Half-open source interval `[start, stop)` in this level's coordinates. |
+| `pieces[].single.start/stop` | Half-open target interval in this level's output coordinates, possibly intermediate. |
 
 Each piece has equal source/target length and maps `i` to
-`single.start + i - local.start`. Source pieces cover the local dimension
+`single.start + i - local.start`. Source pieces cover the level's source domain
 without gaps or overlap; target pieces stay within bounds and do not overlap
-within one rank. Different ranks may map to the same single positions. Several
+within one rank. Different ranks may map to the same target positions. Several
 pieces support noncontiguous layouts; ranks may have unequal local extents.
 Bounds are nonnegative integers, with `start < stop` for every piece.
 
 `dim` belongs to the expression, not each rank entry. There is no `default`.
 Every rank must be present, including ranks whose map happens to be identity.
 Emit a term only if at least one rank has a nonidentity map or a changed extent
-on that dimension; omit the entire term if all ranks map the full dimension
+at that level; omit the entire term if all ranks map the level's full domain
 identically. Empty `maps` is no longer an accepted identity shorthand.
+Two nonidentity levels may compose to identity; that valid chain need not be
+deleted, and normalization retains its final identity mapping.
+
+### Ordered same-dimension chains
+
+For each rank and dimension, the first source extent equals the actual local
+shape, each level's target extent equals the next source extent, and the final
+target extent equals the actual single shape. Intermediate extents are not
+checked against either original shape. Every level independently satisfies
+full source coverage, bounds, equal piece lengths and injectivity.
+
+For `[SP(dim=1), CP(dim=1)]`, the map is `Phi_CP(Phi_SP(i))`. Extent matching
+validates the supplied order; it does not determine or repair the order.
+For DP2/CP2/SP2, the input chain is:
+
+```text
+dim 0: local batch 2 --DP--> global batch 4
+dim 1: GPU-local sequence 4 --SP--> CP-local sequence 8 --CP--> global sequence 16
+```
+
+Its rank 0/1/2/3 final sequence images are `[0,4)`, `[12,16)`, `[4,8)`, `[8,12)`;
+ranks 4/5/6/7 repeat those images in global batch `[2,4)`. AllGather removes SP,
+so output terms retain DP and CP only. Each level lists all eight ranks.
+
+Normalization composes interval functions by intersecting the earlier image
+with later source pieces. If `[0,4)->[2,6)` is followed by
+`[0,4)->[0,4), [4,8)->[12,16)`, the result is
+`[0,2)->[2,4), [2,4)->[12,14)`. Adjacent pieces merge only when both source and
+target are contiguous, preserving the same translation. It never enumerates
+tensor elements or assumes contiguous final images. Forward, inverse and
+Partial domain checks consume this final composed map.
 
 ### Fused QKV and multiple pieces
 
@@ -256,8 +290,8 @@ composition contract and must not be guessed.
 
 ## 6. Composing the relation
 
-1. Gather all IndexPhi maps. Different terms must affect different dimensions;
-   overlapping explicit dimensions are rejected in this initial contract.
+1. For each dimension, compose its IndexPhi terms in their supplied order.
+   Validate every level, adjacent extents and actual local/global endpoints.
 2. For dimensions with no term, use global identity and check equal
    local/single sizes. All bound tensors have the same number of dimensions.
 3. The result is a complete local-to-single map `Phi_r` for each rank. There is
@@ -294,6 +328,7 @@ Start with these complete files:
 | Two explicit index dimensions | [MLP FC1/GELU](../mlp_dp2_tp4_index_value/mlp_dp2_tp4_02_fc1_gelu.json) |
 | Index map plus Partial | [Shard/Partial transpose](../mesh/mesh_shard_partial_transpose_proved/mesh_shard_partial_transpose_proved.json) |
 | Eight-rank sequence AllGather | [MLP stage 01](../mlp_dp2_tp4_index_value/mlp_dp2_tp4_sp_01_allgather.json) |
+| Same-dimension SP then CP with DP | [Zigzag AllGather](../dp2_cp2_sp2_zigzag_allgather/dp2_cp2_sp2_zigzag_allgather.json) |
 | Complete MLP suite | [Stage index](../mlp_dp2_tp4_index_value/README.md) |
 
 The MLP chain is AllGather -> FC1/GELU -> FC2 Partial -> ReduceScatter. AllReduce
@@ -328,7 +363,8 @@ To add a fixture:
    their actual attributes. Promote cut inputs to free tensors, not their old
    producer operations.
 3. Bind input relations. Add only nonidentity index terms with expression-level
-   `dim` and all-rank intervals. Use `terms: []` for full equality. Add at most
+   `dim` and all-rank intervals; order same-dimension levels from local through
+   intermediate spaces to global. Use `terms: []` for full equality. Add at most
    one Partial where needed; never hide additional value constraints in identity terms.
 4. Bind every output to a candidate relation. The current input collection keeps
    positive targets only; future negative regression cases should be maintained
@@ -343,20 +379,21 @@ To add a fixture:
 | Supported target | Not yet defined or supported |
 | --- | --- |
 | Static positive shapes; exact real values | Dynamic routing/shapes, IEEE kernel equivalence, aliases, tuple/scalar values |
-| One IndexPhi per changed dimension; distinct families | One family with multiple index terms; multiple families sharding the same dimension |
+| Ordered IndexPhi chains on the same dimension across distinct families | Repeated family IDs; ambiguous or automatically inferred chain order |
 | Uneven static shards and several unit-stride pieces | Cross-dimension maps, duplicate target indices within a rank, dynamic gathers |
 | No Partial or one Partial(sum) | Several Partial families, implicit nested reduction or additional replica constraints |
 | Explicit groups, including nonorthogonal families | Assuming arbitrary nonorthogonal maps/reductions compose without checks |
 
-The excluded same-dimension case is relevant to FSDP+TP and CP+SP. It requires
-ordered/nested maps or a normalized final map, not silently adding offsets.
+Same-dimension sharding, including the CP+SP fixture, is represented by supplied
+ordered maps rather than adding unrelated global offsets. This does not enable
+all FSDP/CP layouts automatically: each must satisfy the map and operator contract.
 Retaining the current one-family/one-term limit is an implementation boundary,
 not a claim that all distributed layouts obey it.
 
-Audit on 2026-10-09 after collection cleanup: 10 files contain 24 bindings and
-33 terms. None currently uses `terms: []`, but empty terms remain valid under
+Audit on 2026-10-10 after ordered-map extension: 11 files contain 26 bindings and
+38 terms. None currently uses `terms: []`, but empty terms remain valid under
 this contract. No empty-map IndexPhi terms remain.
-The ten retained inputs now pass the new backend with proof scope
+All eleven inputs now pass the backend with proof scope
 ORIGINAL_SHAPES_EXACT_REAL. The six removed false goals and two malformed files
 are historical cleanup facts; new negative cases live in tests.
 

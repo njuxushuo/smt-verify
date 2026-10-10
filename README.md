@@ -9,10 +9,11 @@
 - matmul、add、mul、gelu、transpose、reshape、expand、all_gather、all_reduce、reduce_scatter。
 - 精确实数语义；GELU 使用两侧共享的一元未解释函数，不表示 GPU 浮点内核等价。
 - 输入关系通过完整索引映射和 Partial 消元精确参数化；不根据文件名选择结论。
+- 同一维度的多个 IndexPhi 按 terms 顺序组合，支持 SP→CP 等中间索引域及分段跨边界处理。
 - 保留原始 shape 和完整 matmul 求和范围，用任意受界符号索引替代输出元素枚举。
 - PROVED / DISPROVED / UNKNOWN / INVALID_INPUT / UNSUPPORTED，以及原始索引反例和可审计报告。
 
-现有 10 个 JSON 已全部在原始 shape 上得到 PROVED；这仍是给定输入假设和实数/共享函数模型下的条件性结论。
+现有 11 个 JSON 已全部在原始 shape 上得到 PROVED，含 DP2/CP2/SP2 Zigzag AllGather；这仍是给定输入假设和实数/共享函数模型下的条件性结论。
 所有输入文件保持不变。没有执行物理 shape 缩小，也不依赖小 shape 到大 shape 的未经证明推广。
 集成测试之外还包含错误目标、缺失前提、QKV 多段映射、通信顺序、API 校验和依赖方向回归。
 

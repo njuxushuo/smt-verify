@@ -2,7 +2,7 @@
 
 The implementation follows [roadmap.md](../roadmap.md). Input documents live
 under `input/`; their contract is in [English](../input/docs/README.md) and
-[Chinese](../input/docs/README.zh-CN.md). The ten checked-in JSON files were not
+[Chinese](../input/docs/README.zh-CN.md). The eleven checked-in JSON files were not
 changed to make the new verifier succeed.
 
 ## Modules and dependency direction
@@ -51,6 +51,28 @@ functions, and any such assignment reconstructs a satisfying original input.
 No replica-value conditions are added in the Partial case. This is why the
 solver query does not need to retain quantified Rin after substitution.
 The original universal Rin equations and substitutions are printed in demo.txt.
+
+## Ordered IndexPhi normalization
+
+IndexPhi terms on the same tensor dimension compose in their supplied order:
+`[SP, CP]` means `CP(SP(i))`. Each dimension has an independent chain. No reordering
+by family name or inferred extent is allowed, even when domains have equal sizes.
+Each map level is validated on its own input/output domains; for every rank,
+the first source is the actual local extent, adjacent extents must match, and
+the last target is the actual single extent. Partial is not a coordinate stage.
+
+`relation/normalization.py` composes pure interval translations without Z3 or
+operator dependencies. It intersects each preceding image interval with the
+next source partition, splits crossing pieces, sorts by original local indices,
+and merges only adjacent equal translations. The sweep is linear after sorting
+because validated maps are injective. It does not enumerate tensor elements.
+
+The internal `(rank, dim) -> pieces` interface still contains exactly one final
+map. Existing SMT forward/inverse encoding and Partial image checks use that
+map, not the uncomposed terms. Original terms and order remain in the binding
+and codec output for audit. Reports show intermediate extents, level order and
+the final maps separately. Old single-level relations keep their semantics.
+Repeated family IDs and multiple Partial terms remain outside the supported subset.
 
 ## What reduction means here
 
@@ -108,7 +130,7 @@ collective order, absent members and deadlock. Direct API validation and deep
 dependency limits have regressions from independent review. Report tests replay
 both SAT and UNSAT SMT-LIB queries and check that report writes cannot overwrite inputs.
 
-`python -m src.app.cli batch input --write-reports` generates all ten reports.
+`python -m src.app.cli batch input --write-reports` generates all eleven reports.
 Normally a report is beside its JSON. For the five MLP JSON files sharing a parent,
 reports go to `<parent>/<json-stem>/demo.txt`, preserving every input path.
 Each report records the canonical input hash, parsed models, original shapes,

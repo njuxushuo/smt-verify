@@ -61,3 +61,14 @@ verification/reduction 使用下层接口，app 位于最上层。__init__.py �
   当前工具不提供名为 gpt 6 astra ultra 的模型覆盖项，审核使用继承当前模型的子智能体，未冒称指定模型。
 - 最终 41 项测试通过，10 个输入全部 PROVED，10 份报告中的 44 条 SMT 查询重放均 UNSAT。
   审核和验证记录见 [review-20261009.md](docs/review-20261009.md)。
+
+## 同维有序映射扩展（2026-10-10）
+
+- 扩展前检查点：3d11079。增加 DP2/CP2/SP2 Zigzag AllGather，所有输入 JSON 保持原样。
+- IndexPhi 按维度分链并保留 terms 顺序，逐 rank 校验各级区间、相邻 extent 和首尾 shape。
+- 规范化使用通用分段函数组合，处理跨边界和非连续目标；Partial 和 SMT 只读取最终映射。
+- 同维顺序不可交换；不同维度可交错。仍限制每个 family 至多一个 term、至多一个 Partial(sum)。
+- 报告展示映射链各级与合成结果；全部 11 个输入均在原始 shape 上验证。
+- 独立审核未发现本次扩展的问题；可用工具仍无“6 astra”覆盖项，实际使用继承当前模型的子智能体。
+- 最终 57 项测试通过，11 个输入全部 PROVED；11 份报告的 52 条 SMT 查询重放均 UNSAT。
+  详情见 [有序映射审核记录](docs/review-20261010.md)。

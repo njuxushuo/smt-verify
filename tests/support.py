@@ -4,6 +4,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 INPUT = ROOT / "input"
+INPUT_CASE_COUNT = 11
 
 
 def fixture(stem):

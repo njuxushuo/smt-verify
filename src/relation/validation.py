@@ -11,6 +11,40 @@ from .model import (
 from .normalization import normalize
 
 
+def _validate_rank_map(m, where):
+    if any(type(n) is not int or n < 1 for n in (m.local_extent, m.single_extent)):
+        raise InvalidInput(f"{where}: IndexPhi extents must be positive integers")
+    if any(
+        not isinstance(p, RangeMap)
+        or any(
+            type(n) is not int
+            for n in (p.local_start, p.local_stop, p.single_start, p.single_stop)
+        )
+        for p in m.pieces
+    ):
+        raise InvalidInput(f"{where}: range map bounds must be integers")
+    end, images = 0, []
+    changed = m.local_extent != m.single_extent
+    for p in sorted(m.pieces, key=lambda p: p.local_start):
+        if not (
+            p.local_start == end < p.local_stop <= m.local_extent
+            and 0 <= p.single_start < p.single_stop <= m.single_extent
+            and p.local_stop - p.local_start == p.single_stop - p.single_start
+        ):
+            raise InvalidInput(
+                f"{where}: invalid, overlapping, or gapped local range map"
+            )
+        end = p.local_stop
+        images.append((p.single_start, p.single_stop))
+        changed |= p.local_start != p.single_start
+    if end != m.local_extent:
+        raise InvalidInput(f"{where}: pieces do not cover local dimension")
+    images.sort()
+    if any(a[1] > b[0] for a, b in zip(images, images[1:])):
+        raise InvalidInput(f"{where}: overlapping target image within one rank")
+    return changed
+
+
 def validate_relation(binding, single_shape, local_shapes, topology):
     if not isinstance(binding, RelationBinding) or not isinstance(
         binding.relation, TensorRelation
@@ -24,8 +58,11 @@ def validate_relation(binding, single_shape, local_shapes, topology):
     if any(len(s) != len(single_shape) for s in local_shapes.values()):
         raise InvalidInput("relation tensor dimensionalities must match")
     families, dims = set(), set()
+    # Each dimension has its own ordered chain; other dimensions and Partial
+    # terms do not advance this chain's intermediate coordinate space.
+    levels, extents = {}, {}
     partials = 0
-    for term in binding.relation.terms:
+    for term_index, term in enumerate(binding.relation.terms):
         if not isinstance(term, RelationTerm):
             raise InvalidInput("expected RelationTerm")
         topology.family_groups(term.family)
@@ -42,11 +79,8 @@ def validate_relation(binding, single_shape, local_shapes, topology):
             raise InvalidInput("expected IndexPhi or Partial")
         if type(e.dim) is not int or not 0 <= e.dim < len(single_shape):
             raise InvalidInput("IndexPhi dimension outside tensor rank")
-        if e.dim in dims:
-            raise Unsupported(
-                "multiple families mapping the same dimension are unsupported"
-            )
         dims.add(e.dim)
+        level = levels.get(e.dim, 0)
         if any(not isinstance(m, RankMap) or type(m.rank) is not int for m in e.maps):
             raise InvalidInput("IndexPhi rank maps must have integer rank IDs")
         if len(e.maps) != topology.world_size or {m.rank for m in e.maps} != world:
@@ -55,54 +89,36 @@ def validate_relation(binding, single_shape, local_shapes, topology):
             )
         changed = False
         for m in e.maps:
-            if any(
-                type(n) is not int or n < 1 for n in (m.local_extent, m.single_extent)
-            ):
-                raise InvalidInput("IndexPhi extents must be positive integers")
-            if (
-                m.local_extent != local_shapes[m.rank][e.dim]
-                or m.single_extent != single_shape[e.dim]
-            ):
-                raise InvalidInput("IndexPhi extent differs from tensor shape")
-            end = 0
-            images = []
-            if any(
-                not isinstance(p, RangeMap)
-                or any(
-                    type(n) is not int
-                    for n in (
-                        p.local_start,
-                        p.local_stop,
-                        p.single_start,
-                        p.single_stop,
-                    )
+            where = (
+                f"relation {binding.single_tensor!r}, rank {m.rank}, dim {e.dim}, "
+                f"level {level + 1}, term {term_index} ({term.family})"
+            )
+            changed |= _validate_rank_map(m, where)
+            key = (m.rank, e.dim)
+            expected = extents.get(key, local_shapes[m.rank][e.dim])
+            if m.local_extent != expected:
+                origin = (
+                    "preceding level target extent"
+                    if level
+                    else "actual local shape extent"
                 )
-                for p in m.pieces
-            ):
-                raise InvalidInput("range map bounds must be integers")
-            for p in sorted(m.pieces, key=lambda p: p.local_start):
-                if not (
-                    p.local_start == end < p.local_stop <= m.local_extent
-                    and 0 <= p.single_start < p.single_stop <= m.single_extent
-                    and p.local_stop - p.local_start == p.single_stop - p.single_start
-                ):
-                    raise InvalidInput(
-                        "invalid, overlapping, or gapped local range map"
-                    )
-                end = p.local_stop
-                images.append((p.single_start, p.single_stop))
-                changed |= p.local_start != p.single_start
-            if end != m.local_extent:
-                raise InvalidInput("pieces do not cover local dimension")
-            images.sort()
-            if any(a[1] > b[0] for a, b in zip(images, images[1:])):
-                raise InvalidInput("overlapping single image within one rank")
-            changed |= m.local_extent != m.single_extent
+                raise InvalidInput(
+                    f"{where}: source extent {m.local_extent} != {origin} {expected}"
+                )
+            extents[key] = m.single_extent
+        levels[e.dim] = level + 1
         if not changed:
             raise InvalidInput(
                 "identity-only IndexPhi must be omitted; use terms=[] for full equality"
             )
-    for shape in local_shapes.values():
+    for rank, shape in local_shapes.items():
+        for dim in dims:
+            if extents[(rank, dim)] != single_shape[dim]:
+                raise InvalidInput(
+                    f"relation {binding.single_tensor!r}, rank {rank}, dim {dim}: "
+                    f"final level target extent {extents[(rank, dim)]} != "
+                    f"actual single shape extent {single_shape[dim]}"
+                )
         if any(shape[d] != single_shape[d] for d in range(len(shape)) if d not in dims):
             raise InvalidInput(
                 "unmapped dimension must have equal single/local extents"

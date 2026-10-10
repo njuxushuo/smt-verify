@@ -11,7 +11,7 @@ import z3
 
 from src.app.cli import main
 from src.app.reporting import demo_path, render_report
-from tests.support import INPUT, identity_stage
+from tests.support import INPUT, INPUT_CASE_COUNT, identity_stage
 from tests.test_proofs import prove
 
 
@@ -49,8 +49,8 @@ class ReportingTests(unittest.TestCase):
 
     def test_unique_report_destinations_for_repository_inputs(self):
         paths = list(INPUT.rglob("*.json"))
-        self.assertEqual(len(paths), 10)
-        self.assertEqual(len({demo_path(p) for p in paths}), 10)
+        self.assertEqual(len(paths), INPUT_CASE_COUNT)
+        self.assertEqual(len({demo_path(p) for p in paths}), INPUT_CASE_COUNT)
         for p in paths:
             self.assertEqual(demo_path(p).name, "demo.txt")
 

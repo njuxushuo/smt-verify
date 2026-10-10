@@ -28,10 +28,12 @@ def _coordinate(value, pieces, inverse=False):
 
 
 def forward(relation, rank, index):
+    """Apply the normalized final map, never an individual intermediate term."""
     return tuple(_coordinate(i, relation.pieces(rank, d)) for d, i in enumerate(index))
 
 
 def inverse(relation, rank, index):
+    """Invert the composed map on its validated final single-tensor image."""
     return tuple(
         _coordinate(i, relation.pieces(rank, d), True) for d, i in enumerate(index)
     )

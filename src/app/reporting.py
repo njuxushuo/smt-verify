@@ -19,20 +19,56 @@ def _relation(lines, rel, role, number):
     lines.append(f"{role}[{number}]: single.{b.single_tensor}{rel.single_shape}")
     for r, name in sorted(b.distributed_tensors.items()):
         lines.append(f"  rank{r}.{name}{rel.local_shapes[r]}")
+    index_chains = {}
+    for term in b.relation.terms:
+        if isinstance(term.expr, IndexPhi):
+            index_chains.setdefault(term.expr.dim, []).append(term)
+    has_chain = any(len(chain) > 1 for chain in index_chains.values())
+    levels = {}
     for term in b.relation.terms:
         e = term.expr
         if isinstance(e, IndexPhi):
-            lines.append(f"  family={term.family}, IndexPhi dim={e.dim}")
+            level = levels.get(e.dim, 0) + 1
+            levels[e.dim] = level
+            count = len(index_chains[e.dim])
+            suffix = (
+                f", level={level}/{count} (supplied term order)" if count > 1 else ""
+            )
+            lines.append(f"  family={term.family}, IndexPhi dim={e.dim}{suffix}")
             for m in e.maps:
+                source_label = "local" if level == 1 else "intermediate"
+                target_label = "single" if level == count else "intermediate"
                 text = "; ".join(
-                    f"local [{p.local_start},{p.local_stop}) -> single [{p.single_start},{p.single_stop})"
+                    f"{source_label} [{p.local_start},{p.local_stop}) -> {target_label} [{p.single_start},{p.single_stop})"
                     for p in m.pieces
                 )
-                lines.append(f"    rank {m.rank}: {text}")
+                extents = (
+                    f" (level extents {m.local_extent} -> {m.single_extent})"
+                    if count > 1
+                    else ""
+                )
+                lines.append(f"    rank {m.rank}: {text}{extents}")
         else:
             lines.append(
                 f"  family={term.family}, Partial({e.op}), groups={rel.reduction_groups}"
             )
+    if has_chain:
+        lines.append(
+            "  Final composed maps used by SMT (not overwritten by later terms):"
+        )
+        for dim, chain in index_chains.items():
+            lines.append(
+                f"    dim {dim}: " + " -> ".join(term.family for term in chain)
+            )
+            for rank in sorted(rel.local_shapes):
+                text = "; ".join(
+                    f"local [{p.local_start},{p.local_stop}) -> single [{p.single_start},{p.single_stop})"
+                    for p in rel.pieces(rank, dim)
+                )
+                lines.append(f"      rank {rank}: {text}")
+        lines.append(
+            "  Checked every level: full local coverage, injective bounded image, adjacent extents, actual shape endpoints."
+        )
     lines.append("  Other dimensions: identity; matching extents checked.")
     if rel.reduction_groups:
         lines.append(

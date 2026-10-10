@@ -8,7 +8,15 @@ from src.app.bootstrap import default_registry
 from src.core.errors import InvalidInput, Unsupported
 from src.stage.codec import load_stage, stage_from_dict, stage_to_dict
 from src.stage.validation import validate_stage
-from tests.support import INPUT, fixture, identity_stage, phi, piece, partial
+from tests.support import (
+    INPUT,
+    INPUT_CASE_COUNT,
+    fixture,
+    identity_stage,
+    phi,
+    piece,
+    partial,
+)
 
 
 class CodecValidationTests(unittest.TestCase):
@@ -17,7 +25,7 @@ class CodecValidationTests(unittest.TestCase):
 
     def test_all_fixture_roundtrips_and_normalization(self):
         paths = list(INPUT.rglob("*.json"))
-        self.assertEqual(len(paths), 10)
+        self.assertEqual(len(paths), INPUT_CASE_COUNT)
         for path in paths:
             with self.subTest(path=path):
                 stage = load_stage(path)
@@ -92,7 +100,7 @@ class CodecValidationTests(unittest.TestCase):
         with self.assertRaisesRegex(InvalidInput, "same mapped"):
             self.check(raw)
 
-    def test_unknown_operator_and_repeated_dimension_are_unsupported(self):
+    def test_unknown_operator_is_unsupported_and_invalid_index_chain_is_rejected(self):
         raw = fixture("mlp_dp2_tp4_02_fc1_gelu")
         raw["single"]["ops"][0]["type"] = "not_implemented"
         with self.assertRaises(Unsupported):
@@ -100,7 +108,7 @@ class CodecValidationTests(unittest.TestCase):
         raw = fixture("mlp_dp2_tp4_sp_01_allgather")
         terms = raw["input_relations"][0]["relation"]["terms"]
         terms[1]["expr"]["dim"] = 0
-        with self.assertRaises(Unsupported):
+        with self.assertRaisesRegex(InvalidInput, "preceding level target extent"):
             self.check(raw)
 
     def test_empty_terms_are_full_identity_not_missing_relation(self):

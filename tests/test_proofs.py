@@ -66,7 +66,7 @@ class ProofTests(unittest.TestCase):
         self.assertEqual(result.status, Status.UNSUPPORTED)
         self.assertIn("depth", result.reason)
 
-    def test_all_ten_original_shape_obligations(self):
+    def test_all_input_original_shape_obligations(self):
         for p in sorted(INPUT.rglob("*.json")):
             with self.subTest(case=p.stem):
                 result = verify_file(p, default_registry())

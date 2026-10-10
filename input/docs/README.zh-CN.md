@@ -6,10 +6,11 @@
 单机子图、各 rank 子图、作为前提的输入关系、待证明的输出关系。重构后的后端已支持本文列明的
 关系和算子，采用原始 shape 上的符号索引域验证。
 
-精简后保留 10 个 JSON，包括全部 5 个受保护的 MLP 阶段。从原 34 个文件中移除了 6 个反例、
+当前有 11 个 JSON，包括全部 5 个受保护的 MLP 阶段及新增的 DP2/CP2/SP2 Zigzag AllGather。
+此前精简从原 34 个文件中移除了 6 个反例、
 2 个 shape 非法用例和 16 个正例变体。
 关系表示已同步到本规范；第 8 节记录集合核查结果。
-新解析入口为 `src/stage/codec.py`，旧测试及脚本已替换。全部 10 个 JSON 已生成新验证器的 demo.txt。
+新解析入口为 `src/stage/codec.py`，旧测试及脚本已替换。全部 11 个 JSON 已生成新验证器的 demo.txt。
 文件名不决定证明结论；AutoVerify 前端模型仍需适配。输入关系消元及索引域约简的可靠性说明见
 [当前架构](../../docs/architecture.md)，不要把它与物理 shape 缩小混淆。
 
@@ -122,8 +123,10 @@ squeeze/unsqueeze、slice/concat 等尚未注册的算子返回 UNSUPPORTED；�
 
 输入绑定只能引用真正的程序输入；输出绑定只能引用 stage 输出。所有导出张量都必须有输出目标。
 未绑定关系的输入在跨程序之间保持不受约束，不能因名字相同就假定相等。同一列表内每个单机张量
-最多绑定一次，多 family 使用 terms 表达。第一阶段支持范围内，每个 family 最多出现一次，
-每个索引维度最多一个 term；term 顺序不影响数学含义。这是支持范围限制，不意味着实际布局永远满足该限制。
+最多绑定一次，多 family 使用 terms 表达。每个 family 仍最多出现一次；不同 family 可以作用于
+同一个张量维度，其 IndexPhi 按原始 terms 顺序组成映射链。按 dim 筛选时保留相对顺序，
+不能按 family 名字排序，也不能根据 extent 推测或修复顺序。不同维度分别组合；Partial 不参加索引链，
+只在最终索引映射得到后约束元素值。
 
 明确的 `"relation": {"terms": []}` 表示完整逐元素相等：每个本地张量都与单机张量 shape、值相同。
 它不表示信息缺失。没有输入绑定，才表示未给出该跨程序关系；不接受 `relation: null`。
@@ -168,21 +171,46 @@ Partial 只约束组内归约，不隐式添加不同副本的局部贡献相等
 | `expr.dim` | 必填非负张量维度，不是 mesh 轴。 |
 | `expr.maps` | 非空数组，每个 rank 恰好一个映射条目。 |
 | `maps[].rank` | 当前条目对应的 world rank。 |
-| `maps[].local_extent` | 本地张量在 expr.dim 的长度，必须匹配 shape。 |
-| `maps[].single_extent` | 单机张量在 expr.dim 的长度，必须匹配 shape。 |
-| `maps[].pieces` | 完整覆盖本地维度的区间映射。 |
-| `pieces[].local.start/stop` | 本地半开区间 `[start,stop)`。 |
-| `pieces[].single.start/stop` | 对应的单机半开区间。 |
+| `maps[].local_extent` | 本级输入索引域长度，只有首级必须匹配真实 local shape。 |
+| `maps[].single_extent` | 本级输出索引域长度，只有末级必须匹配真实 single shape。 |
+| `maps[].pieces` | 完整覆盖本级输入域的区间映射。 |
+| `pieces[].local.start/stop` | 本级输入坐标中的半开区间 `[start,stop)`。 |
+| `pieces[].single.start/stop` | 本级输出坐标中的半开区间，可以是中间坐标空间。 |
 
-每段两端长度相等，映射为 `single.start + i - local.start`。本地段必须无重叠、无空缺地覆盖
-整个 local_extent；单机段不能越界，同一 rank 内目标段不能重叠。不同 rank 可以映射到相同位置。
+每段两端长度相等，映射为 `single.start + i - local.start`。输入段必须无重叠、无空缺地覆盖
+本级整个 local_extent；目标段不能越界，同一 rank 内目标段不能重叠。不同 rank 可以映射到相同位置。
 多段 pieces 支持非连续布局，各 rank 也可以有不同长度。
 区间端点是非负整数，每段必须满足 `start < stop`。
 
 `dim` 放在 expr 层，不放在各 rank 条目中。没有 default 字段。maps 必须列出全部 rank，
-包括在该维恰好采用恒等映射的 rank。只有至少一个 rank 在该维存在非恒等映射或长度变化时，
-才生成这个 term；若所有 rank 在整个维度上均为恒等，则省略整个 term。
+包括在本级恰好采用恒等映射的 rank。只有至少一个 rank 在本级存在非恒等映射或长度变化时，
+才生成这个 term；若所有 rank 在本级完整输入域上均为恒等，则省略整个 term。
 空 `maps` 不再是合法的恒等简写。
+两个非恒等级别可能组合成最终恒等映射；这种合法链可以保留，规范化会保存最终恒等结果。
+
+### 同维度的有序映射链
+
+对每个 rank、每个 dim，首级 local_extent 必须等于真实本地 shape，该级 single_extent 必须
+等于下一级 local_extent，末级 single_extent 必须等于真实单机 shape。中间级长度不直接对照
+原始 tensor shape。每一级独立检查输入全覆盖、边界、等长区间和单射性。
+
+`[SP(dim=1), CP(dim=1)]` 表示 `Phi_CP(Phi_SP(i))`。extent 只校验上游给出的顺序，
+不能替上游决定或自动修正顺序。DP2/CP2/SP2 示例的输入为：
+
+```text
+dim 0：本地 batch 2 --DP--> 全局 batch 4
+dim 1：GPU-local sequence 4 --SP--> CP-local sequence 8 --CP--> 全局 sequence 16
+```
+
+rank 0/1/2/3 最终对应序列 `[0,4)`、`[12,16)`、`[4,8)`、`[8,12)`；
+rank 4/5/6/7 在全局 batch `[2,4)` 内重复该序列布局。AllGather 消除 SP 分片，输出只保留
+DP、CP 两个 term。每一级都显式列出 8 个 rank。
+
+规范化将前一级目标区间与后一级输入区间求交，再换算为最终的 local-to-global 区间。
+例如 `[0,4)->[2,6)` 接上 `[0,4)->[0,4), [4,8)->[12,16)`，结果是
+`[0,2)->[2,4), [2,4)->[12,14)`。仅当本地和目标区间都首尾相连、平移关系相同时才合并片段，
+不能抹掉 Zigzag 的全局间隙。组合不枚举 tensor 元素；forward、inverse、Partial 目标域检查
+都使用最终组合结果。
 
 ### Fused QKV 与多段映射
 
@@ -211,7 +239,7 @@ term 的 family 决定。一个绑定最多包含一个 Partial term；多 famil
 
 ## 6. 完整关系如何组合
 
-1. 收集所有 IndexPhi；第一阶段要求各 term 作用于不同维度，显式维度冲突时拒绝。
+1. 对每个维度，按 terms 中给定顺序组合 IndexPhi；检查各级合法性、相邻 extent 衔接及真实首尾 shape。
 2. 没有 term 的维度采用全局恒等，检查单机、本地长度相等；所有绑定张量的维数一致。
 3. 得到每个 rank 完整的本地到单机映射 Phi_r。不能为每个 IndexPhi 单独生成一条全局值相等断言。
 4. 没有 Partial 时，对每个 rank 和本地元素要求 `D_r[l] = S[Phi_r(l)]`。
@@ -239,6 +267,7 @@ term 的 family 决定。一个绑定最多包含一个 Partial term；多 famil
 | 两个维度的显式映射 | [MLP FC1/GELU](../mlp_dp2_tp4_index_value/mlp_dp2_tp4_02_fc1_gelu.json) |
 | 索引映射加 Partial | [Shard/Partial transpose](../mesh/mesh_shard_partial_transpose_proved/mesh_shard_partial_transpose_proved.json) |
 | 8 卡序列 AllGather | [MLP 阶段 01](../mlp_dp2_tp4_index_value/mlp_dp2_tp4_sp_01_allgather.json) |
+| DP 与同维 SP→CP 组合 | [Zigzag AllGather](../dp2_cp2_sp2_zigzag_allgather/dp2_cp2_sp2_zigzag_allgather.json) |
 | 完整 MLP 样例集 | [阶段索引](../mlp_dp2_tp4_index_value/README.md) |
 
 MLP 主链为 AllGather -> FC1/GELU -> FC2 Partial -> ReduceScatter；AllReduce 是替代结尾，
@@ -260,7 +289,8 @@ MLP 的 AllReduce 输出只保留 DP batch 映射 term。同一个 TP 组的全�
 
 1. 先声明有序通信组和完整 family；不要让后端通过 mesh 坐标猜测 rank 映射。
 2. 声明两侧程序、边界和内部 shape，以及完整算子参数。切分边界应提升为自由输入，不带入其原图生产操作。
-3. 绑定输入关系，仅对非恒等维度添加带 expr.dim 的 IndexPhi，并写出全部 rank 的区间。
+3. 绑定输入关系，仅对非恒等映射添加带 expr.dim 的 IndexPhi，并写出全部 rank 的区间；
+   同维度各级按“本地→中间→全局”顺序排列。
    完整相等使用 `terms: []`。需要归约时添加至多一个 Partial，不在恒等项中隐藏额外值约束。
 4. 为每个输出声明待证关系。当前 input 集合只保留正向目标，未来负向回归应单独维护在测试 fixture 中；
    序列化时不能擅自修复候选关系。
@@ -272,17 +302,18 @@ MLP 的 AllReduce 输出只保留 DP batch 映射 term。同一个 TP 组的全�
 | 当前目标支持 | 尚未定义或不支持 |
 | --- | --- |
 | 静态正整数 shape、精确实数值 | 动态路由或 shape、浮点内核等价、别名、tuple 和标量值 |
-| 每个变化维度一个 IndexPhi，各自使用不同 family | 同 family 多个索引 term；多 family 分片同一维 |
+| 不同 family 在同一维度上的有序 IndexPhi 链 | 重复 family ID、含糊的顺序或由后端猜测组合顺序 |
 | 非均匀静态分片、多段单位步长区间 | 跨维映射、同 rank 重复目标索引、动态 gather |
 | 无 Partial 或一个 Partial(sum) | 多 Partial family、隐式嵌套归约、额外副本值约束 |
 | 显式组，包括非正交 family | 不经检查就假定任意非正交布局都可组合 |
 
-同维多 family 分片会出现在 FSDP+TP、CP+SP，需定义有序嵌套映射或最终规范化映射，
-不能简单相加偏移。当前每个 family 至多一个 term 是支持范围限制，不是对所有实际布局的断言。
+同维分片（包括 CP+SP 样例）通过显式有序链表达，不是将无关的全局偏移简单相加。
+这不自动支持所有 FSDP/CP 布局，各布局仍需满足映射和算子合同。
+每个 family 至多一个 term 仍是支持范围限制，不是对所有实际布局的断言。
 
-2026-10-09 集合精简后核查：10 个文件含 24 条绑定、33 个 term；目前没有样例使用 `terms: []`，
+2026-10-10 有序映射扩展后核查：11 个文件含 26 条绑定、38 个 term；目前没有样例使用 `terms: []`，
 但空 terms 仍是规范支持的合法关系。已无空 maps 的 IndexPhi。
-当前 10 个输入已通过新后端验证，证明范围为 ORIGINAL_SHAPES_EXACT_REAL。
+当前 11 个输入已通过后端验证，证明范围为 ORIGINAL_SHAPES_EXACT_REAL。
 曾删除的 6 个反例与 2 个非法 shape 是历史清理记录；新的负向回归位于 tests 中。
 
 - 精简时未改变存留 JSON 内容，5 个受保护的 MLP JSON 逐字节核对不变；文档另行同步更新。
