@@ -1,0 +1,184 @@
+{
+  "name": "dp2_cp2_sp2_zigzag_allgather",
+  "topology": {
+    "world_size": 8,
+    "groups": {
+      "sp_0": {"ranks": [0, 1]},
+      "sp_1": {"ranks": [2, 3]},
+      "sp_2": {"ranks": [4, 5]},
+      "sp_3": {"ranks": [6, 7]},
+      "cp_0": {"ranks": [0, 2]},
+      "cp_1": {"ranks": [1, 3]},
+      "cp_2": {"ranks": [4, 6]},
+      "cp_3": {"ranks": [5, 7]},
+      "dp_0": {"ranks": [0, 4]},
+      "dp_1": {"ranks": [1, 5]},
+      "dp_2": {"ranks": [2, 6]},
+      "dp_3": {"ranks": [3, 7]}
+    },
+    "families": {
+      "sp": {"groups": ["sp_0", "sp_1", "sp_2", "sp_3"]},
+      "tp": {"groups": ["sp_0", "sp_1", "sp_2", "sp_3"]},
+      "cp": {"groups": ["cp_0", "cp_1", "cp_2", "cp_3"]},
+      "dp": {"groups": ["dp_0", "dp_1", "dp_2", "dp_3"]}
+    }
+  },
+  "single": {"tensors": {"X": {"shape": [4, 16, 8]}}, "inputs": ["X"], "outputs": ["X"], "ops": []},
+  "distributed": {
+    "ranks": {
+      "0": {
+        "tensors": {"Xsp0": {"shape": [2, 4, 8]}, "Xcp0": {"shape": [2, 8, 8]}},
+        "inputs": ["Xsp0"],
+        "outputs": ["Xcp0"],
+        "ops": [{"type": "all_gather", "inputs": ["Xsp0"], "outputs": ["Xcp0"], "attrs": {"group": "sp_0", "axis": 1}}]
+      },
+      "1": {
+        "tensors": {"Xsp1": {"shape": [2, 4, 8]}, "Xcp1": {"shape": [2, 8, 8]}},
+        "inputs": ["Xsp1"],
+        "outputs": ["Xcp1"],
+        "ops": [{"type": "all_gather", "inputs": ["Xsp1"], "outputs": ["Xcp1"], "attrs": {"group": "sp_0", "axis": 1}}]
+      },
+      "2": {
+        "tensors": {"Xsp2": {"shape": [2, 4, 8]}, "Xcp2": {"shape": [2, 8, 8]}},
+        "inputs": ["Xsp2"],
+        "outputs": ["Xcp2"],
+        "ops": [{"type": "all_gather", "inputs": ["Xsp2"], "outputs": ["Xcp2"], "attrs": {"group": "sp_1", "axis": 1}}]
+      },
+      "3": {
+        "tensors": {"Xsp3": {"shape": [2, 4, 8]}, "Xcp3": {"shape": [2, 8, 8]}},
+        "inputs": ["Xsp3"],
+        "outputs": ["Xcp3"],
+        "ops": [{"type": "all_gather", "inputs": ["Xsp3"], "outputs": ["Xcp3"], "attrs": {"group": "sp_1", "axis": 1}}]
+      },
+      "4": {
+        "tensors": {"Xsp4": {"shape": [2, 4, 8]}, "Xcp4": {"shape": [2, 8, 8]}},
+        "inputs": ["Xsp4"],
+        "outputs": ["Xcp4"],
+        "ops": [{"type": "all_gather", "inputs": ["Xsp4"], "outputs": ["Xcp4"], "attrs": {"group": "sp_2", "axis": 1}}]
+      },
+      "5": {
+        "tensors": {"Xsp5": {"shape": [2, 4, 8]}, "Xcp5": {"shape": [2, 8, 8]}},
+        "inputs": ["Xsp5"],
+        "outputs": ["Xcp5"],
+        "ops": [{"type": "all_gather", "inputs": ["Xsp5"], "outputs": ["Xcp5"], "attrs": {"group": "sp_2", "axis": 1}}]
+      },
+      "6": {
+        "tensors": {"Xsp6": {"shape": [2, 4, 8]}, "Xcp6": {"shape": [2, 8, 8]}},
+        "inputs": ["Xsp6"],
+        "outputs": ["Xcp6"],
+        "ops": [{"type": "all_gather", "inputs": ["Xsp6"], "outputs": ["Xcp6"], "attrs": {"group": "sp_3", "axis": 1}}]
+      },
+      "7": {
+        "tensors": {"Xsp7": {"shape": [2, 4, 8]}, "Xcp7": {"shape": [2, 8, 8]}},
+        "inputs": ["Xsp7"],
+        "outputs": ["Xcp7"],
+        "ops": [{"type": "all_gather", "inputs": ["Xsp7"], "outputs": ["Xcp7"], "attrs": {"group": "sp_3", "axis": 1}}]
+      }
+    }
+  },
+  "input_relations": [
+    {
+      "single_tensor": "X",
+      "distributed_tensors": {"0": "Xsp0", "1": "Xsp1", "2": "Xsp2", "3": "Xsp3", "4": "Xsp4", "5": "Xsp5", "6": "Xsp6", "7": "Xsp7"},
+      "relation": {
+        "terms": [
+          {
+            "family": "dp",
+            "expr": {
+              "kind": "index_phi",
+              "dim": 0,
+              "maps": [
+                {"rank": 0, "local_extent": 2, "single_extent": 4, "pieces": [{"local": {"start": 0, "stop": 2}, "single": {"start": 0, "stop": 2}}]},
+                {"rank": 1, "local_extent": 2, "single_extent": 4, "pieces": [{"local": {"start": 0, "stop": 2}, "single": {"start": 0, "stop": 2}}]},
+                {"rank": 2, "local_extent": 2, "single_extent": 4, "pieces": [{"local": {"start": 0, "stop": 2}, "single": {"start": 0, "stop": 2}}]},
+                {"rank": 3, "local_extent": 2, "single_extent": 4, "pieces": [{"local": {"start": 0, "stop": 2}, "single": {"start": 0, "stop": 2}}]},
+                {"rank": 4, "local_extent": 2, "single_extent": 4, "pieces": [{"local": {"start": 0, "stop": 2}, "single": {"start": 2, "stop": 4}}]},
+                {"rank": 5, "local_extent": 2, "single_extent": 4, "pieces": [{"local": {"start": 0, "stop": 2}, "single": {"start": 2, "stop": 4}}]},
+                {"rank": 6, "local_extent": 2, "single_extent": 4, "pieces": [{"local": {"start": 0, "stop": 2}, "single": {"start": 2, "stop": 4}}]},
+                {"rank": 7, "local_extent": 2, "single_extent": 4, "pieces": [{"local": {"start": 0, "stop": 2}, "single": {"start": 2, "stop": 4}}]}
+              ]
+            }
+          },
+          {
+            "family": "sp",
+            "expr": {
+              "kind": "index_phi",
+              "dim": 1,
+              "maps": [
+                {"rank": 0, "local_extent": 4, "single_extent": 8, "pieces": [{"local": {"start": 0, "stop": 4}, "single": {"start": 0, "stop": 4}}]},
+                {"rank": 1, "local_extent": 4, "single_extent": 8, "pieces": [{"local": {"start": 0, "stop": 4}, "single": {"start": 4, "stop": 8}}]},
+                {"rank": 2, "local_extent": 4, "single_extent": 8, "pieces": [{"local": {"start": 0, "stop": 4}, "single": {"start": 0, "stop": 4}}]},
+                {"rank": 3, "local_extent": 4, "single_extent": 8, "pieces": [{"local": {"start": 0, "stop": 4}, "single": {"start": 4, "stop": 8}}]},
+                {"rank": 4, "local_extent": 4, "single_extent": 8, "pieces": [{"local": {"start": 0, "stop": 4}, "single": {"start": 0, "stop": 4}}]},
+                {"rank": 5, "local_extent": 4, "single_extent": 8, "pieces": [{"local": {"start": 0, "stop": 4}, "single": {"start": 4, "stop": 8}}]},
+                {"rank": 6, "local_extent": 4, "single_extent": 8, "pieces": [{"local": {"start": 0, "stop": 4}, "single": {"start": 0, "stop": 4}}]},
+                {"rank": 7, "local_extent": 4, "single_extent": 8, "pieces": [{"local": {"start": 0, "stop": 4}, "single": {"start": 4, "stop": 8}}]}
+              ]
+            }
+          },
+          {
+            "family": "cp",
+            "expr": {
+              "kind": "index_phi",
+              "dim": 1,
+              "maps": [
+                {"rank": 0, "local_extent": 8, "single_extent": 16, "pieces": [{"local": {"start": 0, "stop": 4}, "single": {"start": 0, "stop": 4}}, {"local": {"start": 4, "stop": 8}, "single": {"start": 12, "stop": 16}}]},
+                {"rank": 1, "local_extent": 8, "single_extent": 16, "pieces": [{"local": {"start": 0, "stop": 4}, "single": {"start": 0, "stop": 4}}, {"local": {"start": 4, "stop": 8}, "single": {"start": 12, "stop": 16}}]},
+                {"rank": 2, "local_extent": 8, "single_extent": 16, "pieces": [{"local": {"start": 0, "stop": 8}, "single": {"start": 4, "stop": 12}}]},
+                {"rank": 3, "local_extent": 8, "single_extent": 16, "pieces": [{"local": {"start": 0, "stop": 8}, "single": {"start": 4, "stop": 12}}]},
+                {"rank": 4, "local_extent": 8, "single_extent": 16, "pieces": [{"local": {"start": 0, "stop": 4}, "single": {"start": 0, "stop": 4}}, {"local": {"start": 4, "stop": 8}, "single": {"start": 12, "stop": 16}}]},
+                {"rank": 5, "local_extent": 8, "single_extent": 16, "pieces": [{"local": {"start": 0, "stop": 4}, "single": {"start": 0, "stop": 4}}, {"local": {"start": 4, "stop": 8}, "single": {"start": 12, "stop": 16}}]},
+                {"rank": 6, "local_extent": 8, "single_extent": 16, "pieces": [{"local": {"start": 0, "stop": 8}, "single": {"start": 4, "stop": 12}}]},
+                {"rank": 7, "local_extent": 8, "single_extent": 16, "pieces": [{"local": {"start": 0, "stop": 8}, "single": {"start": 4, "stop": 12}}]}
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "output_relations": [
+    {
+      "single_tensor": "X",
+      "distributed_tensors": {"0": "Xcp0", "1": "Xcp1", "2": "Xcp2", "3": "Xcp3", "4": "Xcp4", "5": "Xcp5", "6": "Xcp6", "7": "Xcp7"},
+      "relation": {
+        "terms": [
+          {
+            "family": "dp",
+            "expr": {
+              "kind": "index_phi",
+              "dim": 0,
+              "maps": [
+                {"rank": 0, "local_extent": 2, "single_extent": 4, "pieces": [{"local": {"start": 0, "stop": 2}, "single": {"start": 0, "stop": 2}}]},
+                {"rank": 1, "local_extent": 2, "single_extent": 4, "pieces": [{"local": {"start": 0, "stop": 2}, "single": {"start": 0, "stop": 2}}]},
+                {"rank": 2, "local_extent": 2, "single_extent": 4, "pieces": [{"local": {"start": 0, "stop": 2}, "single": {"start": 0, "stop": 2}}]},
+                {"rank": 3, "local_extent": 2, "single_extent": 4, "pieces": [{"local": {"start": 0, "stop": 2}, "single": {"start": 0, "stop": 2}}]},
+                {"rank": 4, "local_extent": 2, "single_extent": 4, "pieces": [{"local": {"start": 0, "stop": 2}, "single": {"start": 2, "stop": 4}}]},
+                {"rank": 5, "local_extent": 2, "single_extent": 4, "pieces": [{"local": {"start": 0, "stop": 2}, "single": {"start": 2, "stop": 4}}]},
+                {"rank": 6, "local_extent": 2, "single_extent": 4, "pieces": [{"local": {"start": 0, "stop": 2}, "single": {"start": 2, "stop": 4}}]},
+                {"rank": 7, "local_extent": 2, "single_extent": 4, "pieces": [{"local": {"start": 0, "stop": 2}, "single": {"start": 2, "stop": 4}}]}
+              ]
+            }
+          },
+          {
+            "family": "cp",
+            "expr": {
+              "kind": "index_phi",
+              "dim": 1,
+              "maps": [
+                {"rank": 0, "local_extent": 8, "single_extent": 16, "pieces": [{"local": {"start": 0, "stop": 4}, "single": {"start": 0, "stop": 4}}, {"local": {"start": 4, "stop": 8}, "single": {"start": 12, "stop": 16}}]},
+                {"rank": 1, "local_extent": 8, "single_extent": 16, "pieces": [{"local": {"start": 0, "stop": 4}, "single": {"start": 0, "stop": 4}}, {"local": {"start": 4, "stop": 8}, "single": {"start": 12, "stop": 16}}]},
+                {"rank": 2, "local_extent": 8, "single_extent": 16, "pieces": [{"local": {"start": 0, "stop": 8}, "single": {"start": 4, "stop": 12}}]},
+                {"rank": 3, "local_extent": 8, "single_extent": 16, "pieces": [{"local": {"start": 0, "stop": 8}, "single": {"start": 4, "stop": 12}}]},
+                {"rank": 4, "local_extent": 8, "single_extent": 16, "pieces": [{"local": {"start": 0, "stop": 4}, "single": {"start": 0, "stop": 4}}, {"local": {"start": 4, "stop": 8}, "single": {"start": 12, "stop": 16}}]},
+                {"rank": 5, "local_extent": 8, "single_extent": 16, "pieces": [{"local": {"start": 0, "stop": 4}, "single": {"start": 0, "stop": 4}}, {"local": {"start": 4, "stop": 8}, "single": {"start": 12, "stop": 16}}]},
+                {"rank": 6, "local_extent": 8, "single_extent": 16, "pieces": [{"local": {"start": 0, "stop": 8}, "single": {"start": 4, "stop": 12}}]},
+                {"rank": 7, "local_extent": 8, "single_extent": 16, "pieces": [{"local": {"start": 0, "stop": 8}, "single": {"start": 4, "stop": 12}}]}
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
